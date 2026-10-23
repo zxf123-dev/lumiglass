@@ -92,7 +92,7 @@
        同时带出指针在该形状边框上的最近点 ptrPt 与该形状的指针接近度 ptrK，
        供 surf() 在边框上画跟随光。 */
     'float field(vec2 p, float layer, out vec2 grad, out float frost, out vec3 tintC, out float tintA,',
-    '            out vec2 ptrPt, out float ptrK){',
+    '            out vec2 ptrPt, out float ptrK, out float ptrR){',
     '  float dHard = 1e4; float dMerge = 1e4;',
     '  vec2 gHard = vec2(0.0); vec2 gMerge = vec2(0.0);',
     '  float fH = 0.5; vec3 tH = vec3(0.5); float aH = 0.0;',
@@ -100,6 +100,7 @@
     '  vec4 gH = vec4(0.0); vec4 gM = vec4(0.0);',
     '  float rH = 0.0; float rM = 0.0;',
     '  vec4 gS = vec4(0.0); float rS = 0.0; float dS = 1e4;',
+    '  ptrPt = p; ptrK = 0.0; ptrR = 90.0;',
     '  for (int i = 0; i < MAXG; i++){',
     '    if (i >= uGN) break;',
     '    if (abs(uA[i].y - layer) > 0.5) continue;',
@@ -126,13 +127,14 @@
     '  }',
     '  if (dMerge < dHard) { grad = gMerge; frost = fM; tintC = tM; tintA = aM; dS = dMerge; gS = gM; rS = rM; }',
     '  else { grad = gHard; frost = fH; tintC = tH; tintA = aH; dS = dHard; gS = gH; rS = rH; }',
-    /* 指针 → 该形状边框最近点：沿指针处法线走 |d| 即落在框上 */
-    '  ptrPt = p; ptrK = 0.0;',
+    /* 指针 → 该形状边框最近点：沿指针处法线走 |d| 即落在框上。
+       光斑半径随元素短边缩放：小按钮局部亮，大面板亮一段弧 */
     '  if (uPtrOn > 0.5 && dS < 9e3) {',
     '    vec2 pl = uPtr - gS.xy;',
     '    float dp = sdRR(pl, gS.zw, rS);',
     '    vec2 gp = sdGrad(pl, gS.zw, rS);',
     '    ptrPt = uPtr - gp * dp;',
+    '    ptrR = clamp(min(gS.z, gS.w) * 2.4, 40.0, 300.0);',
     '    float reach = clamp(min(gS.z, gS.w) * 1.6, 72.0, 280.0);',
     '    ptrK = 1.0 - smoothstep(reach, reach * 2.5, max(dp, 0.0));',
     '  }',
@@ -142,7 +144,7 @@
     /* 单层玻璃面：输入该像素的场参数，输出 premultiplied 前的 (rgb, a)
        px2uv: 屏幕 px → 源图 UV 的换算（cover 映射下 = uFit.xy / uRes） */
     'vec4 surf(float d, vec2 n, float fr, vec3 tc, float ta, vec2 uv, vec2 suv,',
-    '          vec2 p, vec2 ptrPt, float ptrK){',
+    '          vec2 p, vec2 ptrPt, float ptrK, float ptrR){',
     '  float hot = 0.0;',
     '  float a = 1.0 - smoothstep(-0.75, 0.0, d);',
     /* 折射：边缘位移最大，向内部指数衰减；RGB 位移不同 → 色散 */
@@ -173,9 +175,8 @@
     /* 指针跟光：指针投影到本形状边框上的那个点，周围一段边框被点亮。
        只加到边框带 band / 轮廓线 line 上，玻璃内部不铺光。 */
     '  if (uPtrOn > 0.5 && ptrK > 0.001) {',
-    '    float rp = clamp(min(uRes.x, uRes.y) * 0.15, 90.0, 260.0);',
-    '    float dd = length(p - ptrPt) / rp;',
-    '    hot = exp(-dd * dd) * ptrK;',
+    '    float dd = length(p - ptrPt) / ptrR;',
+    '    hot = exp(-dd * dd * 1.8) * ptrK;',
     '    band = max(band, hot * 0.95 * exp(-abs(d) / 2.2));',
     '  }',
     '  float rimI = uRim * mix(0.45, 1.0, uDark) * (1.0 + 2.6 * hot);',
@@ -191,12 +192,12 @@
     '  vec2 p = vUv * uRes;',
     '  vec2 uv = vUv * uFit.xy + uFit.zw;',
     '  vec3 col = texture2D(uTex, uv).rgb;',   // 底：壁纸
-    '  float d0; vec2 n0; float fr0; vec3 tc0; float ta0; vec2 pt0; float pk0;',
-    '  d0 = field(p, 0.0, n0, fr0, tc0, ta0, pt0, pk0);',
-    '  float d1; vec2 n1; float fr1; vec3 tc1; float ta1; vec2 pt1; float pk1;',
-    '  d1 = field(p, 1.0, n1, fr1, tc1, ta1, pt1, pk1);',
-    '  if (d0 < 0.0) { vec4 s = surf(d0, n0, fr0, tc0, ta0, uv, vUv, p, pt0, pk0); col = mix(col, s.rgb, s.a); }',
-    '  if (d1 < 0.0) { vec4 s = surf(d1, n1, fr1, tc1, ta1, uv, vUv, p, pt1, pk1); col = mix(col, s.rgb, s.a); }',
+    '  float d0; vec2 n0; float fr0; vec3 tc0; float ta0; vec2 pt0; float pk0; float pr0;',
+    '  d0 = field(p, 0.0, n0, fr0, tc0, ta0, pt0, pk0, pr0);',
+    '  float d1; vec2 n1; float fr1; vec3 tc1; float ta1; vec2 pt1; float pk1; float pr1;',
+    '  d1 = field(p, 1.0, n1, fr1, tc1, ta1, pt1, pk1, pr1);',
+    '  if (d0 < 0.0) { vec4 s = surf(d0, n0, fr0, tc0, ta0, uv, vUv, p, pt0, pk0, pr0); col = mix(col, s.rgb, s.a); }',
+    '  if (d1 < 0.0) { vec4 s = surf(d1, n1, fr1, tc1, ta1, uv, vUv, p, pt1, pk1, pr1); col = mix(col, s.rgb, s.a); }',
     '  gl_FragColor = vec4(col, 1.0);',
     '}'
   ].join('\n');
