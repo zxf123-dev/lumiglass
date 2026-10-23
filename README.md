@@ -142,6 +142,8 @@ LICENSE                MIT 许可
 
 MIT，见 `LICENSE`。可自由用于个人与商业项目，保留版权声明即可。
 
+本仓库包含一份第三方编译产物 `glass-liquid-engine.js`（上游 [crenspire/glass-ui](https://github.com/crenspire/glass-ui)，其 README 声明 MIT 但未附 LICENSE 文件），来源、修改与许可状态详见 **[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)**。分发或商用前请先读该文件。
+
 ## 版本
 
 v1.1.1 · 2026-10 · MIT 风格许可，可自由用于个人与商业项目。
