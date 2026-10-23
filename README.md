@@ -1,8 +1,8 @@
-# Lumi Glass · 液态玻璃组件库 v1.1.1
+# Lumi Glass · 液态玻璃组件库 v1.2.0
 
 > 作者：**赵鑫飞** · 一套遵循 Apple「Liquid Glass」材质规范的纯 CSS 组件库
 
-遵循 Apple HIG「Liquid Glass」思路的组件库：CSS 组件 + **Glass UI 同源 WebGL 液态引擎**（全站默认 `aurora` 动态壁纸）。手机端与网页端两套组件、明暗双主题、零构建依赖。
+遵循 Apple HIG「Liquid Glass」思路的组件库：CSS 组件 + **自研 WebGL 液态玻璃引擎**（SDF + 折射 + 色散 + 霜化，全站默认 `aurora` 动态壁纸）。手机端与网页端两套组件、明暗双主题、零构建依赖。
 
 ## 在线预览
 
@@ -142,7 +142,7 @@ LICENSE                MIT 许可
 
 MIT，见 `LICENSE`。可自由用于个人与商业项目，保留版权声明即可。
 
-本仓库包含一份第三方编译产物 `glass-liquid-engine.js`（上游 [crenspire/glass-ui](https://github.com/crenspire/glass-ui)，其 README 声明 MIT 但未附 LICENSE 文件），来源、修改与许可状态详见 **[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)**。分发或商用前请先读该文件。
+本项目的全部代码（含 `glass-liquid-engine.js` 渲染引擎）均为原创实现，不含任何第三方代码。
 
 ## 版本
 
