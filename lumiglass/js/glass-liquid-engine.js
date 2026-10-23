@@ -60,6 +60,8 @@
     'uniform float uMergeK;',
     'uniform float uDark;',
     'uniform float uRim;',
+    'uniform vec2 uPtr;',      // 指针位置（画布 px）
+    'uniform float uPtrOn;',   // 指针是否在页面上
 
     /* 圆角矩形 SDF（经典公式，公有数学） */
     'float sdRR(vec2 p, vec2 h, float r){',
@@ -86,12 +88,18 @@
     '}',
 
     /* 场求值：返回带符号距离；带出最近形状的 frost/tint 与法线。
-       merge 形状彼此平滑并集（距离小于 uMergeK 时），其余取硬 min。 */
-    'float field(vec2 p, float layer, out vec2 grad, out float frost, out vec3 tintC, out float tintA){',
+       merge 形状彼此平滑并集（距离小于 uMergeK 时），其余取硬 min。
+       同时带出指针在该形状边框上的最近点 ptrPt 与该形状的指针接近度 ptrK，
+       供 surf() 在边框上画跟随光。 */
+    'float field(vec2 p, float layer, out vec2 grad, out float frost, out vec3 tintC, out float tintA,',
+    '            out vec2 ptrPt, out float ptrK){',
     '  float dHard = 1e4; float dMerge = 1e4;',
     '  vec2 gHard = vec2(0.0); vec2 gMerge = vec2(0.0);',
     '  float fH = 0.5; vec3 tH = vec3(0.5); float aH = 0.0;',
     '  float fM = 0.5; vec3 tM = vec3(0.5); float aM = 0.0;',
+    '  vec4 gH = vec4(0.0); vec4 gM = vec4(0.0);',
+    '  float rH = 0.0; float rM = 0.0;',
+    '  vec4 gS = vec4(0.0); float rS = 0.0; float dS = 1e4;',
     '  for (int i = 0; i < MAXG; i++){',
     '    if (i >= uGN) break;',
     '    if (abs(uA[i].y - layer) > 0.5) continue;',
@@ -101,6 +109,7 @@
     '    if (uB[i].x > 0.5) {',
     '      if (dMerge > 9e3) {',
     '        dMerge = di; gMerge = gi; fM = uA[i].z; tM = uB[i].yzw; aM = uA[i].w;',
+    '        gM = uG[i]; rM = uA[i].x;',
     '      } else if (di < uMergeK) {',
     '        float h = clamp(0.5 + 0.5 * (di - dMerge) / uMergeK, 0.0, 1.0);',
     '        gMerge = mix(gMerge, gi, h);',
@@ -108,19 +117,33 @@
     '        fM = mix(fM, uA[i].z, h); tM = mix(tM, uB[i].yzw, h); aM = mix(aM, uA[i].w, h);',
     '      } else if (di < dHard) {',
     '        dHard = di; gHard = gi; fH = uA[i].z; tH = uB[i].yzw; aH = uA[i].w;',
+    '        gH = uG[i]; rH = uA[i].x;',
     '      }',
     '    } else if (di < dHard) {',
     '      dHard = di; gHard = gi; fH = uA[i].z; tH = uB[i].yzw; aH = uA[i].w;',
+    '      gH = uG[i]; rH = uA[i].x;',
     '    }',
     '  }',
-    '  if (dMerge < dHard) { grad = gMerge; frost = fM; tintC = tM; tintA = aM; return dMerge; }',
-    '  grad = gHard; frost = fH; tintC = tH; tintA = aH;',
-    '  return dHard;',
+    '  if (dMerge < dHard) { grad = gMerge; frost = fM; tintC = tM; tintA = aM; dS = dMerge; gS = gM; rS = rM; }',
+    '  else { grad = gHard; frost = fH; tintC = tH; tintA = aH; dS = dHard; gS = gH; rS = rH; }',
+    /* 指针 → 该形状边框最近点：沿指针处法线走 |d| 即落在框上 */
+    '  ptrPt = p; ptrK = 0.0;',
+    '  if (uPtrOn > 0.5 && dS < 9e3) {',
+    '    vec2 pl = uPtr - gS.xy;',
+    '    float dp = sdRR(pl, gS.zw, rS);',
+    '    vec2 gp = sdGrad(pl, gS.zw, rS);',
+    '    ptrPt = uPtr - gp * dp;',
+    '    float reach = clamp(min(gS.z, gS.w) * 1.6, 72.0, 280.0);',
+    '    ptrK = 1.0 - smoothstep(reach, reach * 2.5, max(dp, 0.0));',
+    '  }',
+    '  return dS;',
     '}',
 
     /* 单层玻璃面：输入该像素的场参数，输出 premultiplied 前的 (rgb, a)
        px2uv: 屏幕 px → 源图 UV 的换算（cover 映射下 = uFit.xy / uRes） */
-    'vec4 surf(float d, vec2 n, float fr, vec3 tc, float ta, vec2 uv, vec2 suv){',
+    'vec4 surf(float d, vec2 n, float fr, vec3 tc, float ta, vec2 uv, vec2 suv,',
+    '          vec2 p, vec2 ptrPt, float ptrK){',
+    '  float hot = 0.0;',
     '  float a = 1.0 - smoothstep(-0.75, 0.0, d);',
     /* 折射：边缘位移最大，向内部指数衰减；RGB 位移不同 → 色散 */
     '  float k = exp(d / max(uBezel, 1.0));',
@@ -147,12 +170,20 @@
     '  vec2 L = normalize(vec2(-0.55, -0.83));',
     '  float lit = clamp(dot(n, L) * 0.5 + 0.5, 0.0, 1.0);',
     '  vec3 rimCol = mix(vec3(1.0), vec3(0.75, 0.85, 1.0), uDark);',
-    '  float rimI = uRim * mix(0.45, 1.0, uDark);',
+    /* 指针跟光：指针投影到本形状边框上的那个点，周围一段边框被点亮。
+       只加到边框带 band / 轮廓线 line 上，玻璃内部不铺光。 */
+    '  if (uPtrOn > 0.5 && ptrK > 0.001) {',
+    '    float rp = clamp(min(uRes.x, uRes.y) * 0.15, 90.0, 260.0);',
+    '    float dd = length(p - ptrPt) / rp;',
+    '    hot = exp(-dd * dd) * ptrK;',
+    '    band = max(band, hot * 0.95 * exp(-abs(d) / 2.2));',
+    '  }',
+    '  float rimI = uRim * mix(0.45, 1.0, uDark) * (1.0 + 2.6 * hot);',
     '  col += rimCol * (rimI * band * (0.22 + 0.55 * lit));',
     '  col -= rimCol * (rimI * 0.25 * band * (1.0 - lit));',
-    /* 外沿 1px 亮线，托出轮廓 */
+    /* 外沿 1px 亮线，托出轮廓；靠近指针处一起变亮 */
     '  float line = 1.0 - smoothstep(0.0, 1.2, abs(d + 0.6));',
-    '  col += rimCol * line * mix(0.05, 0.12, uDark);',
+    '  col += rimCol * line * mix(0.05, 0.12, uDark) * (1.0 + 2.0 * hot);',
     '  return vec4(col, a);',
     '}',
 
@@ -160,12 +191,12 @@
     '  vec2 p = vUv * uRes;',
     '  vec2 uv = vUv * uFit.xy + uFit.zw;',
     '  vec3 col = texture2D(uTex, uv).rgb;',   // 底：壁纸
-    '  float d0; vec2 n0; float fr0; vec3 tc0; float ta0;',
-    '  d0 = field(p, 0.0, n0, fr0, tc0, ta0);',
-    '  float d1; vec2 n1; float fr1; vec3 tc1; float ta1;',
-    '  d1 = field(p, 1.0, n1, fr1, tc1, ta1);',
-    '  if (d0 < 0.0) { vec4 s = surf(d0, n0, fr0, tc0, ta0, uv, vUv); col = mix(col, s.rgb, s.a); }',
-    '  if (d1 < 0.0) { vec4 s = surf(d1, n1, fr1, tc1, ta1, uv, vUv); col = mix(col, s.rgb, s.a); }',
+    '  float d0; vec2 n0; float fr0; vec3 tc0; float ta0; vec2 pt0; float pk0;',
+    '  d0 = field(p, 0.0, n0, fr0, tc0, ta0, pt0, pk0);',
+    '  float d1; vec2 n1; float fr1; vec3 tc1; float ta1; vec2 pt1; float pk1;',
+    '  d1 = field(p, 1.0, n1, fr1, tc1, ta1, pt1, pk1);',
+    '  if (d0 < 0.0) { vec4 s = surf(d0, n0, fr0, tc0, ta0, uv, vUv, p, pt0, pk0); col = mix(col, s.rgb, s.a); }',
+    '  if (d1 < 0.0) { vec4 s = surf(d1, n1, fr1, tc1, ta1, uv, vUv, p, pt1, pk1); col = mix(col, s.rgb, s.a); }',
     '  gl_FragColor = vec4(col, 1.0);',
     '}'
   ].join('\n');
@@ -242,6 +273,10 @@
     this.size = { w: 0, h: 0 };
     this._sx = 0; this._sy = 0; this._fc = 0;
     this._fit = [1, 1, 0, 0];
+    /* 指针：ptr = 目标位置，ptrS = 平滑后位置（制造跟随的拖尾感） */
+    this.ptr = { x: -9999, y: -9999, on: false };
+    this.ptrS = { x: -9999, y: -9999, on: false };
+    this._rc = null; this._rct = 0;
     this.u = {};
     this._gBuf = new Float32Array(MAXG * 4);
     this._aBuf = new Float32Array(MAXG * 4);
@@ -282,9 +317,29 @@
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
     var self = this;
-    ['uTex', 'uBlur', 'uRes', 'uFit', 'uGN', 'uBezel', 'uStrength', 'uDisp', 'uMergeK', 'uDark', 'uRim']
+    ['uTex', 'uBlur', 'uRes', 'uFit', 'uGN', 'uBezel', 'uStrength', 'uDisp', 'uMergeK', 'uDark', 'uRim', 'uPtr', 'uPtrOn']
       .forEach(function (n) { self.u[n] = gl.getUniformLocation(pr, n); });
     ['uG', 'uA', 'uB'].forEach(function (n) { self.u[n] = gl.getUniformLocation(pr, n + '[0]'); });
+
+    /* ---- 指针监听：只登记坐标，重活留到渲染帧，不在事件里读布局 ---- */
+    this._onMove = function (e) {
+      var t = (window.performance && performance.now) ? performance.now() : Date.now();
+      if (!self._rc || t - self._rct > 300) {
+        self._rc = canvas.getBoundingClientRect(); self._rct = t;
+      }
+      self.ptr.x = e.clientX - self._rc.left;
+      self.ptr.y = e.clientY - self._rc.top;
+      self.ptr.on = true;
+    };
+    this._onLeave = function () { self.ptr.on = false; };
+    this._onUp = function (e) {
+      if (e && e.pointerType && e.pointerType !== 'mouse') self.ptr.on = false;
+    };
+    window.addEventListener('pointermove', this._onMove, { passive: true });
+    window.addEventListener('pointerdown', this._onMove, { passive: true });
+    window.addEventListener('pointerup', this._onUp, { passive: true });
+    document.addEventListener('pointerleave', this._onLeave);
+    window.addEventListener('blur', this._onLeave);
 
     this.tex = this._tex(0);
     this.blurTex = this._tex(1);
@@ -404,6 +459,13 @@
   LiquidGlass.prototype.destroy = function () {
     this._dead = true;
     if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._onMove) {
+      window.removeEventListener('pointermove', this._onMove);
+      window.removeEventListener('pointerdown', this._onMove);
+      window.removeEventListener('pointerup', this._onUp);
+      document.removeEventListener('pointerleave', this._onLeave);
+      window.removeEventListener('blur', this._onLeave);
+    }
     document.documentElement.classList.remove('lg-ready');
     this.items.forEach(function (i) { i.el.removeAttribute('data-glass-live'); });
     var gl = this.gl;
@@ -514,6 +576,21 @@
     gl.uniform1f(this.u.uMergeK, this.o.mergeK);
     gl.uniform1f(this.u.uDark, this.o.mode === 'dark' ? 1 : 0);
     gl.uniform1f(this.u.uRim, this.o.rim);
+
+    /* 指针平滑：进入页面时直接就位，移动时带一点跟手延迟 → 光沿边框滑动 */
+    var tp = this.ptr, sp = this.ptrS;
+    if (tp.on) {
+      if (!sp.on) { sp.x = tp.x; sp.y = tp.y; sp.on = true; }
+      else {
+        sp.x += (tp.x - sp.x) * 0.22;
+        sp.y += (tp.y - sp.y) * 0.22;
+        if (Math.abs(tp.x - sp.x) < 0.4 && Math.abs(tp.y - sp.y) < 0.4) { sp.x = tp.x; sp.y = tp.y; }
+      }
+    } else {
+      sp.on = false;
+    }
+    gl.uniform2f(this.u.uPtr, sp.x, sp.y);
+    gl.uniform1f(this.u.uPtrOn, sp.on ? 1 : 0);
     if (gN) {
       gl.uniform4fv(this.u.uG, gB);
       gl.uniform4fv(this.u.uA, aB);
