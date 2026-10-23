@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lumi Glass 起步模板：一个真实业务页面骨架，直接改成自己的产品即可。">
+<title>起步模板 · Lumi Glass</title>
+
+<!-- 只需要这两行样式，不引 glass-stage.css（那是案例页的展示台） -->
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+
+<style>
+  /* ============================================================
+     以下只是这一个页面的骨架样式，可以整段替换成你自己的布局。
+     所有组件（按钮 / 表格 / 卡片 / 开关…）的样式都在 glass/ 里，
+     这里不要重复定义。
+     ============================================================ */
+
+  /* ① 背景层
+     玻璃必须「有东西可折」。这里用品牌柔光 + 工程网格；
+     真实项目里换成产品截图、主视觉图、品牌渐变都可以。
+     没有这一层，玻璃会退化成一块白框。 */
+
+  /* ② 页面骨架：内容区永远是实体底或近不透明，玻璃只留给浮层 */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 26px 0 56px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 16px 0 12px;
+  }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .foot {
+    margin-top: 30px;
+    font-size: 11.5px;
+    color: var(--lg-ink-3);
+    text-align: center;
+  }
+  .foot a { color: var(--lg-ink-2); text-decoration: none; }
+  .foot a:hover { color: var(--lg-ink); }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .topbar-web nav[data-site-nav] { display: none; }
+  }
+</style>
+</head>
+
+<body class="web" data-wallpaper="aurora" data-lg-profile="app">
+
+
+<!-- ============================================================
+     ③ 浮层：顶部胶囊导航
+     滚动 8px 后 glass.js 自动加 .is-scrolled，玻璃会加厚落影
+     ============================================================ -->
+<header class="topbar-web glass">
+  <a class="brand" href="starter.html"><span class="mark"></span>Atlas</a>
+  <span class="tag">起步模板</span>
+  <nav data-site-nav="starter"></nav>
+  <div class="topbar-actions">
+    <div class="dd">
+      <button type="button" class="btn sm">工作区 ⌄</button>
+      <div class="menu glass">
+        <button type="button" class="mi">概览</button>
+        <button type="button" class="mi">项目</button>
+        <button type="button" class="mi">成员</button>
+        <button type="button" class="mi">设置</button>
+        <div class="sep-line"></div>
+        <button type="button" class="mi">导出报表</button>
+        <button type="button" class="mi danger">删除项目</button>
+      </div>
+    </div>
+    <button class="btn sm ghost" id="toast-demo">保存</button>
+    <button class="btn sm primary">新建项目</button>
+    <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 页面头部：面包屑 + 标题 + 操作组 -->
+  <div class="pagehead">
+    <div class="ph-l">
+      <div class="crumbs">
+        <a href="#">工作台</a>
+        <span class="sep">/</span>
+        <span class="cur">本周概览</span>
+      </div>
+      <h3>本周概览</h3>
+      <p>10 月 15 日 – 10 月 21 日 · 数据每 5 分钟同步一次</p>
+    </div>
+    <div class="ph-r">
+      <button class="btn sm">导出</button>
+      <button class="btn sm tinted">邀请成员</button>
+    </div>
+  </div>
+
+  <!-- 行内横幅：玻璃薄底，可读性优先 -->
+  <div class="banner info" style="margin-top:14px">
+    <span class="bi">i</span>
+    <span><b>新版本已就绪。</b>本次更新包含 3 个功能改进，建议在低峰期发布。</span>
+  </div>
+
+  <!-- 指标行：实体卡，不用玻璃 —— 数字要稳定底色 -->
+  <div class="stats">
+    <div class="metric glass">
+      <span class="mk">今日请求</span>
+      <span class="mv">12,840</span>
+      <span class="md">较昨日 <em>＋18.2%</em></span>
+    </div>
+    <div class="metric glass">
+      <span class="mk">平均延迟</span>
+      <span class="mv">182 ms</span>
+      <span class="md">较昨日 <em>－11 ms</em></span>
+    </div>
+    <div class="metric glass">
+      <span class="mk">成功率</span>
+      <span class="mv">99.4%</span>
+      <span class="md">近 24 小时</span>
+    </div>
+    <div class="metric glass">
+      <span class="mk">活跃成员</span>
+      <span class="mv">28 / 34</span>
+      <span class="md">本周新增 <em>3</em></span>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- 主区：玻璃只做外框，表格本身是实体行 -->
+    <div class="tablecard glass">
+      <div class="tc-head">
+        <span class="t">项目成员</span>
+        <span class="pill ok">4 人在线</span>
+        <span class="more">查看全部</span>
+      </div>
+      <div class="scroll-x">
+        <table class="gtable">
+          <thead>
+            <tr>
+              <th>成员</th>
+              <th>角色</th>
+              <th>状态</th>
+              <th>最近活跃</th>
+              <th style="text-align:right">提交</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="who"><span class="av-mini">林</span>林一</span></td>
+              <td>设计负责人</td>
+              <td><span class="pill ok">在线</span></td>
+              <td>12 分钟前</td>
+              <td class="num" style="text-align:right">128</td>
+            </tr>
+            <tr>
+              <td><span class="who"><span class="av-mini" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">陈</span>陈默</span></td>
+              <td>前端</td>
+              <td><span class="pill ok">在线</span></td>
+              <td>1 小时前</td>
+              <td class="num" style="text-align:right">96</td>
+            </tr>
+            <tr>
+              <td><span class="who"><span class="av-mini" style="background:linear-gradient(140deg,#ff6482,#ff375f)">苏</span>苏可</span></td>
+              <td>产品</td>
+              <td><span class="pill wait">离开</span></td>
+              <td>3 小时前</td>
+              <td class="num" style="text-align:right">54</td>
+            </tr>
+            <tr>
+              <td><span class="who"><span class="av-mini" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">周</span>周至</span></td>
+              <td>运营</td>
+              <td><span class="pill stop">未激活</span></td>
+              <td>—</td>
+              <td class="num" style="text-align:right">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 侧栏：内容卡（实体底）+ 通知卡（玻璃） -->
+    <div class="stack">
+
+      <div class="card">
+        <div class="cover c2"><span class="cv-t">PROJECT · 设计系统</span></div>
+        <div style="padding:12px 2px 0">
+          <div class="ct">Q4 设计系统改版</div>
+          <div class="cs">组件库 v2 已进入灰度，本周完成 12 个核心组件的验收。</div>
+          <div class="cfoot">
+            <span>进度 68%</span>
+            <span style="margin-left:auto"><button class="btn sm">查看</button></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice glass">
+        <span class="ni" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">✉</span>
+        <span class="nb"><b>你被邀请加入「设计系统」</b><small>林一 · 2 分钟前</small></span>
+        <span class="nt">新</span>
+      </div>
+
+      <div class="notice glass">
+        <span class="ni" style="background:linear-gradient(140deg,#4cd964,#0a84ff)">✓</span>
+        <span class="nb"><b>构建 #1284 通过</b><small>CI · 18 分钟前</small></span>
+        <span class="nt">2m 14s</span>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="foot">
+    这是起步模板：改背景层、换成你的内容，就得到自己的页面 ·
+    <a href="docs.html">使用文档</a> ·
+    <a href="web.html">网页端案例</a> ·
+    <a href="mobile.html">手机端案例</a>
+  </p>
+
+</main>
+
+<!-- 可选脚本：折射滤镜、指针高光、顶栏滚动加厚、明暗切换、Toast -->
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+<script>
+  // 用库自带的 Toast，无需额外依赖
+  document.getElementById('toast-demo').addEventListener('click', function () {
+    LiquidGlass.toast('已保存到「本周报告」', { icon: '✓' });
+  });
+</script>
+
+</body>
+</html>

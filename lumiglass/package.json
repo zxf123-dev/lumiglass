@@ -1,0 +1,45 @@
+{
+  "name": "lumiglass",
+  "version": "1.1.1",
+  "description": "Lumi Glass · iOS 液态玻璃（Liquid Glass）CSS 组件库。零依赖纯 CSS：磨砂 + SVG 折射 + 镜面高光三层配方，130+ 类名，明暗双主题，Vue / React 可直接使用。",
+  "license": "MIT",
+  "author": "Zhao Xinfei",
+  "homepage": "https://github.com/your-name/lumiglass#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-name/lumiglass.git"
+  },
+  "keywords": [
+    "glassmorphism",
+    "liquid-glass",
+    "glass",
+    "css",
+    "ui-components",
+    "ios",
+    "backdrop-filter",
+    "dark-mode",
+    "vue",
+    "react"
+  ],
+  "files": [
+    "css/",
+    "js/",
+    "README.md",
+    "LICENSE"
+  ],
+  "style": "css/glass-core.css",
+  "exports": {
+    "./css/*.css": "./css/*.css",
+    "./js/glass.js": "./js/glass.js",
+    "./js/glass-webgl.js": "./js/glass-webgl.js",
+    "./js/glass-liquid-engine.js": "./js/glass-liquid-engine.js",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css",
+    "js/glass.js"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

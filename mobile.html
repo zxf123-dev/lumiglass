@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Liquid Glass 液态玻璃组件库 · 手机端。含 9 套页面模板与 8 组触控组件，命中区 ≥44px。">
+<title>液态玻璃 · 手机端组件库</title>
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-mobile.css">
+<link rel="stylesheet" href="glass/glass-stage.css">
+<style>
+  /* 仅案例页：手机模板双列摆放 */
+  .specs.phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .specs.phones .spec .stage { padding: 26px 20px; }
+  .specs.phones .stage { align-items: flex-start; }
+  @media (max-width: 980px) { .specs.phones { grid-template-columns: 1fr; } }
+  .stage .navbar { width: min(360px, 100%); }
+  .stage .large-title { width: min(360px, 100%); }
+  .stage .tabbar { width: min(360px, 100%); }
+  .stage .list { width: min(360px, 100%); }
+  .stage .searchbar,
+  .stage .field { width: min(360px, 100%); }
+</style>
+</head>
+<body class="mobile" data-wallpaper="aurora">
+
+<header class="topbar-web glass">
+  <a class="brand" href="landing.html"><span class="mark"></span>Lumi Glass</a>
+  <span class="tag">手机端 · Mobile</span>
+  <nav data-site-nav="mobile"></nav>
+  <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Human Interface Guidelines · Mobile</div>
+    <h1>液态玻璃<em>手机端</em></h1>
+    <p>悬浮的导航与 Tab Bar、可滚动的列表、贴底的抽屉——手机是这套材质最自然的舞台。所有尺寸按 iOS 触控规范：<b>命中区 ≥44px</b>，主按钮 50px，列表行 52px，底部预留安全区。</p>
+    <div class="meta">
+      <span>9 套页面模板</span>
+      <span>3 档开关尺寸</span>
+      <span>8 组组件</span>
+      <span>明暗双主题</span>
+    </div>
+    <div class="switch-links">
+      <a class="btn sm tinted" href="web.html">看网页端 →</a>
+      <a class="btn sm ghost" href="docs.html">使用文档</a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       01 页面模板
+       ============================================================ -->
+  <section class="sec" id="templates">
+    <div class="sec-head"><span class="num">01</span><h2>页面模板</h2><span class="en">Page Templates</span></div>
+    <p class="sec-desc">九个最常用的手机页面骨架。它们的共同点：<b>顶层永远是悬浮的</b>——状态栏、导航、Tab Bar 都压在内容之上，内容从玻璃下方流过，而不是被一条不透明横条截断。</p>
+
+    <div class="specs phones">
+
+      <!-- 首页 -->
+      <div class="spec">
+        <div class="stage a">
+          <div class="phone">
+            <div class="screen tint-a">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">今日</span>
+                <div class="acts">
+                  <button aria-label="搜索">⌕</button>
+                  <button aria-label="更多">⋯</button>
+                </div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px">
+                <div class="large-title glass">
+                  <div class="eyebrow">Wednesday, Oct 21</div>
+                  <h2>早上好，林一</h2>
+                  <p>今天有 3 个待办 · 2 条新消息</p>
+                </div>
+                <div class="searchbar glass">
+                  <span class="s-ico">⌕</span>
+                  <input type="search" placeholder="搜索照片、文件、成员" aria-label="搜索">
+                </div>
+                <div class="cardfeed">
+                  <div class="photo-card pc1">今日精选<small>摄影 · 24 张</small></div>
+                  <div class="photo-card pc2">设计笔记<small>液态玻璃的折射逻辑</small></div>
+                  <div class="photo-card pc3">Ambient Glass<small>正在播放</small></div>
+                </div>
+                <div class="list glass">
+                  <div class="lrow"><span class="ico blue">◎</span><span class="body">本周目标<small>78 / 100 已完成</small></span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico green">✓</span><span class="body">待办事项</span><span class="val">3</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico purple">◈</span><span class="body">共享空间</span><span class="val">12 人</span><span class="chev">›</span></div>
+                </div>
+                <div class="miniplayer glass">
+                  <span class="art"></span>
+                  <span class="meta"><b>Ambient Glass</b><small>Field Recordings</small></span>
+                  <span class="ctrl"><button aria-label="上一首">⏮</button><button aria-label="播放">▶</button><button aria-label="下一首">⏭</button></span>
+                </div>
+              </div>
+              <div class="tabbar glass float">
+                <input type="radio" name="tb-home" id="tb-h1" checked><label for="tb-h1"><span class="ico">⌂</span>首页</label>
+                <input type="radio" name="tb-home" id="tb-h2"><label for="tb-h2"><span class="ico">◎</span>发现</label>
+                <input type="radio" name="tb-home" id="tb-h3"><label for="tb-h3"><span class="ico">▣</span>相册</label>
+                <input type="radio" name="tb-home" id="tb-h4"><label for="tb-h4"><span class="ico">✉</span>消息</label>
+                <input type="radio" name="tb-home" id="tb-h5"><label for="tb-h5"><span class="ico">☺</span>我的</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>内容流首页</b> · 大标题在滚动初期提供身份感，搜索与卡片都是玻璃；底部 Tab Bar 悬浮，内容可滚动到其下方</p>
+      </div>
+
+      <!-- 设置页 -->
+      <div class="spec">
+        <div class="stage b">
+          <div class="phone">
+            <div class="screen tint-b">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">设置</span>
+                <div class="acts"><button aria-label="编辑">编辑</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px">
+                <div class="list glass">
+                  <div class="list-head">Apple 账户</div>
+                  <div class="lrow">
+                    <span class="ico blue" style="width:38px;height:38px;border-radius:50%;font-size:15px">林</span>
+                    <span class="body" style="font-size:15px">林一<small>Apple ID · iCloud+</small></span>
+                    <span class="chev">›</span>
+                  </div>
+                </div>
+
+                <div class="list glass">
+                  <div class="list-head">连接</div>
+                  <div class="lrow"><span class="ico blue">✈</span><span class="body">飞行模式</span><label class="sw mini blue"><input type="checkbox"><span class="track"></span><span class="knob"></span></label></div>
+                  <div class="lrow"><span class="ico blue">✦</span><span class="body">无线局域网</span><span class="val">Studio-5G</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico gray">ᛒ</span><span class="body">蓝牙<small>AirPods Pro 已连接</small></span><span class="val">已连接</span><span class="chev">›</span></div>
+                </div>
+
+                <div class="list glass">
+                  <div class="list-head">通用</div>
+                  <div class="lrow"><span class="ico orange">◐</span><span class="body">专注模式<small>22:00 自动开启</small></span><label class="sw mini"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label></div>
+                  <div class="lrow"><span class="ico green">▤</span><span class="body">软件更新</span><span class="val">1 项</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico gray">ⓘ</span><span class="body">关于本机</span><span class="val">18.1</span><span class="chev">›</span></div>
+                </div>
+
+                <div class="list glass">
+                  <div class="lrow"><span class="ico red">⏻</span><span class="body" style="color:var(--lg-red)">退出登录</span></div>
+                </div>
+                <p style="padding:4px 8px 0;font-size:11px;line-height:1.6;color:var(--lg-ink-2)">玻璃只包裹「组」，组内行保持透明——这样整组看起来是一块材质，而不是一排小方块。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>设置页</b> · inset grouped 列表：整组一颗玻璃，行间一条发丝线；开关用 44×26 的 mini 档</p>
+      </div>
+
+      <!-- 详情页 -->
+      <div class="spec">
+        <div class="stage c">
+          <div class="phone">
+            <div class="screen tint-c">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">商品详情</span>
+                <div class="acts"><button aria-label="收藏">♡</button><button aria-label="分享">↗</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px;padding-bottom:132px">
+                <div class="photo-card pc3" style="height:230px;font-size:16px;border-radius:26px">Ambient Glass 桌面灯<small>磨砂玻璃 · 三档色温</small></div>
+                <div style="padding:4px 6px 0">
+                  <h3 style="font-size:22px;letter-spacing:-.6px">Ambient Glass</h3>
+                  <p style="margin-top:4px;font-size:13px;color:var(--lg-ink-2)">手工吹制的磨砂灯罩，内置 2700K–5000K 无级调光。灯体本身是一块厚玻璃，光线从内部折射出来。</p>
+                </div>
+                <div class="glass" style="padding:14px 16px;border-radius:18px;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600">
+                    <span class="rate" style="font-size:14px">★★★★<span class="off">★</span></span>
+                    <span style="color:var(--lg-ink-2);font-weight:500">4.8 · 128 条评价</span>
+                  </div>
+                  <div class="chips">
+                    <span class="chip on">暖光</span><span class="chip">冷光</span><span class="chip">自然光</span>
+                  </div>
+                  <div class="lrow" style="border-top:none;padding:4px 0;min-height:auto">
+                    <span class="body" style="font-size:13px">数量</span>
+                    <span class="stepper glass sm" style="margin-left:auto">
+                      <button aria-label="减少">−</button><span class="val">1</span><button aria-label="增加">+</button>
+                    </span>
+                  </div>
+                </div>
+                <div class="list glass">
+                  <div class="lrow"><span class="ico green">✓</span><span class="body">现货 · 顺丰包邮</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico blue">↺</span><span class="body">7 天无理由退货</span><span class="chev">›</span></div>
+                </div>
+              </div>
+              <div class="actionbar glass">
+                <span class="ab-info"><b>¥ 268</b><small>含运费</small></span>
+                <button class="btn sm ghost">加入清单</button>
+                <button class="btn sm primary">加入购物车</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>详情页</b> · 底部操作条用 regular 玻璃（不是 clear），因为下方是白底内容；价格与主按钮分离，避免误触</p>
+      </div>
+
+      <!-- 相册页 -->
+      <div class="spec">
+        <div class="stage d">
+          <div class="phone">
+            <div class="screen tint-a">
+              <div class="statusbar glass" style="color:#fff">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">最近项目</span>
+                <div class="acts"><button aria-label="选择">选择</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px">
+                <div class="large-title glass">
+                  <div class="eyebrow">2026 · 十月</div>
+                  <h2>最近项目</h2>
+                  <p>1,284 张照片 · 36 段视频</p>
+                </div>
+                <div class="album">
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="miniplayer glass">
+                  <span class="art"></span>
+                  <span class="meta"><b>山脊航拍</b><small>4K · 00:42</small></span>
+                  <span class="ctrl"><button aria-label="播放">▶</button><button aria-label="更多">⋯</button></span>
+                </div>
+              </div>
+              <div class="tabbar glass float">
+                <input type="radio" name="tb-alb" id="tb-a1"><label for="tb-a1"><span class="ico">⌂</span>首页</label>
+                <input type="radio" name="tb-alb" id="tb-a2"><label for="tb-a2"><span class="ico">◎</span>发现</label>
+                <input type="radio" name="tb-alb" id="tb-a3" checked><label for="tb-a3"><span class="ico">▣</span>相册</label>
+                <input type="radio" name="tb-alb" id="tb-a4"><label for="tb-a4"><span class="ico">✉</span>消息</label>
+                <input type="radio" name="tb-alb" id="tb-a5"><label for="tb-a5"><span class="ico">☺</span>我的</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>相册页</b> · 九宫格本身不加玻璃（会拖慢滚动），只让标题与播放器浮起来——性能优先的取舍</p>
+      </div>
+
+      <!-- 登录 / 注册 -->
+      <div class="spec">
+        <div class="stage b">
+          <div class="phone">
+            <div class="screen tint-e">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="auth">
+                <div class="auth-hero">
+                  <div class="eyebrow">Studio Account</div>
+                  <h2>欢迎回来<br>继续你的创作</h2>
+                  <p>一个账号同步全部项目、素材与协作记录。</p>
+                </div>
+                <div class="auth-form">
+                  <input class="field" type="email" value="linyi@studio.design" aria-label="邮箱">
+                  <input class="field" type="password" value="glass2026" aria-label="密码">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:1px 3px;font-size:11.5px;color:var(--lg-ink-2)">
+                    <label class="check"><input type="checkbox" checked><span class="box"></span>保持登录</label>
+                    <a href="#" style="font-weight:600;color:var(--lg-blue-deep);text-decoration:none">忘记密码？</a>
+                  </div>
+                  <button class="btn primary">登录</button>
+                </div>
+                <div class="auth-alt"><span>或使用</span></div>
+                <div class="social">
+                  <button class="btn" aria-label="用 Apple 登录"></button>
+                  <button class="btn" aria-label="用微信登录">✆</button>
+                  <button class="btn" aria-label="用 Google 登录">G</button>
+                </div>
+                <div class="auth-foot">还没有账号？<a href="#">立即注册</a><br>继续即表示同意服务条款与隐私政策</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>登录 / 注册</b> · 表单用 regular 玻璃，第三方登录降为轻量 .btn；整页只有一颗主按钮，其余全部退到次级</p>
+      </div>
+
+      <!-- 聊天会话 -->
+      <div class="spec">
+        <div class="stage c">
+          <div class="phone">
+            <div class="screen tint-b">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="avatar" style="width:26px;height:26px;font-size:10px;background:linear-gradient(140deg,#ffd60a,#ff9f0a)">陈</span>
+                <span class="t" style="text-align:left;margin-left:-4px">陈默<small style="display:block;font-size:9px;font-weight:500;color:var(--lg-ink-3)">在线</small></span>
+                <div class="acts"><button aria-label="语音通话">✆</button><button aria-label="更多">⋯</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:112px;padding-bottom:88px">
+                <div class="chat">
+                  <span class="chat-day">今天 14:20</span>
+                  <div class="bub them glass">玻璃按钮的 hover 我看还是有点糊，是不是 backdrop 采样被父级截断了？</div>
+                  <div class="bub them glass">我把 z-index 和 isolation 都去掉了，还是没变化 😑</div>
+                  <div class="bub me">先看祖先有没有 filter / contain，这两个最容易把采样链掐断<span><time>14:22</time></span></div>
+                  <div class="bub me">另外 hover 不要「加白」，在浅色底上叠白等于没反馈，改成中性加深 + 上浮 2px<span><time>14:22</time></span></div>
+                  <div class="bub them glass">好了！就是 contain 的问题 🎉</div>
+                  <div class="bub them glass typing" aria-label="对方正在输入"><i></i><i></i><i></i></div>
+                </div>
+              </div>
+              <div class="chat-input glass">
+                <button class="ci-btn" aria-label="添加附件">＋</button>
+                <input type="text" placeholder="发消息…" aria-label="消息输入框">
+                <button class="ci-btn" aria-label="语音">◉</button>
+                <button class="ci-btn send" aria-label="发送">↑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>聊天会话</b> · 自己的气泡用实色品牌渐变（保证文字对比），对方气泡是玻璃；输入条吸底悬浮，键盘弹出时整体上移</p>
+      </div>
+
+      <!-- 音乐播放器 -->
+      <div class="spec">
+        <div class="stage d">
+          <div class="phone">
+            <div class="screen tint-d">
+              <div class="statusbar glass" style="color:#fff">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="screen-scroll" style="padding:104px 20px 26px;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;color:#fff">
+                  <button class="btn icon ghost" style="color:#fff;background:none;border:none" aria-label="收起">⌄</button>
+                  <span style="font-size:9.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.7">正在播放 · 专辑</span>
+                  <button class="btn icon ghost" style="color:#fff;background:none;border:none" aria-label="更多">⋯</button>
+                </div>
+                <div class="player glass clear" style="color:#fff">
+                  <div class="p-cover"></div>
+                  <div class="p-meta">
+                    <div class="pm-t">
+                      <b>Ambient Glass</b>
+                      <small style="color:rgba(255,255,255,.7)">Field Recordings · 2026</small>
+                    </div>
+                    <button aria-label="收藏" style="color:rgba(255,255,255,.8)">♡</button>
+                  </div>
+                  <div class="p-seek">
+                    <div class="progress" style="background:rgba(255,255,255,.24)"><span class="fill" style="width:42%;background:#fff"></span></div>
+                    <div class="p-time" style="color:rgba(255,255,255,.6)"><span>1:42</span><span>−3:58</span></div>
+                  </div>
+                  <div class="p-ctrl">
+                    <button aria-label="上一首" style="color:#fff">⏮</button>
+                    <button aria-label="后退 15 秒" style="color:#fff;font-size:13px">↺15</button>
+                    <button class="play" aria-label="播放">▶</button>
+                    <button aria-label="前进 15 秒" style="color:#fff;font-size:13px">15↻</button>
+                    <button aria-label="下一首" style="color:#fff">⏭</button>
+                  </div>
+                  <div class="p-foot" style="color:rgba(255,255,255,.55)">
+                    <span>无损 · 24bit</span>
+                    <span>AirPods Pro</span>
+                    <span>♾</span>
+                  </div>
+                </div>
+                <div class="glass" style="padding:12px 14px;border-radius:16px;display:flex;gap:10px;align-items:center;color:#fff">
+                  <span style="font-size:15px">⌁</span>
+                  <span style="flex:1;font-size:11.5px;line-height:1.5;color:rgba(255,255,255,.8)">下一首：Glass Horizon · 来自「深夜缓冲」</span>
+                  <span style="font-size:11px;opacity:.6">跳过</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>全屏播放器</b> · 唯一适合 .glass.clear 的地方：封面与深色氛围仍要透出来；文字反白，进度条改白</p>
+      </div>
+
+      <!-- 钱包 -->
+      <div class="spec">
+        <div class="stage a">
+          <div class="phone">
+            <div class="screen tint-e">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">钱包</span>
+                <div class="acts"><button aria-label="添加">＋</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:112px">
+                <div style="padding:2px 4px 4px">
+                  <div style="font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--lg-ink-3)">总余额</div>
+                  <div style="font-size:32px;font-weight:800;letter-spacing:-1.2px;font-variant-numeric:tabular-nums">¥ 12,480<span style="font-size:15px;font-weight:600;color:var(--lg-ink-3)">.60</span></div>
+                </div>
+                <div class="wallet-stack">
+                  <div class="wallet-card">
+                    <div class="wc-top">
+                      <b>STUDIO CASH</b>
+                      <span class="wc-chip"></span>
+                    </div>
+                    <div class="wc-num">•••• •••• •••• 4821</div>
+                    <div class="wc-bot">
+                      <div><small>持卡人</small><b>LIN YI</b></div>
+                      <div><small>有效期</small><b>09 / 29</b></div>
+                      <span class="wc-brand">◎</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="quick-acts">
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">↑</span>转账</a>
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#4cd964,#25a244)">↓</span>收款</a>
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">▤</span>账单</a>
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">＋</span>充值</a>
+                </div>
+                <div class="list glass">
+                  <div class="list-head">最近交易</div>
+                  <div class="lrow"><span class="ico blue">◫</span><span class="body">Figma 订阅<small>今天 09:12 · 自动扣款</small></span><span class="val" style="color:var(--lg-ink)">−¥ 128</span></div>
+                  <div class="lrow"><span class="ico green">↙</span><span class="body">项目结算<small>昨天 18:40 · 星河科技</small></span><span class="val" style="color:var(--lg-green)">+¥ 8,600</span></div>
+                  <div class="lrow"><span class="ico orange">☕</span><span class="body">Blue Bottle<small>昨天 08:26</small></span><span class="val" style="color:var(--lg-ink)">−¥ 42</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>钱包 / 支付</b> · 卡片本身不做玻璃（要压住背景、保证卡号可读），只让快捷入口与账单组浮起来；叠片用伪元素做出「一叠卡」的厚度</p>
+      </div>
+
+      <!-- 天气 -->
+      <div class="spec">
+        <div class="stage d">
+          <div class="phone">
+            <div class="screen tint-d">
+              <div class="statusbar glass" style="color:#fff">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="screen-scroll" style="padding:100px 18px 26px;gap:10px">
+                <div class="weather-hero">
+                  <div class="wx-city">杭州 · 西湖区</div>
+                  <div class="wx-temp">21°</div>
+                  <div class="wx-desc">多云转晴</div>
+                  <div class="wx-range">最高 24° · 最低 15°</div>
+                </div>
+                <div class="wx-hours glass">
+                  <div class="wh now"><span>现在</span><span class="wi">☁</span><b>21°</b></div>
+                  <div class="wh"><span>16时</span><span class="wi">☁</span><b>22°</b></div>
+                  <div class="wh"><span>17时</span><span class="wi">☀</span><b>23°</b></div>
+                  <div class="wh"><span>18时</span><span class="wi">☀</span><b>21°</b></div>
+                  <div class="wh"><span>19时</span><span class="wi">☾</span><b>19°</b></div>
+                  <div class="wh"><span>20时</span><span class="wi">☾</span><b>18°</b></div>
+                </div>
+                <div class="wx-grid">
+                  <div class="wx-card glass"><span class="wx-l">◈ 空气质量</span><span class="wx-v">32</span><span>优 · 适合开窗</span></div>
+                  <div class="wx-card glass"><span class="wx-l">☂ 降水概率</span><span class="wx-v">10%</span><span>未来 6 小时</span></div>
+                  <div class="wx-card glass"><span class="wx-l">≋ 湿度</span><span class="wx-v">58%</span><span>体感 20°</span></div>
+                  <div class="wx-card glass"><span class="wx-l">➤ 风速</span><span class="wx-v">3.2<small style="font-size:10px"> m/s</small></span><span>东南风</span></div>
+                </div>
+                <div class="list glass">
+                  <div class="lrow"><span class="ico blue">◐</span><span class="body">日出 / 日落</span><span class="val">06:12 · 17:38</span></div>
+                  <div class="lrow"><span class="ico purple">☾</span><span class="body">月相</span><span class="val">上弦月</span></div>
+                </div>
+                <div class="dots" style="justify-content:center;padding:6px 0"><button class="on" aria-label="第 1 页"></button><button aria-label="第 2 页"></button><button aria-label="第 3 页"></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>天气</b> · 彩色氛围背景上密集浮起 6 块玻璃，接近性能上限；小时预报用横向滚动条，内部不再嵌套玻璃</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       02 导航
+       ============================================================ -->
+  <section class="sec" id="nav">
+    <div class="sec-head"><span class="num">02</span><h2>导航</h2><span class="en">Navigation</span></div>
+    <p class="sec-desc">手机端的导航只有三种：<b>胶囊导航条</b>、<b>大标题</b>、<b>Tab Bar</b>。它们都悬浮在内容上，且滚动时不改变高度（避免布局跳动）。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a">
+          <div class="navbar glass">
+            <button class="back" aria-label="返回">‹</button>
+            <span class="t">设置</span>
+            <div class="acts"><button aria-label="完成">完成</button></div>
+          </div>
+        </div>
+        <p class="cap"><b>导航条 Navbar</b> · 高 52，圆角 26；返回键自带一层薄玻璃，右侧操作不做背景</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="padding:20px">
+          <div class="dd">
+            <button type="button" class="btn sm">更多 ⌄</button>
+            <div class="menu glass">
+              <button type="button" class="mi">分享</button>
+              <button type="button" class="mi">添加到主屏幕</button>
+              <div class="sep-line"></div>
+              <button type="button" class="mi danger">删除</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>下拉菜单</b> · 与网页端相同 `.dd` + `.menu.glass` + `.mi` 结构</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b">
+          <div class="large-title glass">
+            <div class="eyebrow">Library</div>
+            <h2>资料库</h2>
+            <p>268 个文件 · 最近同步 2 分钟前</p>
+          </div>
+        </div>
+        <p class="cap"><b>大标题 Large Title</b> · 34px 粗体 + 11px 字距拉开的眉标；它本身也是玻璃，可直接盖在照片上</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div class="tabbar glass">
+            <input type="radio" name="tb-demo" id="tb-d1" checked><label for="tb-d1"><span class="ico">⌂</span>首页</label>
+            <input type="radio" name="tb-demo" id="tb-d2"><label for="tb-d2"><span class="ico">◎</span>发现</label>
+            <input type="radio" name="tb-demo" id="tb-d3"><label for="tb-d3"><span class="ico">▣</span>相册</label>
+            <input type="radio" name="tb-demo" id="tb-d4"><label for="tb-d4"><span class="ico">✉</span>消息</label>
+            <input type="radio" name="tb-demo" id="tb-d5"><label for="tb-d5"><span class="ico">☺</span>我的</label>
+          </div>
+        </div>
+        <p class="cap"><b>Tab Bar</b> · 选中项浮起一枚白色玻璃，未选中图标降饱和；5 项是上限，再多就该换成分组</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage d">
+          <div class="tabbar glass" style="width:min(360px,100%)">
+            <input type="radio" name="tb-dark" id="tb-k1"><label for="tb-k1"><span class="ico">⌂</span>首页</label>
+            <input type="radio" name="tb-dark" id="tb-k2" checked><label for="tb-k2"><span class="ico">▣</span>相册</label>
+            <input type="radio" name="tb-dark" id="tb-k3"><label for="tb-k3"><span class="ico">☺</span>我的</label>
+          </div>
+        </div>
+        <p class="cap"><b>深色场景</b> · 同一组件放在深色照片上：文字自动跟随 token，白色高光降到 52% 才不会发亮</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       03 按钮
+       ============================================================ -->
+  <section class="sec" id="buttons">
+    <div class="sec-head"><span class="num">03</span><h2>按钮</h2><span class="en">Buttons</span></div>
+    <p class="sec-desc">手机端按钮高度统一 50px（小号 38px），左右内边距 ≥20px。主操作永远只有一颗，其余降为 tinted 或 ghost。</p>
+
+    <div class="specs">
+      <div class="spec span2">
+        <div class="stage a">
+          <button class="btn">常规</button>
+          <button class="btn primary">主操作</button>
+          <button class="btn tinted">着墨</button>
+          <button class="btn danger">删除</button>
+          <button class="btn ghost">次要</button>
+          <button class="btn sm">小尺寸</button>
+          <button class="btn icon" aria-label="收藏">♡</button>
+          <button class="btn primary icon" aria-label="添加">＋</button>
+        </div>
+        <p class="cap"><b>八种形态</b> · regular / primary / tinted / danger / ghost / small / icon；图标按钮必须是正方形，圆角取半径的一半</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b">
+          <button class="btn primary loading">提交中</button>
+          <button class="btn loading light">加载</button>
+          <div class="splitbtn">
+            <button>发布</button>
+            <span class="div"></span>
+            <button class="more" aria-label="更多选项">⌄</button>
+          </div>
+        </div>
+        <p class="cap"><b>加载 / 分裂</b> · loading 隐藏文案并显示旋转描边，按钮宽度不变化，避免布局抖动</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a">
+          <button class="fab" aria-label="新建">＋</button>
+          <div class="fab" style="display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,rgba(10,132,255,.92),rgba(0,100,220,.7));border-color:rgba(255,255,255,.55)">NEW</div>
+        </div>
+        <p class="cap"><b>FAB</b> · 58px 圆钮，悬停放大 8% 并旋转 90°；触屏上只保留 scale 1.06</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       04 输入
+       ============================================================ -->
+  <section class="sec" id="inputs">
+    <div class="sec-head"><span class="num">04</span><h2>输入</h2><span class="en">Inputs</span></div>
+    <p class="sec-desc">外壳是玻璃，内部 input 完全透明。移动端字号不要小于 15px，否则 iOS Safari 聚焦时会自动放大页面。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a" style="flex-direction:column;align-items:stretch;gap:12px">
+          <div class="searchbar glass">
+            <span class="s-ico">⌕</span>
+            <input type="search" placeholder="搜索照片、文件、成员" aria-label="搜索">
+            <button class="s-clear" aria-label="清空">✕</button>
+          </div>
+          <input class="field" type="text" placeholder="用户名或邮箱" aria-label="用户名">
+          <div class="selectbox">
+            <select aria-label="选择语言">
+              <option>简体中文</option>
+              <option>繁體中文</option>
+              <option>English</option>
+            </select>
+            <span class="caret">▼</span>
+          </div>
+        </div>
+        <p class="cap"><b>搜索 / 文本 / 选择</b> · 搜索框圆角取全圆（24），文本框取 15；下拉箭头自绘，去掉系统外观</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="flex-direction:column;align-items:stretch;gap:14px">
+          <div class="chips">
+            <span class="chip on">全部 <span class="x">×</span></span>
+            <span class="chip">设计 <span class="x">×</span></span>
+            <span class="chip on">已归档 <span class="x">×</span></span>
+            <span class="chip">＋ 添加</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="strength"><i class="a3"></i><i class="a3"></i><i class="a3"></i><i></i></div>
+            <span style="font-size:12px;font-weight:600;color:var(--lg-ink-2)">强度：强 · 12 位，含符号</span>
+          </div>
+          <textarea class="ta" placeholder="补充说明（可选）" aria-label="补充说明"></textarea>
+        </div>
+        <p class="cap"><b>标签 / 强度 / 多行</b> · chip 选中染品牌色；强度条四段，低段暖色、高段绿色；textarea 只允许纵向拉伸</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage c">
+          <input class="field" type="text" value="glass@example.com" aria-label="邮箱" style="border-color:rgba(52,199,89,.85);box-shadow:0 0 0 4px rgba(52,199,89,.18)">
+          <input class="field" type="text" value="name@" aria-label="邮箱（错误）" style="border-color:rgba(255,59,48,.8);box-shadow:0 0 0 4px rgba(255,59,48,.16)">
+        </div>
+        <p class="cap"><b>校验状态</b> · 只改描边和光环，不换背景色——玻璃质感不会被破坏，错误信息放在字段下方而不是按钮里</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       05 控件
+       ============================================================ -->
+  <section class="sec" id="controls">
+    <div class="sec-head"><span class="num">05</span><h2>控件</h2><span class="en">Controls</span></div>
+    <p class="sec-desc">所有控件的输入区都要 ≥44px。开关有三档：设置行用 44×26，表单用 52×30，大卡片用 62×36。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a" style="flex-direction:column;align-items:stretch;gap:16px">
+          <div class="lg-row" style="justify-content:space-between">
+            <span style="font-size:13px;font-weight:600">62 × 36</span>
+            <label class="sw blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div class="lg-row" style="justify-content:space-between">
+            <span style="font-size:13px;font-weight:600">52 × 30</span>
+            <label class="sw sm"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div class="lg-row" style="justify-content:space-between">
+            <span style="font-size:13px;font-weight:600">44 × 26</span>
+            <label class="sw mini blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+        </div>
+        <p class="cap"><b>开关三档</b> · 轨道是玻璃，旋钮是白色实体；开启色用蓝色或绿色，不要两种混用</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="flex-direction:column;gap:16px">
+          <div class="seg">
+            <input type="radio" name="seg-demo" id="sg1" checked><label for="sg1">日</label>
+            <input type="radio" name="seg-demo" id="sg2"><label for="sg2">周</label>
+            <input type="radio" name="seg-demo" id="sg3"><label for="sg3">月</label>
+          </div>
+          <span class="stepper glass">
+            <button aria-label="减少">−</button>
+            <span class="val">2</span>
+            <button aria-label="增加">+</button>
+          </span>
+        </div>
+        <p class="cap"><b>分段 / 步进</b> · 分段的选中块是白色玻璃，轨道压暗一档；步进器整颗玻璃，按钮不做背景</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="flex-direction:column;align-items:stretch;gap:16px">
+          <label class="check"><input type="checkbox" checked><span class="box">✓</span>接收推送通知</label>
+          <label class="check round"><input type="radio" name="rd" checked><span class="box">●</span>每天汇总一次</label>
+          <div class="swatches">
+            <input type="radio" name="sw-m" id="sw-m1" checked><label for="sw-m1" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></label>
+            <input type="radio" name="sw-m" id="sw-m2"><label for="sw-m2" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></label>
+            <input type="radio" name="sw-m" id="sw-m3"><label for="sw-m3" style="background:linear-gradient(140deg,#ff6482,#ff375f)"></label>
+            <input type="radio" name="sw-m" id="sw-m4"><label for="sw-m4" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)"></label>
+          </div>
+          <div class="rate" aria-label="4 分">★★★★<span class="off">★</span></div>
+        </div>
+        <p class="cap"><b>复选 / 单选 / 色板 / 评分</b> · 选中态都用「放大 4% + 彩色投影」，不用改变尺寸来制造跳动</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage d" style="flex-direction:column;gap:18px">
+          <div class="slider" style="width:100%">
+            <div class="rail"></div>
+            <input type="range" min="0" max="100" value="38" aria-label="亮度">
+          </div>
+          <div class="slider blue" style="width:100%">
+            <div class="rail"></div>
+            <input type="range" min="0" max="100" value="66" aria-label="音量">
+          </div>
+        </div>
+        <p class="cap"><b>滑块</b> · 彩色轨用于亮度/音量这类有语义的调节；灰轨用于普通数值。旋钮 44px，正好是命中区</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       06 列表与卡片
+       ============================================================ -->
+  <section class="sec" id="lists">
+    <div class="sec-head"><span class="num">06</span><h2>列表与卡片</h2><span class="en">Lists &amp; Cards</span></div>
+    <p class="sec-desc">玻璃只包住「组」，不包住「行」。这样整组是一块连续材质，行与行之间用一条 10% 墨色的发丝线分隔。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a">
+          <div class="list glass">
+            <div class="list-head">账户</div>
+            <div class="lrow"><span class="ico blue">林</span><span class="body">林一<small>个人账户</small></span><span class="val">Pro</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico green">✓</span><span class="body">已完成</span><span class="val">128</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico orange">◐</span><span class="body">额度</span><span class="val">82%</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico red">⏻</span><span class="body" style="color:var(--lg-red)">退出登录</span></div>
+          </div>
+        </div>
+        <p class="cap"><b>inset grouped 列表</b> · 圆角 18 + overflow hidden；图标 30px、圆角 8，颜色只用于区分功能</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b">
+          <div style="width:100%;display:flex;flex-direction:column;gap:10px">
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">✉</span>
+              <span class="nb"><b>你被邀请加入「设计系统」</b><small>林一 · 2 分钟前</small></span>
+              <span class="nt">新</span>
+            </div>
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#4cd964,#28a745)">✓</span>
+              <span class="nb"><b>构建已通过</b><small>main · 8 分钟前</small></span>
+              <span class="nt">1m</span>
+            </div>
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#ff9f0a,#ff6b00)">!</span>
+              <span class="nb"><b>存储空间即将用尽</b><small>已使用 92%</small></span>
+              <span class="nt">1h</span>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>通知卡</b> · 左侧方形图标是唯一高饱和色块；右侧时间戳不参与信息层级</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div class="album" style="width:min(360px,100%)">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <p class="cap"><b>相册网格</b> · 3 列、3px 间隙、外框圆角 18；格子本身不套玻璃，滚动性能优先</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage d" style="flex-direction:column;gap:12px">
+          <div class="miniplayer glass">
+            <span class="art"></span>
+            <span class="meta"><b>Ambient Glass</b><small>Field Recordings</small></span>
+            <span class="ctrl"><button aria-label="上一首">⏮</button><button aria-label="播放">▶</button><button aria-label="下一首">⏭</button></span>
+          </div>
+          <div class="glass clear" style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:20px;width:100%">
+            <span style="flex:1;font-size:12px;font-weight:600;color:#fff">3 项已选择</span>
+            <button class="btn sm" style="height:32px;font-size:12px">取消</button>
+            <button class="btn primary sm" style="height:32px;font-size:12px">移动</button>
+          </div>
+        </div>
+        <p class="cap"><b>播放器 / 批量条</b> · 播放器是 regular，批量条是 clear——后者要让照片的颜色透出来</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       07 弹层
+       ============================================================ -->
+  <section class="sec" id="overlays">
+    <div class="sec-head"><span class="num">07</span><h2>弹层</h2><span class="en">Overlays</span></div>
+    <p class="sec-desc">底部抽屉用 regular（文字多，需要可读性）；操作表每一项独立成片；控制中心是唯一适合多层玻璃叠加的场景。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage b" style="padding:0">
+          <div class="mock" style="width:100%;background:radial-gradient(240px 200px at 20% 15%,#ffd60a,transparent 62%),radial-gradient(260px 220px at 85% 30%,#ff375f,transparent 62%),linear-gradient(160deg,#dbe6f6,#cfd8e8)">
+            <span class="mock-title">底部抽屉 · Sheet</span>
+            <div class="sheet glass">
+              <div class="grab"></div>
+              <h4>分享到「设计系统」</h4>
+              <p>将 3 个组件添加到团队库，成员会收到通知。</p>
+              <div class="sheet-acts">
+                <button class="btn primary">确认分享</button>
+                <button class="btn ghost">取消</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>底部抽屉 Sheet</b> · 顶部抓手条 + 双按钮；抽屉本身是 regular，背景内容可见但退到后面</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="padding:0">
+          <div class="mock" style="width:100%;background:radial-gradient(240px 200px at 78% 12%,#bf5af2,transparent 62%),radial-gradient(260px 220px at 15% 70%,#5ac8fa,transparent 62%),linear-gradient(160deg,#e8e4f7,#dfe8f4)">
+            <span class="mock-title">操作表 · Action Sheet</span>
+            <div class="actionsheet">
+              <div class="as-item glass">保存到相册</div>
+              <div class="as-item glass">拷贝链接</div>
+              <div class="as-item glass danger">删除 3 个项目</div>
+              <div class="as-item glass as-cancel">取消</div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>操作表</b> · 每项一颗玻璃，破坏性操作染系统红且单独一组；取消项加粗、与上面拉开间距</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage d" style="flex-direction:column;gap:14px">
+          <div class="control-center glass">
+            <div class="ccg glass wide">
+              <div class="ccg horiz" style="padding:0;background:none;border:none;box-shadow:none">
+                <span class="cc-round on">✈</span><span class="cc-round">✦</span><span class="cc-round">ᛒ</span>
+              </div>
+              <div class="cc-slider">
+                <div class="slider blue"><div class="rail"></div><input type="range" value="62" aria-label="亮度"></div>
+              </div>
+            </div>
+            <div class="ccg glass wide" style="align-items:flex-start">
+              <span class="cc-round on" style="background:linear-gradient(135deg,#bf5af2,#7d3cf0)">♪</span>
+              <span class="cc-name"><b>Ambient Glass</b>Field Recordings</span>
+            </div>
+            <div class="ccg glass"><span class="cc-round on">◐</span><span class="cc-name"><b>专注</b>22:00</span></div>
+            <div class="ccg glass"><span class="cc-round">⌁</span><span class="cc-name"><b>热点</b>关闭</span></div>
+            <div class="ccg glass wide horiz"><span class="cc-round on">Wi</span><span class="cc-name"><b>Studio-5G</b>已连接</span></div>
+            <div class="ccg glass wide horiz"><span class="cc-round">✚</span><span class="cc-name"><b>更多</b>快捷指令</span></div>
+          </div>
+          <span class="cap-on-dark" style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;align-self:flex-start;padding-left:4px">Control Center · 4 列网格</span>
+        </div>
+        <p class="cap"><b>控制中心</b> · 唯一允许「玻璃套玻璃」的地方：外层 30px 圆角大板，内部小组件用 thin 变体，避免两层模糊互相吃色</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div class="keypad glass">
+            <button>1</button><button>2</button><button>3</button>
+            <button>4</button><button>5</button><button>6</button>
+            <button>7</button><button>8</button><button>9</button>
+            <button style="opacity:.4">*</button><button>0</button><button>⌫</button>
+          </div>
+        </div>
+        <p class="cap"><b>数字键盘</b> · 键高 46、圆角 12；按键用半透明白而不是玻璃，一层就够</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage d" style="flex-direction:column;gap:12px">
+          <div class="toast glass" style="animation:none">
+            <span class="ti">✓</span><span>已保存到「最近项目」</span>
+          </div>
+          <div class="toast glass" style="animation:none">
+            <span class="ti" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00)">!</span><span>网络不稳定，正在重试</span>
+          </div>
+        </div>
+        <p class="cap"><b>Toast</b> · 浮在顶部，2.4 秒自动消失；同一时间只允许一条，避免堆叠遮挡</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       08 反馈
+       ============================================================ -->
+  <section class="sec" id="feedback">
+    <div class="sec-head"><span class="num">08</span><h2>反馈</h2><span class="en">Feedback</span></div>
+    <p class="sec-desc">加载状态优先用骨架屏而不是转圈——骨架能提前告诉用户「这里会出现什么」，感知等待时间更短。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage c" style="flex-direction:column;gap:14px;align-items:stretch">
+          <div class="glass" style="padding:14px;border-radius:18px;display:flex;gap:12px">
+            <div class="sk" style="width:56px;height:56px;border-radius:14px;flex:none"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center">
+              <div class="sk" style="height:11px;width:68%"></div>
+              <div class="sk" style="height:9px;width:92%"></div>
+              <div class="sk" style="height:9px;width:46%"></div>
+            </div>
+          </div>
+          <div class="glass" style="padding:14px;border-radius:18px;display:flex;flex-direction:column;gap:9px">
+            <div class="sk" style="height:120px;border-radius:12px"></div>
+            <div class="sk" style="height:10px;width:60%"></div>
+          </div>
+        </div>
+        <p class="cap"><b>骨架屏</b> · 高光从左扫到右（1.5s 循环），只动背景位置，不动布局</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="flex-direction:column;gap:10px;align-items:stretch">
+          <div class="banner info"><span class="bi">i</span><span><b>新版本可用</b> · 刷新后生效</span></div>
+          <div class="banner ok"><span class="bi">✓</span><span><b>已保存</b> · 同步到云端</span></div>
+          <div class="banner warn"><span class="bi">!</span><span><b>连接不稳定</b> · 第 2 次重试</span></div>
+        </div>
+        <p class="cap"><b>行内横幅</b> · 只染 15% 品牌色，文字保持深色；比整块实色柔和，也不会盖过内容</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="flex-direction:column;gap:16px">
+          <div class="progress" style="width:100%">
+            <div class="bar"><div class="fill" style="width:68%"></div></div>
+          </div>
+          <div class="lg-row" style="gap:22px">
+            <div class="ring" style="--val:72%">72%</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="lg-row" style="gap:10px"><span class="spinner"></span><span style="font-size:12.5px;font-weight:600;color:var(--lg-ink-2)">正在生成预览</span></div>
+              <div class="lg-row" style="gap:10px"><span class="spinner dark sm"></span><span style="font-size:12.5px;font-weight:600;color:var(--lg-ink-2)">正在同步</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>进度 / 环形 / 加载</b> · 条形与环形都带 inset 高光；转圈只在 ≤3 秒的等待里使用</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div class="empty" style="width:100%">
+            <div class="ei" style="width:56px;height:56px;border-radius:19px;margin:0 auto 12px;display:grid;place-items:center;font-size:23px;background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.34));border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1.5px .5px -.5px #fff,0 8px 18px -8px rgba(22,28,45,.4)">▤</div>
+            <h4 style="font-size:14px;font-weight:700">还没有组件</h4>
+            <p style="margin:4px 0 14px;font-size:12px;color:var(--lg-ink-2)">从模板开始，或把现有组件拖进来</p>
+            <button class="btn sm primary">新建组件</button>
+          </div>
+        </div>
+        <p class="cap"><b>空态</b> · 图标 + 一句解释 + 一个可执行动作；不要只写「暂无数据」</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       09 扩展组件
+       ============================================================ -->
+  <section class="sec" id="extended">
+    <div class="sec-head"><span class="num">09</span><h2>扩展组件</h2><span class="en">Extended</span></div>
+    <p class="sec-desc">五个高频但容易被忽略的组件：上传区、命令面板、日期选择、头像组、轮播指示点。它们都遵循同一条规则——<b>一组内容一颗玻璃，内部元素不再套玻璃</b>。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage b" style="flex-direction:column;align-items:stretch;gap:12px">
+          <div class="dropzone">
+            <span class="dz-ico">↑</span>
+            <b>拖拽文件到这里</b>
+            <small>或点击选择 · 支持 PNG / JPG / SVG，单个 ≤ 10MB</small>
+            <div class="dz-files">
+              <span class="dz-file">cover.png <i>1.2MB</i></span>
+              <span class="dz-file">glass.svg <i>24KB</i></span>
+            </div>
+          </div>
+          <div class="dropzone is-over">
+            <span class="dz-ico" style="color:var(--lg-green);background:rgba(52,199,89,.14)">↓</span>
+            <b>松开即可上传</b>
+            <small>悬停 / 拖入时描边转品牌色</small>
+          </div>
+        </div>
+        <p class="cap"><b>上传拖放区</b> · 用虚线描边而不是玻璃，避免和容器抢材质；拖入时只改描边与底色，不加缩放</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="flex-direction:column;align-items:stretch;gap:18px">
+          <div class="datepicker glass">
+            <div class="dp-head">
+              <button aria-label="上个月">‹</button>
+              <span>2026 年 10 月</span>
+              <button aria-label="下个月">›</button>
+            </div>
+            <div class="dp-grid">
+              <span class="dw">日</span><span class="dw">一</span><span class="dw">二</span><span class="dw">三</span><span class="dw">四</span><span class="dw">五</span><span class="dw">六</span>
+              <button class="mute">27</button><button class="mute">28</button><button class="mute">29</button><button class="mute">30</button><button>1</button><button>2</button><button>3</button>
+              <button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button>10</button>
+              <button>11</button><button>12</button><button>13</button><button>14</button><button>15</button><button>16</button><button>17</button>
+              <button>18</button><button>19</button><button class="today">21</button><button class="on">22</button><button>23</button><button>24</button>
+              <button>25</button><button>26</button><button>27</button><button>28</button><button>29</button><button>30</button><button>31</button>
+            </div>
+          </div>
+          <div class="dots" style="justify-content:center"><button class="on" aria-label="第 1 张"></button><button aria-label="第 2 张"></button><button aria-label="第 3 张"></button><button aria-label="第 4 张"></button></div>
+        </div>
+        <p class="cap"><b>日期选择 / 轮播点</b> · 选中日填品牌色，今天只描边；指示点选中后拉成胶囊而不是放大，避免布局跳动</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="flex-direction:column;align-items:stretch;gap:12px">
+          <div class="cmdk glass">
+            <div class="ck-in">
+              <span style="color:var(--lg-ink-3);font-size:13px">⌕</span>
+              <input type="text" placeholder="搜索组件、页面或命令" value="glass" aria-label="命令搜索">
+              <kbd>⌘K</kbd>
+            </div>
+            <div class="ck-g">组件</div>
+            <div class="ck-i on"><span>◧</span>Glass Button<span class="k">B</span></div>
+            <div class="ck-i"><span>▭</span>Glass Card<span class="k">C</span></div>
+            <div class="ck-g">页面</div>
+            <div class="ck-i"><span>▤</span>设计系统 / 按钮<span class="k">↵</span></div>
+          </div>
+          <div class="lg-row" style="flex-wrap:wrap;gap:8px">
+            <span class="avatar">林</span>
+            <span class="avatar" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">陈<span class="st"></span></span>
+            <span class="avatar" style="background:linear-gradient(140deg,#ff6482,#ff375f)">苏<span class="st away"></span></span>
+            <span class="avatar" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">周<span class="st off"></span></span>
+            <span class="kbd">4 人</span>
+          </div>
+        </div>
+        <p class="cap"><b>命令面板 / 头像组</b> · 面板内只有「被选中行」铺白；头像状态点用绿 / 橙 / 灰三色，不加文字</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="flex-direction:column;align-items:stretch;gap:16px">
+          <div class="steps" style="width:100%">
+            <div class="stp done"><span class="b">✓</span><span class="lab">下单<small>09:12</small></span></div>
+            <div class="stp-line fill"></div>
+            <div class="stp now"><span class="b">2</span><span class="lab">制作<small>进行中</small></span></div>
+            <div class="stp-line"></div>
+            <div class="stp"><span class="b">3</span><span class="lab">配送<small>预计 18:40</small></span></div>
+          </div>
+          <div class="banner info" style="margin:0"><span class="bi">i</span><span><b>第 2 步进行中</b> · 预计还有 26 分钟完成制作</span></div>
+          <div class="tl">
+            <div class="tl-row"><span class="tl-dot" style="background:linear-gradient(140deg,#4cd964,#28a745)"></span><span class="tl-txt">订单已确认<small>09:12</small></span></div>
+            <div class="tl-row"><span class="tl-dot" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></span><span class="tl-txt">开始制作<small>09:20</small></span></div>
+            <div class="tl-row"><span class="tl-dot" style="background:rgba(120,120,128,.25)"></span><span class="tl-txt" style="color:var(--lg-ink-3)">等待取餐<small>—</small></span></div>
+          </div>
+        </div>
+        <p class="cap"><b>步骤条 / 时间线</b> · 已完成用绿、当前用蓝、未开始透明；连线只在 done 段染色，方向天然可读</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="sitefoot">
+    Lumi Glass · 手机端 v1.1 · 依赖 <code>glass/glass-core.css</code> + <code>glass-mobile.css</code><br>
+    想看完整 API 与接入步骤？打开 <a href="docs.html">使用文档</a>。
+  </footer>
+</main>
+
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+<script>
+  // 演示：点击主按钮弹一条 Toast
+  document.querySelectorAll('[data-toast]').forEach(function (b) {
+    b.addEventListener('click', function () { LiquidGlass.toast(b.getAttribute('data-toast')); });
+  });
+</script>
+</body>
+</html>

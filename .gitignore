@@ -1,0 +1,8 @@
+.DS_Store
+.workbuddy/
+.wbapp_*.genie
+node_modules/
+dist/
+*.zip
+*.tgz
+同类产品与侵权评估.md

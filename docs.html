@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Liquid Glass 液态玻璃组件库 · 完整使用文档。设计原理、Token、组件 API、端差异、无障碍、性能预算与接入清单。">
+<title>液态玻璃 · 使用文档</title>
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<link rel="stylesheet" href="glass/glass-stage.css">
+<link rel="stylesheet" href="glass/glass-templates.css">
+<style>
+  /* ---------- 文档页专属布局 ---------- */
+  .docs-layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 44px; padding-top: 36px; }
+  @media (max-width: 960px) { .docs-layout { grid-template-columns: 1fr; } .docs-toc { display: none; } }
+
+  .docs-toc { position: sticky; top: 82px; align-self: start; max-height: calc(100vh - 110px); overflow-y: auto; }
+  .docs-toc .toc-t { padding: 0 12px 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--lg-ink-3); }
+  .docs-toc a {
+    display: block; padding: 7px 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: var(--lg-ink-2); text-decoration: none;
+    border-left: 2px solid transparent; transition: .2s;
+  }
+  .docs-toc a:hover { color: var(--lg-ink); background: #f5f5f7; }
+  [data-theme="dark"] .docs-toc a:hover { background: rgba(255,255,255,.06); }
+  .docs-toc a.sub { padding-left: 26px; font-size: 12.5px; }
+  .docs-toc a.on { color: var(--lg-ink); font-weight: 600; background: #f5f5f7; border-left-color: var(--lg-blue); }
+  [data-theme="dark"] .docs-toc a.on { background: rgba(255,255,255,.07); }
+
+  .docs-body { max-width: 780px; }
+  .docs-body h2 {
+    display: flex; align-items: baseline; gap: 12px;
+    margin: 0 0 14px; padding-top: 56px; font-size: 26px; font-weight: 800; letter-spacing: -.6px;
+  }
+  .docs-body h2 .num {
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 600;
+    color: var(--lg-ink-3); background: #f5f5f7; padding: 3px 8px; border-radius: 7px;
+  }
+  [data-theme="dark"] .docs-body h2 .num { background: rgba(255,255,255,.07); }
+  .docs-body > section:first-child h2 { padding-top: 0; }
+  .docs-body h3 { margin: 34px 0 10px; font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+  .docs-body h4 { margin: 24px 0 8px; font-size: 14.5px; font-weight: 700; }
+  .docs-body p { margin-bottom: 12px; font-size: 14px; line-height: 1.75; color: var(--lg-ink-2); }
+  .docs-body p b, .docs-body li b { color: var(--lg-ink); font-weight: 600; }
+  .docs-body ul, .docs-body ol { margin: 0 0 14px 20px; font-size: 14px; line-height: 1.75; color: var(--lg-ink-2); }
+  .docs-body li { margin-bottom: 5px; }
+  .docs-body code.inline {
+    padding: 1.5px 6px; border-radius: 6px; background: rgba(120,120,128,.12);
+    font-size: 12.5px; color: var(--lg-blue-deep); white-space: nowrap;
+  }
+  [data-theme="dark"] .docs-body code.inline { color: #8cc4ff; }
+
+  .code {
+    margin: 0 0 16px; padding: 14px 16px; border-radius: 14px;
+    background: #101216; color: #d7dce6;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; line-height: 1.75; overflow-x: auto; white-space: pre;
+  }
+  .code .c { color: #6b7688; }
+  .code .t { color: #7ab8ff; }
+  .code .a { color: #a5e0a2; }
+
+  table.api { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 13px; }
+  table.api th {
+    text-align: left; padding: 7px 10px; border-bottom: 1.5px solid var(--lg-line);
+    font-size: 10.5px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--lg-ink-3);
+  }
+  table.api td { padding: 9px 10px; border-bottom: 1px solid rgba(60,60,67,.08); vertical-align: top; line-height: 1.55; color: var(--lg-ink-2); }
+  [data-theme="dark"] table.api td { border-bottom-color: rgba(255,255,255,.08); }
+  table.api td:first-child { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--lg-blue-deep); white-space: nowrap; }
+  [data-theme="dark"] table.api td:first-child { color: #8cc4ff; }
+
+  .callout {
+    display: flex; gap: 10px; padding: 13px 15px; margin: 0 0 16px;
+    border: 1px solid rgba(10,132,255,.3); border-radius: 13px;
+    background: linear-gradient(135deg, rgba(10,132,255,.08), rgba(10,132,255,.03));
+    font-size: 13px; line-height: 1.65; color: var(--lg-ink-2);
+  }
+  .callout .ci { flex: none; display: grid; place-items: center; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; background: var(--lg-blue); color: #fff; font-size: 11px; font-weight: 800; }
+  .callout b { color: var(--lg-ink); }
+  .callout.warn { border-color: rgba(255,159,10,.4); background: linear-gradient(135deg, rgba(255,159,10,.09), rgba(255,159,10,.03)); }
+  .callout.warn .ci { background: var(--lg-orange); }
+  .callout.ok { border-color: rgba(52,199,89,.4); background: linear-gradient(135deg, rgba(52,199,89,.09), rgba(52,199,89,.03)); }
+  .callout.ok .ci { background: var(--lg-green); }
+
+  .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .token-item { padding: 12px 14px; border: 1px solid var(--lg-line); border-radius: 12px; background: #fbfbfd; }
+  [data-theme="dark"] .token-item { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); }
+  .token-item b { display: block; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; font-weight: 600; color: var(--lg-ink); margin-bottom: 3px; }
+  .token-item span { font-size: 11px; color: var(--lg-ink-2); line-height: 1.5; display: block; }
+  .token-item .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; vertical-align: -1px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+
+  .checklist { list-style: none; margin-left: 0 !important; }
+  .checklist li { padding: 9px 0 9px 30px; position: relative; border-bottom: 1px solid rgba(60,60,67,.07); }
+  [data-theme="dark"] .checklist li { border-bottom-color: rgba(255,255,255,.07); }
+  .checklist li::before { content: "☐"; position: absolute; left: 2px; top: 8px; font-size: 15px; color: var(--lg-ink-3); }
+
+  .demo-strip { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 22px; margin-bottom: 16px; border-radius: 18px; background: radial-gradient(220px 180px at 15% 20%, rgba(255,255,255,.85), transparent 60%), radial-gradient(240px 200px at 85% 80%, rgba(120,150,200,.45), transparent 62%), linear-gradient(150deg, #eef1f6, #dde2ec); }
+
+  /* ---------- 组件效果演示容器 ---------- */
+  .demo {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    padding: 18px 20px; margin-bottom: 14px; border-radius: 16px;
+    background: #fbfbfd; border: 1px solid var(--lg-line);
+  }
+  [data-theme="dark"] .demo { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.1); }
+  .demo.col { flex-direction: column; align-items: stretch; }
+  .demo .dlab {
+    flex-basis: 100%; margin-bottom: -4px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--lg-ink-3);
+  }
+  .demo.dark {
+    background:
+      radial-gradient(280px 200px at 20% 18%, rgba(255,196,90,.75), transparent 62%),
+      radial-gradient(300px 220px at 82% 78%, rgba(94,92,230,.8), transparent 64%),
+      linear-gradient(150deg, #23283a, #12141d);
+    border: none; color: #fff;
+  }
+  .demo.dark .dlab { color: rgba(255,255,255,.55); }
+  .demo.grow > *:not(.dlab) { flex: 1 1 auto; }
+  .demo .btn:disabled { opacity: .45; }
+  .demo-note { margin: -6px 0 16px; font-size: 12px; color: var(--lg-ink-3); line-height: 1.6; }
+</style>
+</head>
+<body class="web" data-wallpaper="aurora">
+
+<header class="topbar-web glass">
+  <a class="brand" href="landing.html"><span class="mark"></span>Lumi Glass</a>
+  <span class="tag">使用文档 · v1.1</span>
+  <nav data-site-nav="docs"></nav>
+  <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+</header>
+
+<main class="wrap">
+  <div class="hero" style="padding-bottom:0;border-bottom:none">
+    <div class="eyebrow">Documentation · v1.1</div>
+    <h1>使用文档</h1>
+    <p>一套遵循 Apple HIG「Liquid Glass」思路的纯 CSS 组件库：<b>手机端与网页端两套组件、明暗双主题、无构建依赖</b>。这份文档覆盖设计原理、Token、全部组件 API、无障碍、性能与接入清单——<b>每个组件都在页面里真实可交互</b>，直接试。</p>
+    <div class="meta">
+      <span>9 + 9 页面模板</span><span>130+ 类名</span><span>零依赖</span><span>全部示例可交互</span>
+    </div>
+  </div>
+
+  <div class="docs-layout">
+    <!-- ============ 目录 ============ -->
+    <aside class="docs-toc" aria-label="目录">
+      <div class="toc-t">目录</div>
+      <a href="#s1">01 概述</a>
+      <a href="#s2">02 快速开始</a>
+      <a href="#s3">03 设计原理</a>
+      <a href="#s4">04 设计 Token</a>
+      <a href="#s5">05 手机端 × 网页端</a>
+      <a href="#s6">06 组件参考</a>
+      <a class="sub" href="#c-btn">按钮</a>
+      <a class="sub" href="#c-form">表单输入</a>
+      <a class="sub" href="#c-ctrl">控件</a>
+      <a class="sub" href="#c-nav">导航</a>
+      <a class="sub" href="#c-box">容器与布局</a>
+      <a class="sub" href="#c-over">弹层</a>
+      <a class="sub" href="#c-fb">反馈</a>
+      <a class="sub" href="#c-ext">扩展组件</a>
+      <a href="#s7">07 动效规范</a>
+      <a href="#s8">08 无障碍</a>
+      <a href="#s9">09 性能预算</a>
+      <a href="#s10">10 兼容与降级</a>
+      <a href="#s11">11 定制主题</a>
+      <a href="#s12">12 接入检查清单</a>
+      <a href="#s13">13 常见问题</a>
+      <a href="#s14">14 类名速查表</a>
+    </aside>
+
+    <!-- ============ 正文 ============ -->
+    <div class="docs-body">
+
+      <!-- 01 概述 -->
+      <section id="s1">
+        <h2><span class="num">01</span>概述</h2>
+        <p><b>Lumi Glass</b> 是一套以 Apple「液态玻璃」材质为核心的界面组件库。它不依赖任何框架，全部由 HTML + CSS 组成，唯一的可选脚本是 <code class="inline">glass.js</code>（约 4KB），负责折射滤镜注入、指针光斑与主题切换。</p>
+        <h3>文件结构</h3>
+<pre class="code">glass/
+├─ glass-core.css      通用层：Token、玻璃基类、按钮、表单、控件、反馈、
+│                      时间线 / 步骤条 / 上传区 / 命令面板 / 日期选择
+├─ glass-mobile.css    手机端：手机壳、导航、列表、Tab Bar、抽屉、控制中心、
+│                      登录 / 聊天 / 播放器 / 钱包 / 天气模板
+├─ glass-web.css       网页端：浮动顶栏、应用框架、Bento、表格、定价、
+│                      登录分屏 / 文章阅读 / 看板 / 收件箱
+├─ glass-templates.css 页面模板扩展：管理台图表 / 官网 Hero / 商品卡
+├─ glass-stage.css     仅案例/文档页使用，业务页面不需要
+└─ glass.js            可选：折射滤镜、指针光斑、滚动加厚、主题切换、Toast
+
+starter.html           起步模板：真实页面骨架，直接改成自己的产品（推荐起点）
+mobile.html            手机端案例页（9 套页面模板 + 9 组组件）
+web.html               网页端案例页（9 套布局模板 + 桌面密度组件）
+admin.html             页面模板：后端管理台（可直接改用）
+landing.html           页面模板：产品官网（可直接改用）
+shop.html              页面模板：电商店铺（可直接改用）
+docs.html              本文档（示例全部可交互）
+LICENSE                MIT 许可
+white.html / index.html 合辑与深色原版（参考用）</pre>
+        <h3>适合什么</h3>
+        <ul>
+          <li>产品官网、后台仪表盘、作品集、活动页中的<b>导航、工具条、卡片悬浮层</b></li>
+          <li>移动端 H5 / 小程序 WebView 中的<b>悬浮控制层</b></li>
+          <li>需要「有厚度的半透明材质」但不想引入 UI 框架的项目</li>
+        </ul>
+        <h3>不适合什么</h3>
+        <div class="callout warn">
+          <span class="ci">!</span>
+          <span><b>不要把玻璃用在长文内容卡上。</b>文字密集的内容区需要近乎不透明的底，否则文字会随背景滚动失去对比度——这是 HIG 的硬规则，不是风格偏好。</span>
+        </div>
+        <p>同样不建议：全屏铺满玻璃（性能开销大且没有层次）、深浅文字直接叠在强彩色背景上、把玻璃套三层以上。</p>
+      </section>
+
+      <!-- 02 快速开始 -->
+      <section id="s2">
+        <h2><span class="num">02</span>快速开始</h2>
+        <p>把 <code class="inline">glass/</code> 目录整个拷进项目，然后三步接入。想先看一个真实页面长什么样，打开 <code class="inline">starter.html</code>——它只有背景层、顶栏和几块内容，是可以直接改的业务骨架。<b>接入是否成功</b>可打开 <a href="docs-test.html" style="color:var(--lg-blue-deep)">docs-test.html</a>（仅引文档中的 CSS/JS，自动跑冒烟测试）。</p>
+        <h4>第 1 步：引样式</h4>
+<pre class="code"><span class="c">&lt;!-- 通用层必引；按平台选一个 --&gt;</span>
+&lt;link rel=<span class="a">"stylesheet"</span> href=<span class="a">"glass/glass-core.css"</span>&gt;
+&lt;link rel=<span class="a">"stylesheet"</span> href=<span class="a">"glass/glass-web.css"</span>&gt;   <span class="c">&lt;!-- 或 glass-mobile.css --&gt;</span>
+
+<span class="c">&lt;!-- 可选：整页模板组件（后台图表 / 官网 Hero / 商品卡 / 认证页） --&gt;</span>
+&lt;link rel=<span class="a">"stylesheet"</span> href=<span class="a">"glass/glass-templates.css"</span>&gt;</pre>
+        <h4>第 2 步：给容器加平台类</h4>
+<pre class="code">&lt;body class=<span class="a">"web"</span>&gt;      <span class="c">&lt;!-- 桌面密度：按钮 40px、输入 44px --&gt;</span>
+&lt;body class=<span class="a">"mobile"</span>&gt;   <span class="c">&lt;!-- 触控密度：按钮 50px、命中区 44px --&gt;</span></pre>
+        <h4>第 3 步（可选）：引脚本</h4>
+<pre class="code">&lt;script src=<span class="a">"glass/glass.js"</span>&gt;&lt;/script&gt;
+<span class="c">&lt;!-- 获得：边缘折射、鼠标光斑、顶栏滚动加厚、明暗切换、Toast --&gt;</span>
+<span class="c">&lt;!-- 可选：body data-wallpaper="aurora" 启用动态壁纸（玻璃底下有活内容可折射） --&gt;</span>
+<span class="c">&lt;!-- Toast 无需手写容器，glass.js 会自动创建 .toast-zone --&gt;</span></pre>
+        <h4>最小示例</h4>
+<pre class="code">&lt;<span class="t">body</span> class=<span class="a">"web"</span>&gt;
+  &lt;<span class="t">div</span> class=<span class="a">"glass"</span> style=<span class="a">"padding:20px;border-radius:20px"</span>&gt;
+    &lt;<span class="t">h3</span>&gt;我的第一块玻璃&lt;/<span class="t">h3</span>&gt;
+    &lt;<span class="t">p</span>&gt;把它放在有内容的背景上，折射才会出现。&lt;/<span class="t">p</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+&lt;/<span class="t">body</span>&gt;</pre>
+        <h4>第 4 步（可选）：官网级液态动效</h4>
+        <p>与 <code class="inline">landing.html</code> 一致的<b>动态壁纸、WebGL 液态层、顶栏页间过渡</b>，在 <code class="inline">glass.js</code> 之后按顺序追加：</p>
+<pre class="code">&lt;link rel=<span class="a">"stylesheet"</span> href=<span class="a">"glass/glass-lg.css"</span>&gt;
+&lt;body class=<span class="a">"web"</span> data-wallpaper=<span class="a">"aurora"</span>&gt;
+
+&lt;script src=<span class="a">"glass/glass.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="a">"glass/site-topbar.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="a">"glass/glass-liquid-engine.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="a">"glass/glass-webgl.js"</span>&gt;&lt;/script&gt;
+<span class="c">&lt;!-- 业务页用 app 略减面板光效；若要关控件 WebGL：data-lg-controls="off" --&gt;</span></pre>
+        <p>完整自检见 <a href="docs-test.html" style="color:var(--lg-blue-deep)">docs-test.html</a>：收录 §06 全部 demo、§07 弹簧阻尼抽样、网页/手机布局与 <code class="inline">html.lg-on</code> 检测（不含壁纸调音）。</p>
+        <div class="callout">
+          <span class="ci">i</span>
+          <span><b>玻璃必须有内容可以折射。</b>纯白背景上玻璃会退化成「白框」。要么把组件放在照片 / 彩色渐变上，要么参考案例页用一块「展示台」背景。接入前先确认：这块玻璃底下有什么？</span>
+        </div>
+
+        <h3>方式 B：npm 安装（推荐工程化项目）</h3>
+<pre class="code">npm install lumiglass</pre>
+<pre class="code"><span class="c">// Vite / Vue CLI / CRA / Next.js 通用 —— 引全局 CSS 一次即可</span>
+<span class="k">import</span> <span class="s">'lumiglass/css/glass-core.css'</span>;
+<span class="k">import</span> <span class="s">'lumiglass/css/glass-web.css'</span>;    <span class="c">// 或 glass-mobile.css</span>
+<span class="k">import</span> <span class="s">'lumiglass/js/glass.js'</span>;          <span class="c">// 可选：折射 / 光斑 / 主题 / Toast</span></pre>
+        <p>包内文件与 <code class="inline">glass/</code> 目录一一对应（core / web / mobile / templates 四层），<code class="inline">package.json</code> 已配好 <code class="inline">exports</code>，按子路径直接引。发布步骤见项目根目录 <code class="inline">lumiglass/PUBLISH.md</code>。</p>
+
+        <h3>在 Vue / React 中使用</h3>
+        <p>本库是<b>纯 CSS 类名库，不依赖任何框架</b>——类名写在 <code class="inline">class</code>（Vue）或 <code class="inline">className</code>（React）里即可，行为层（Toast / 主题 / 折射）由全局 <code class="inline">LiquidGlass</code> 对象提供。</p>
+<pre class="code"><span class="c">&lt;!-- Vue 3 单文件组件 --&gt;</span>
+&lt;<span class="t">template</span>&gt;
+  &lt;<span class="t">button</span> class=<span class="a">"btn primary"</span> @click=<span class="a">"save"</span>&gt;保存&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">template</span>&gt;
+&lt;<span class="t">script</span> setup&gt;
+<span class="k">function</span> <span class="f">save</span>() { LiquidGlass.<span class="f">toast</span>(<span class="s">'已保存'</span>); }
+&lt;/<span class="t">script</span>&gt;</pre>
+<pre class="code"><span class="c">/* React 组件 */</span>
+<span class="k">export function</span> <span class="f">SaveButton</span>() {
+  <span class="k">return</span> &lt;<span class="t">button</span> className=<span class="a">"btn primary"</span>
+    onClick={() =&gt; LiquidGlass.<span class="f">toast</span>(<span class="s">'已保存'</span>)}&gt;保存&lt;/<span class="t">button</span>&gt;;
+}</pre>
+        <table class="api">
+          <tr><th>场景</th><th>做法</th></tr>
+          <tr><td>路由切换（Vue Router / React Router）</td><td>新页面挂载后调一次 <code class="inline">LiquidGlass.refresh()</code>，重新绑定吸顶加厚与折射检测</td></tr>
+          <tr><td>明暗主题</td><td>按钮加 <code class="inline">data-theme-toggle</code> 属性即可；或在代码里调 <code class="inline">LiquidGlass.setTheme('dark')</code></td></tr>
+          <tr><td>Toast</td><td>直接调 <code class="inline">LiquidGlass.toast('文案')</code>；案例页的 <code class="inline">data-toast</code> 属性绑定只是演示代码，业务里不要依赖</td></tr>
+          <tr><td>SSR（Next.js / Nuxt）</td><td>CSS 在服务端正常引入；<code class="inline">glass.js</code> 操作 DOM，只在客户端引入（<code class="inline">useEffect</code> / <code class="inline">onMounted</code> 里 <code class="inline">import</code>，或加 <code class="inline">&lt;Script&gt;</code> 标记）</td></tr>
+          <tr><td>作用域冲突</td><td>类名无前缀，可用 PostCSS 包装 <code class="inline">.lgk .btn</code> 一次性加命名空间（见第 14 章）</td></tr>
+        </table>
+
+        <h3>图标方案</h3>
+        <p>库本身<b>不内置图标字体</b>，保持零依赖；演示里的 ⌕ ✕ ＋ 是字符兜底。上线项目建议接入一套 SVG 线性图标（如 lucide、tabler-icons），笔画粗细 1.5–1.8 最配玻璃质感——主题切换按钮的太阳 / 月亮就是 glass.js 按这个规格自动注入的 SVG，可直接对照。</p>
+      </section>
+
+      <!-- 03 设计原理 -->
+      <section id="s3">
+        <h2><span class="num">03</span>设计原理</h2>
+        <h3>三层配方</h3>
+        <p>每一块玻璃由三层叠加而成，三者缺一不可：</p>
+        <table class="api">
+          <tr><th>层</th><th>实现</th><th>作用</th></tr>
+          <tr><td>① 磨砂</td><td>backdrop-filter: blur() saturate()</td><td>让底下的内容模糊并提饱和，玻璃「吃掉」背景色</td></tr>
+          <tr><td>② 折射（可选）</td><td>filter: url(#lg-lens) + JS 抓取层</td><td><code class="inline">backdrop-filter: url()</code> 只有极少数引擎支持，所以折射由 glass.js 把壁纸抓进小 canvas、对最外一圈施加位移滤镜（<code class="inline">body[data-lens="on"]</code> 启用；Chromium 上主流液态玻璃站同样只用磨砂）</td></tr>
+          <tr><td>③ 边缘与镜面</td><td>padding-box/border-box 双层背景 + inset 高光 + 投影</td><td>边框是一圈「角亮中暗」的对角光带（光从左上穿入、右下穿出）；顶部高光模拟镜面、外投影表达厚度</td></tr>
+        </table>
+        <h3>五种材质</h3>
+        <p>HIG 定义了 regular / clear，本库补全为五级阶梯。<b>关键规律：模糊越低，折射越明显</b>——blur 18px 时位移滤镜基本被糊掉，只剩「毛玻璃」；想要一眼液态，用 clear（2px）并保证玻璃下有颜色：</p>
+        <table class="api">
+          <tr><th>类名</th><th>模糊 · 身体</th><th>用在</th><th>典型场景</th></tr>
+          <tr><td>.glass.clear</td><td>2px · 白 10%</td><td>彩色背景 / 照片之上，透镜感最强</td><td>官网 Hero、控制层、取景器控件</td></tr>
+          <tr><td>.glass</td><td>16px · 白 42%（默认）</td><td>内容之上的控制层</td><td>导航、卡片、按钮、输入框</td></tr>
+          <tr><td>.glass.tinted</td><td>12px · 主色染 55%</td><td>品牌色染色玻璃，白字</td><td>强调面板、选中态容器</td></tr>
+          <tr><td>.glass.thin</td><td>10px · 白 16%</td><td>玻璃内部的嵌套小组件</td><td>控制中心内的格子</td></tr>
+          <tr><td>.glass.overlay</td><td>24px · 白 72%</td><td>弹层，可读性优先</td><td>弹窗、Toast、下拉菜单</td></tr>
+        </table>
+        <h3>层级模型</h3>
+        <p>一个页面永远分三层，玻璃只属于第 3 层：</p>
+        <ul>
+          <li><b>页面背景层</b>：照片、渐变、工程网格——负责给玻璃提供可折射的颜色</li>
+          <li><b>内容层</b>：近乎不透明的底（白 85%+），承载正文、表格、长文</li>
+          <li><b>控制层</b>：玻璃。导航、工具条、弹窗、悬浮按钮——可以动的那一层</li>
+        </ul>
+        <p>案例页反复强调的「侧栏悬浮 / 内容实体底」对比，就是这三层的具象化。</p>
+        <h3>液态交互（fx）</h3>
+        <ul>
+          <li><b>边框亮环</b>：hover 时 <code class="inline">.glass::after</code> 显示 1.2px 对角亮边（不进盒内）；</li>
+          <li><b>追光镜面</b>：大面板加 <code class="inline">.lg-sheen</code>，glass.js 把指针位置写入 <code class="inline">--lg-mx / --lg-my</code>，<code class="inline">::before</code> 径向高光跟随；</li>
+          <li><b>按压弹簧</b>：按钮 / FAB / Dock 由 JS 阻尼弹簧驱动（按下 ~1.12、松开略过冲再收敛）；无 JS 时降级 CSS <code class="inline">:active</code>；</li>
+          <li><b>浮起</b>：卡片类自动挂 <code class="inline">fx-lift</code>（阴影加深，无位移）。</li>
+        </ul>
+        <h3>动态壁纸（body[data-wallpaper]）</h3>
+        <p>静态渐变背景是「玻璃显假」的头号原因——光不动，折射就死板。给 <code class="inline">&lt;body&gt;</code> 加 <code class="inline">data-wallpaper="lumi"</code> 并引入 glass.js，页面底层会挂一张全屏 canvas：三段同明度底色 + 4 个缓慢漂移的光斑（主周期约 46 秒，半分辨率渲染、30fps 节流，<code class="inline">prefers-reduced-motion</code> 自动降为静帧，切换主题自动换色）。</p>
+        <pre class="code">&lt;body <span class="a">data-wallpaper</span>=<span class="s">"lumi"</span>&gt;
+&lt;script src=<span class="a">"glass/glass.js"</span>&gt;&lt;/script&gt;
+
+<span class="c">// JS 切换 / 关闭</span>
+LiquidGlass.setWallpaper(<span class="s">'sonoma'</span>);
+LiquidGlass.setWallpaper(<span class="k">null</span>);</pre>
+        <p>内置五套预设：<code class="inline">lumi</code>（灰蓝工作区）、<code class="inline">aurora</code>（低饱和紫雾，对齐 Glass UI 官网）、<code class="inline">sonoma</code> / <code class="inline">tahoe</code> / <code class="inline">graphite</code>。业务页用 <code class="inline">lumi</code>，营销 Hero 用 <code class="inline">aurora</code>。</p>
+        <h3>WebGL 液态引擎（glass-liquid-engine.js + glass-webgl.js）</h3>
+        <p>与 <a href="https://glass-ui.crenspire.com/" target="_blank" rel="noopener">Glass UI</a> 相同架构：全屏 WebGL 画布在 UI 下方，<code class="inline">data-glass</code> 控件由着色器绘制折射 + 色散 + 追光边缘；CSS 使用 <code class="inline">.lg</code> 材质层（<code class="inline">glass-lg.css</code>）。</p>
+        <pre class="code">&lt;link rel=<span class="s">"stylesheet"</span> href=<span class="a">"glass/glass-lg.css"</span>&gt;
+&lt;body <span class="a">data-wallpaper</span>=<span class="s">"aurora"</span> <span class="a">data-lg-engine</span>=<span class="s">"on"</span>&gt;
+&lt;script src=<span class="a">"glass/glass.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="a">"glass/glass-liquid-engine.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="a">"glass/glass-webgl.js"</span>&gt;&lt;/script&gt;
+
+&lt;div class=<span class="s">"lg lg-regular lg-surface"</span> <span class="a">data-glass</span>=<span class="s">"card"</span> <span class="a">data-frost</span>=<span class="s">"1"</span> <span class="a">data-tint</span>=<span class="s">"0.2"</span>&gt;…&lt;/div&gt;</pre>
+        <p>壁纸 canvas 带 <code class="inline">data-glass-backdrop</code>；引擎就绪后 <code class="inline">html.lg-ready</code> 会隐藏 DOM 壁纸副本，避免双层。Chrome 另加 <code class="inline">#lg-lens</code> 给未走 WebGL 的 <code class="inline">.lg</code> 条。</p>
+        <p><b>官网示例</b>：<code class="inline">landing.html</code>（暗色 + aurora + 控制中心）。</p>
+        <h3 id="lg-profile">光效三档 <code class="inline">data-lg-profile</code></h3>
+        <p>写在 <code class="inline">&lt;body&gt;</code> 上，控制 WebGL 强度与控件是否挂 <code class="inline">data-glass</code>。未写时默认为 <code class="inline">showcase</code>。</p>
+        <table class="api">
+          <thead><tr><th>档位</th><th>典型页面</th><th>面板 WebGL</th><th>控件 WebGL</th><th>引擎倾向</th></tr></thead>
+          <tbody>
+            <tr><td><code>app</code></td><td>starter / admin / shop</td><td>与 studio 同引擎强度</td><td>开</td><td>仅横幅等极少元素不自动挂 WebGL 面板</td></tr>
+            <tr><td><code>studio</code></td><td>产品站、自控强度</td><td>中等</td><td>开（开关旋钮、蓝轨滑块、进度条等）</td><td>折中参数，可改源码表</td></tr>
+            <tr><td><code>showcase</code>（默认）</td><td>index / docs / white</td><td>强</td><td>开</td><td>高折射、高 rim</td></tr>
+          </tbody>
+        </table>
+        <pre class="code">&lt;body <span class="a">data-lg-profile</span>=<span class="s">"studio"</span> <span class="a">data-wallpaper</span>=<span class="s">"lumi"</span>&gt;</pre>
+        <h4>自定义 studio 参数</h4>
+        <p>在 <code class="inline">glass/glass-webgl.js</code> 顶部修改对象 <code class="inline">LG_PROFILE_STUDIO</code>（折射、色散、frost、bezel、mergeK、rim）。保存后硬刷新；控制台可查看默认值：</p>
+        <pre class="code"><span class="c">// 引擎就绪后</span>
+LiquidGlassRuntime.studioDefaults
+<span class="c">// 当前档位</span>
+LiquidGlassRuntime.profile()</pre>
+        <p><b>彩虹滑块拇指</b>：全屏 WebGL 在 DOM 彩虹轨下方，无法像蓝轨一样折射渐变轨。彩虹轨使用 <code class="inline">thumb-rainbow</code>：CSS 玻璃层 + JS 同步 <code class="inline">--rainbow-w / --rainbow-x</code> 采样与轨道相同的 <code class="inline">--lg-rainbow-track</code>。蓝轨拇指仍走 WebGL <code class="inline">knob</code>。</p>
+      </section>
+
+      <!-- 04 Token -->
+      <section id="s4">
+        <h2><span class="num">04</span>设计 Token</h2>
+        <p>所有 Token 以 <code class="inline">--lg-</code> 为前缀，定义在 <code class="inline">glass-core.css</code> 的 <code class="inline">:root</code>。改主题只改这一段。</p>
+        <h3>文本与背景</h3>
+        <div class="token-grid">
+          <div class="token-item"><b>--lg-ink</b><span>主文本 <i class="swatch" style="background:#1d1d1f"></i>#1d1d1f</span></div>
+          <div class="token-item"><b>--lg-ink-2</b><span>次级文本 <i class="swatch" style="background:#6e6e73"></i>#6e6e73</span></div>
+          <div class="token-item"><b>--lg-ink-3</b><span>辅助文本 <i class="swatch" style="background:#a1a1a6"></i>#a1a1a6</span></div>
+          <div class="token-item"><b>--lg-line</b><span>发丝线 / 分隔线 <i class="swatch" style="background:#e8e8ed"></i>#e8e8ed</span></div>
+          <div class="token-item"><b>--lg-page</b><span>页面底色 <i class="swatch" style="background:#fff"></i>#ffffff</span></div>
+        </div>
+        <h3>系统色</h3>
+        <div class="token-grid">
+          <div class="token-item"><b>--lg-blue</b><span><i class="swatch" style="background:#0a84ff"></i>主操作、选中态</span></div>
+          <div class="token-item"><b>--lg-blue-deep</b><span><i class="swatch" style="background:#0060df"></i>白底上的链接与文字蓝</span></div>
+          <div class="token-item"><b>--lg-green</b><span><i class="swatch" style="background:#34c759"></i>成功、开启</span></div>
+          <div class="token-item"><b>--lg-red</b><span><i class="swatch" style="background:#ff3b30"></i>破坏性、错误</span></div>
+          <div class="token-item"><b>--lg-orange</b><span><i class="swatch" style="background:#ff9f0a"></i>警告</span></div>
+          <div class="token-item"><b>--lg-yellow</b><span><i class="swatch" style="background:#ffd60a"></i>收藏、评分星、高亮</span></div>
+          <div class="token-item"><b>--lg-purple</b><span><i class="swatch" style="background:#bf5af2"></i>辅助强调</span></div>
+        </div>
+        <h3>玻璃材质</h3>
+        <div class="token-grid">
+          <div class="token-item"><b>--lg-blur</b><span>模糊半径，默认 14px。模糊越低折射越明显：clear 材质 3px、tinted 12px、thin 10px</span></div>
+          <div class="token-item"><b>--lg-sat</b><span>饱和度提升，默认 180%；过高会「荧光」</span></div>
+          <div class="token-item"><b>--lg-wash</b><span>玻璃基色填充（均匀，亮白 38% / 暗石墨 42%——暗色玻璃有自己的身体，不靠背景透色）</span></div>
+          <div class="token-item"><b>--lg-rim-hi / rim-lo</b><span>边框光带：对角亮角 80% ↔ 中段暗边 18%，光从左上穿入右下穿出</span></div>
+          <div class="token-item"><b>--lg-highlight</b><span>顶缘高光线（亮 60% / 暗 16%）</span></div>
+          <div class="token-item"><b>--lg-drop</b><span>外投影基色（亮 rgba(15,23,42,.14) / 暗 45% 黑）</span></div>
+          <div class="token-item"><b>--lg-sheen</b><span>镜面高光；暗色下降到 52%</span></div>
+          <div class="token-item"><b>--lg-shadow</b><span>标准悬浮投影</span></div>
+          <div class="token-item"><b>--lg-shadow-lift</b><span>hover 上浮时的加深投影</span></div>
+        </div>
+        <h3>圆角、动效与层级</h3>
+        <div class="token-grid">
+          <div class="token-item"><b>--lg-radius-lg / … / xs</b><span>28 / 24 / 18 / 14 / 10 五档</span></div>
+          <div class="token-item"><b>--lg-ease-spring</b><span>cubic-bezier(.34,1.7,.64,1) 弹性回弹</span></div>
+          <div class="token-item"><b>--lg-ease-out</b><span>cubic-bezier(.22,.61,.36,1) 通用出场</span></div>
+          <div class="token-item"><b>--lg-dur</b><span>标准时长 350ms</span></div>
+          <div class="token-item"><b>--lg-hit</b><span>最小命中区 44px，触控组件必须满足</span></div>
+          <div class="token-item"><b>--lg-z-sticky / z-toast / z-dialog</b><span>层级基准：悬浮层 100 / Toast 300 / 弹窗 400</span></div>
+        </div>
+        <h3>明暗双主题</h3>
+        <p>暗色通过 <code class="inline">[data-theme="dark"]</code> 覆盖同一批 Token 实现：文字反转为 #f5f5f7 / 页面底 #0b0d12，填充降低到 9%→2%，描边降到 15%，镜面高光降到 52%，分隔线转为白 12%。切换方式二选一：</p>
+<pre class="code">&lt;<span class="t">html</span> data-theme=<span class="a">"dark"</span>&gt;          <span class="c">&lt;!-- 手动指定 --&gt;</span>
+
+<span class="c">&lt;!-- 或引 glass.js 后用按钮切换（记住用户偏好） --&gt;</span>
+&lt;<span class="t">button</span> data-theme-toggle&gt;☾&lt;/<span class="t">button</span>&gt;</pre>
+        <p>未设置 <code class="inline">data-theme</code> 时自动跟随系统的 <code class="inline">prefers-color-scheme</code>。网页端案例页右上角就是活的切换按钮。</p>
+      </section>
+
+      <!-- 05 端差异 -->
+      <section id="s5">
+        <h2><span class="num">05</span>手机端 × 网页端</h2>
+        <p>同一套 Token，两套密度与交互假设。给 <code class="inline">body</code> 加 <code class="inline">mobile</code> 或 <code class="inline">web</code> 类即可切换。</p>
+        <table class="api">
+          <tr><th>维度</th><th>手机端</th><th>网页端</th></tr>
+          <tr><td>命中区</td><td>≥44px（指尖）</td><td>≥32px（指针）</td></tr>
+          <tr><td>主按钮</td><td>高 50px，圆角 25</td><td>高 40px，圆角 20</td></tr>
+          <tr><td>输入框</td><td>高 50px，字号 15px+</td><td>高 44px，字号 14px</td></tr>
+          <tr><td>列表行</td><td>52–56px，行间发丝线</td><td>44–50px，hover 铺白</td></tr>
+          <tr><td>主导航</td><td>底部 Tab Bar（悬浮胶囊）</td><td>顶部浮动顶栏 / 侧栏</td></tr>
+          <tr><td>反馈动效</td><td>:active 按压缩放</td><td>同左：果冻按压 1.04/.96 + 0.45s 弹簧回弹；hover 静止仅光斑跟随</td></tr>
+          <tr><td>底部安全区</td><td>env(safe-area-inset-bottom)</td><td>不适用</td></tr>
+          <tr><td>玻璃厚度</td><td>屏幕内建议 16px 模糊</td><td>默认 18px</td></tr>
+        </table>
+        <div class="callout">
+          <span class="ci">i</span>
+          <span>输入框字号手机端不小于 15px，否则 iOS Safari 聚焦时会<b>自动放大页面</b>破坏布局。</span>
+        </div>
+        <h3>高频组件尺寸速查</h3>
+        <table class="api">
+          <tr><th>组件</th><th>手机端</th><th>网页端</th></tr>
+          <tr><td>.btn</td><td>50px / 圆角 25</td><td>40px / 圆角 20</td></tr>
+          <tr><td>.btn.sm</td><td>38px</td><td>32px</td></tr>
+          <tr><td>.field / .searchbar</td><td>50px</td><td>44px</td></tr>
+          <tr><td>.sw 开关</td><td>62 / 52 / 44 三档</td><td>同左</td></tr>
+          <tr><td>.list 行</td><td>52–56px</td><td>44–50px</td></tr>
+          <tr><td>.topbar-web.glass</td><td colspan="2">全站统一顶栏：56px 高 · 1120px 宽 · sticky top 10px；<code class="inline">nav[data-site-nav]</code> + <code class="inline">site-topbar.js</code></td></tr>
+          <tr><td>.navbar</td><td>手机壳内导航</td><td>见 mobile 案例</td></tr>
+          <tr><td>.fab</td><td>58px</td><td>58px</td></tr>
+          <tr><td>.avatar</td><td>36 / 56px</td><td>36 / 56px</td></tr>
+        </table>
+      </section>
+
+      <!-- 06 组件参考 -->
+      <section id="s6">
+        <h2><span class="num">06</span>组件参考</h2>
+        <p>130+ 类名按 9 组归档。每个组件给出结构、变体与要点，完整可交互示例见案例页。</p>
+
+        <h3 id="c-btn">6.1 按钮</h3>
+        <div class="demo">
+          <span class="dlab">变体 · Variant</span>
+          <button class="btn">常规</button>
+          <button class="btn primary">主操作</button>
+          <button class="btn tinted">着墨</button>
+          <button class="btn ghost">幽灵</button>
+          <button class="btn danger">删除</button>
+          <button class="btn sm">小号</button>
+          <button class="btn icon" aria-label="搜索">⌕</button>
+          <button class="btn" disabled>禁用</button>
+          <span class="tip-wrap"><button class="btn icon" aria-label="带提示">?</button><span class="tip glass">悬停提示气泡</span></span>
+        </div>
+        <div class="demo">
+          <span class="dlab">复合形态 · Compound</span>
+          <button class="btn primary loading" aria-label="加载中">保存中</button>
+          <div class="splitbtn"><button>导出</button><button class="more" aria-label="更多导出格式">⌄</button></div>
+          <button class="fab" aria-label="新建">＋</button>
+          <button class="btn primary" data-toast="已保存到「设计系统」">点我弹 Toast →</button>
+        </div>
+        <div class="demo dark">
+          <span class="dlab">暗色舞台 · Dark Stage</span>
+          <button class="btn">常规</button>
+          <button class="btn primary">主操作</button>
+          <button class="btn tinted">着墨</button>
+          <button class="btn ghost" style="color:rgba(255,255,255,.85)">幽灵</button>
+          <button class="btn danger">删除</button>
+        </div>
+        <p class="demo-note">loading 态宽度不变（文字隐藏、旋转描边替代）；点「点我弹 Toast」触发真实反馈。<a href="mobile.html" style="color:var(--lg-blue-deep)">案例页</a>还有分裂按钮的展开菜单与 FAB 子操作。</p>
+<pre class="code">&lt;<span class="t">button</span> class=<span class="a">"btn primary"</span>&gt;保存&lt;/<span class="t">button</span>&gt;
+&lt;<span class="t">button</span> class=<span class="a">"btn primary loading"</span> aria-label=<span class="a">"加载中"</span>&gt;保存&lt;/<span class="t">button</span>&gt;</pre>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.btn</td><td>玻璃按钮基类，高 46（桌面 40 / 手机 50）</td></tr>
+          <tr><td>.primary</td><td>主操作，蓝色玻璃；一屏最多一颗</td></tr>
+          <tr><td>.tinted</td><td>薄染品牌色的次级主操作</td></tr>
+          <tr><td>.danger</td><td>破坏性操作，系统红</td></tr>
+          <tr><td>.ghost</td><td>极轻；用于玻璃面板内部</td></tr>
+          <tr><td>.sm / .icon</td><td>36px 小号 / 正方形图标钮</td></tr>
+          <tr><td>.loading</td><td>加载中：隐藏文字，旋转描边替代（宽度不变）</td></tr>
+          <tr><td>.splitbtn</td><td>分裂按钮：主操作 + ⌄ 菜单合成一颗玻璃</td></tr>
+          <tr><td>.fab</td><td>58px 悬浮圆钮</td></tr>
+        </table>
+        <div class="callout ok">
+          <span class="ci">✓</span>
+          <span><b>要点</b>：hover 上浮 2px + 光斑；active 回缩 4%；禁用降透明度，<b>不要</b>换成灰实底。</span>
+        </div>
+
+        <h3 id="c-form">6.2 表单输入</h3>
+        <p>规则：外壳玻璃、内核透明。<code class="inline">.field:focus</code> 只加 4px 蓝色光环，不改背景。</p>
+        <div class="demo grow">
+          <span class="dlab">输入框 · 校验态只动描边与光环</span>
+          <input class="field" placeholder="默认态">
+          <input class="field ok" value="可用的用户名">
+          <input class="field err" value="该邮箱已被注册">
+          <input class="field" type="password" value="glass2026" aria-label="密码">
+        </div>
+        <div class="demo grow">
+          <span class="dlab">搜索 / 下拉 / 多行 / 组合</span>
+          <div class="searchbar glass"><span class="s-ico">⌕</span><input type="search" placeholder="搜索组件…" aria-label="搜索"><button class="s-clear" aria-label="清空">✕</button></div>
+          <div class="selectbox"><select aria-label="排序方式"><option>按更新时间</option><option>按名称</option><option>按使用频率</option></select><span class="caret">⌄</span></div>
+          <div class="combo glass"><span class="pre">https://</span><input placeholder="studio.design/lin" aria-label="站点地址"><button class="btn primary sm">检查</button></div>
+          <textarea class="ta" rows="2" placeholder="多行文本，只允许纵向拉伸…"></textarea>
+        </div>
+        <div class="demo col">
+          <span class="dlab">标签组 · 密码强度 · 字段组 · 上传</span>
+          <div class="chips">
+            <span class="chip on">全部<span class="x">✕</span></span>
+            <span class="chip">组件<span class="x">✕</span></span>
+            <span class="chip">模板<span class="x">✕</span></span>
+            <span class="chip">＋ 新标签</span>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+            <div style="min-width:190px">
+              <div class="strength"><i class="a1"></i><i class="a2"></i><i></i><i></i></div>
+              <div style="font-size:10.5px;color:var(--lg-ink-3);margin-top:3px">密码强度：中等</div>
+            </div>
+            <div class="fieldgroup" style="flex:1;min-width:200px">
+              <span class="fl">工作邮箱</span>
+              <input class="field" value="lin@studio.design">
+              <span class="hint">仅用于团队邀请，不会公开</span>
+            </div>
+          </div>
+          <div class="dropzone">
+            <span class="dz-ico">↑</span>
+            <b>拖拽文件到这里</b>
+            <small>或点击选择 · 支持 PNG / JPG / SVG，单个 ≤ 10MB</small>
+            <div class="dz-files"><span class="dz-file">cover.png <i>1.2MB</i></span><span class="dz-file">glass.svg <i>24KB</i></span></div>
+          </div>
+        </div>
+        <p class="demo-note">校验态不换底色不抖动，只换描边、光环和提示文字——错误反馈不需要打断用户。</p>
+<pre class="code">&lt;<span class="t">input</span> class=<span class="a">"field"</span> placeholder=<span class="a">"用户名或邮箱"</span>&gt;
+&lt;<span class="t">input</span> class=<span class="a">"field err"</span> value=<span class="a">"该邮箱已被注册"</span>&gt;
+
+&lt;<span class="t">div</span> class=<span class="a">"searchbar glass"</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"s-ico"</span>&gt;⌕&lt;/<span class="t">span</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"search"</span> placeholder=<span class="a">"搜索"</span>&gt;
+  &lt;<span class="t">button</span> class=<span class="a">"s-clear"</span>&gt;✕&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">div</span>&gt;
+
+<span class="c">&lt;!-- 组合输入：前缀 + 输入 + 内嵌按钮同处一颗玻璃 --&gt;</span>
+&lt;<span class="t">div</span> class=<span class="a">"combo glass"</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"pre"</span>&gt;https://&lt;/<span class="t">span</span>&gt;
+  &lt;<span class="t">input</span>&gt;
+  &lt;<span class="t">button</span> class=<span class="a">"btn primary sm"</span>&gt;检查&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">div</span>&gt;</pre>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.field</td><td>文本输入；变体 .ok / .err 只改描边与光环</td></tr>
+          <tr><td>.searchbar</td><td>搜索框，全圆 24；含 .s-ico / .s-clear</td></tr>
+          <tr><td>.selectbox</td><td>玻璃下拉：去系统外观 + 自绘 .caret</td></tr>
+          <tr><td>.ta</td><td>多行文本；只允许纵向 resize</td></tr>
+          <tr><td>.combo</td><td>组合输入容器</td></tr>
+          <tr><td>.chips / .chip</td><td>标签组；.on 染品牌色；.x 是删除符</td></tr>
+          <tr><td>.strength i.a1/a2/a3</td><td>密码强度四段条（空 / 弱 / 中 / 强）</td></tr>
+          <tr><td>.fieldgroup</td><td>字段组：label + 控件 + .hint / .msg</td></tr>
+        </table>
+
+        <h3 id="c-ctrl">6.3 控件</h3>
+        <div class="demo">
+          <span class="dlab">开关三档 · 开启态染品牌色</span>
+          <label class="sw blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          <label class="sw"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+          <label class="sw sm blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          <label class="sw mini"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          <span style="font-size:11px;color:var(--lg-ink-3)">62 / 52 / 44px 三档</span>
+        </div>
+        <div class="demo">
+          <span class="dlab">分段 · 步进 · 滑块</span>
+          <div class="seg"><input type="radio" name="dseg" id="dseg1" checked><label for="dseg1">日</label><input type="radio" name="dseg" id="dseg2"><label for="dseg2">周</label><input type="radio" name="dseg" id="dseg3"><label for="dseg3">月</label></div>
+          <div class="stepper"><button aria-label="减少">−</button><span class="val">1</span><button aria-label="增加">＋</button></div>
+          <div class="slider" style="min-width:170px"><div class="rail"></div><input type="range" min="0" max="100" value="46" aria-label="色温"></div>
+          <div class="slider blue" style="min-width:170px"><div class="rail"></div><input type="range" min="0" max="100" value="72" aria-label="音量"></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">复选 · 磁贴 · 评分 · 色板</span>
+          <label class="check"><input type="checkbox" checked><span class="box">✓</span>接收通知</label>
+          <label class="check round"><input type="radio" name="dchk" checked><span class="box">●</span>自动</label>
+          <label class="tile"><input type="checkbox" checked><span class="face">✦</span></label>
+          <div class="rate" aria-label="4 分">★★★★<span class="off">★</span></div>
+          <div class="swatches">
+            <input type="radio" name="dsw" id="dsw1" checked><label for="dsw1" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></label>
+            <input type="radio" name="dsw" id="dsw2"><label for="dsw2" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></label>
+            <input type="radio" name="dsw" id="dsw3"><label for="dsw3" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)"></label>
+          </div>
+        </div>
+        <p class="demo-note">全部由原生 <code class="inline">input</code> 驱动——点击试试；键盘 Tab 也能到达每一个控件。</p>
+<pre class="code"><span class="c">&lt;!-- 开关：input:checked 驱动，三档尺寸 --&gt;</span>
+&lt;<span class="t">label</span> class=<span class="a">"sw blue"</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"checkbox"</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"track"</span>&gt;&lt;/<span class="t">span</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"knob"</span>&gt;&lt;/<span class="t">span</span>&gt;
+&lt;/<span class="t">label</span>&gt;
+
+<span class="c">&lt;!-- 分段控制 --&gt;</span>
+&lt;<span class="t">div</span> class=<span class="a">"seg"</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"radio"</span> name=<span class="a">"v"</span> id=<span class="a">"v1"</span> checked&gt;&lt;<span class="t">label</span> <span class="t">for</span>=<span class="a">"v1"</span>&gt;日&lt;/<span class="t">label</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"radio"</span> name=<span class="a">"v"</span> id=<span class="a">"v2"</span>&gt;&lt;<span class="t">label</span> <span class="t">for</span>=<span class="a">"v2"</span>&gt;周&lt;/<span class="t">label</span>&gt;
+&lt;/<span class="t">div</span>&gt;</pre>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.sw</td><td>开关 62×36；.sm 52×30；.mini 44×26；.blue 蓝色开启</td></tr>
+          <tr><td>.seg</td><td>分段控制，radio + label 驱动</td></tr>
+          <tr><td>.slider</td><td>滑块；默认彩轨，.blue 为系统灰细轨；旋钮 44px</td></tr>
+          <tr><td>.stepper</td><td>步进器（− / 值 / +）</td></tr>
+          <tr><td>.check</td><td>复选/单选；.round 圆形；input:checked 驱动</td></tr>
+          <tr><td>.tile</td><td>62px 磁贴开关；选中默认系统蓝，<code class="inline">.face.warm</code> 为橙色（如 Wi‑Fi 📶）</td></tr>
+          <tr><td>.rate</td><td>文字星评分；.off 未点亮</td></tr>
+          <tr><td>.swatches</td><td>色板，选中双层光环</td></tr>
+        </table>
+
+        <h3 id="c-nav">6.4 导航</h3>
+        <div class="demo col">
+          <span class="dlab">下划线 Tab + 分页器（可点击）</span>
+          <nav class="utabs"><a href="#" class="on">概览</a><a href="#">成员</a><a href="#">日志</a><a href="#">设置</a></nav>
+          <div class="pager"><button aria-label="上一页">‹</button><button>1</button><button class="on">2</button><button>3</button><span class="gap">…</span><button>12</button><button aria-label="下一页">›</button></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">折叠面板</span>
+          <div class="acc" style="flex:1;min-width:240px">
+            <details open><summary>玻璃何时降级？<span class="ar">›</span></summary><p>父级存在 filter / isolation:isolate / contain 时，backdrop 采样链会被截断，玻璃退化为灰块。</p></details>
+            <details><summary>控制中心为什么可以嵌套？<span class="ar">›</span></summary><p>内层固定使用 .glass.thin，模糊减半，避免两层互相吃色。</p></details>
+          </div>
+          <div class="dd" style="flex:none">
+            <button class="btn sm">下拉菜单 ⌄</button>
+            <div class="menu glass">
+              <div class="mi">重命名<span class="k">⌘R</span></div>
+              <div class="mi">复制<span class="k">⌘C</span></div>
+              <div class="sep-line"></div>
+              <div class="mi danger">删除<span class="k">⌫</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">搜索建议（输入框聚焦查看）</span>
+          <div style="flex:1;min-width:260px">
+            <div class="searchbar glass"><span class="s-ico">⌕</span><input type="search" placeholder="试试聚焦这颗搜索框" aria-label="搜索"></div>
+            <div class="suggest glass">
+              <div class="sg"><span class="sy">⌕</span>液态玻璃设计规范<span class="k">文档</span></div>
+              <div class="sg"><span class="sy">⌕</span>玻璃材质的最佳实践<span class="k">文档</span></div>
+              <div class="sg"><span class="sy">↩</span>glass materials<span class="k">搜索</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-note">手机端的 navbar / tabbar / large-title 见 <a href="mobile.html" style="color:var(--lg-blue-deep)">手机端案例页</a>，桌面浮动顶栏与侧栏见 <a href="web.html" style="color:var(--lg-blue-deep)">网页端案例页</a>。</p>
+        <h4>手机端</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.navbar</td><td>52px 胶囊导航；.float 悬浮于屏幕内容上</td></tr>
+          <tr><td>.large-title</td><td>大标题页头（eyebrow + 34px 标题 + 说明）</td></tr>
+          <tr><td>.tabbar</td><td>底部 Tab Bar；.float 吸底并预留安全区；radio 驱动</td></tr>
+          <tr><td>.statusbar</td><td>状态栏（演示用）</td></tr>
+        </table>
+        <h4>网页端</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.topbar-web</td><td>1120px 浮动胶囊顶栏；滚动 8px 自动 .is-scrolled 加厚</td></tr>
+          <tr><td>.pagehead / .crumbs</td><td>页面头部（面包屑 + 标题 + 操作组）</td></tr>
+          <tr><td>.utabs</td><td>下划线页面 Tab；.on 有 2.5px 渐变下划线</td></tr>
+          <tr><td>.pager</td><td>玻璃分页器；.on 白玻璃浮起</td></tr>
+          <tr><td>.acc</td><td>原生 details 折叠面板；箭头旋转 90°</td></tr>
+          <tr><td>.dd / .menu / .mi</td><td>下拉菜单；:hover 与 :focus-within 双通道展开；.right 右对齐</td></tr>
+          <tr><td>.suggest / .sg</td><td>搜索建议列表</td></tr>
+          <tr><td>.sidebar</td><td>218px 通用侧栏</td></tr>
+        </table>
+
+        <h3 id="c-box">6.5 容器与布局</h3>
+        <div class="demo">
+          <span class="dlab">inset grouped 列表 + 通知卡</span>
+          <div class="list glass" style="flex:1;min-width:250px">
+            <div class="list-head">账户</div>
+            <div class="lrow"><span class="ico blue">林</span><span class="body">林一<small>个人账户</small></span><span class="val">Pro</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico green">✓</span><span class="body">已完成</span><span class="val">128</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico red">⏻</span><span class="body" style="color:var(--lg-red)">退出登录</span></div>
+          </div>
+          <div style="flex:1;min-width:250px">
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">✉</span>
+              <span class="nb"><b>你被邀请加入「设计系统」</b><small>林一 · 2 分钟前</small></span>
+              <span class="nt">新</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">指标卡 / 头像组 / 时间线 / 步骤条</span>
+          <div class="metric glass"><span class="mk">今日请求</span><span class="mv">12,840</span><span class="md">较昨日 <em>＋18.2%</em></span></div>
+          <div class="avs"><span class="av av1">林</span><span class="av av2">陈</span><span class="av av3">苏</span><span class="av more">＋6</span></div>
+          <div class="tl" style="min-width:210px">
+            <div class="tl-row"><span class="tl-dot" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></span><span class="tl-txt">林一 发布了 v3.4<small>12 分钟前</small></span></div>
+            <div class="tl-row"><span class="tl-dot" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></span><span class="tl-txt">陈默 提交了 6 个组件<small>1 小时前</small></span></div>
+          </div>
+          <div class="steps" style="min-width:220px">
+            <div class="stp done"><span class="b">✓</span><span class="lab">提交</span></div>
+            <div class="stp-line fill"></div>
+            <div class="stp now"><span class="b">2</span><span class="lab">审核</span></div>
+            <div class="stp-line"></div>
+            <div class="stp"><span class="b">3</span><span class="lab">发布</span></div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">内容卡 + 渐变封面 · .card 故意不做玻璃，保证正文可读</span>
+          <div class="card" style="flex:1;min-width:250px">
+            <div class="cover c2"><span class="cv-t">PROJECT · 设计系统</span></div>
+            <div style="padding-top:10px">
+              <div class="ct">Q4 设计系统改版</div>
+              <div class="cs">组件库 v2 已进入灰度，本周完成 12 个核心组件的验收。</div>
+              <div class="cfoot"><span>进度 68%</span><span style="margin-left:auto"><button class="btn sm">查看</button></span></div>
+            </div>
+          </div>
+          <div class="card" style="flex:1;min-width:250px">
+            <div class="cover c4"><span class="cv-t">WEEKLY · 数据</span></div>
+            <div style="padding-top:10px">
+              <div class="ct">数据周报 · 第 42 周</div>
+              <div class="cs">请求量环比 ＋18.2%，错误率降至 0.6%。</div>
+              <div class="cfoot"><span>周一 09:00 自动生成</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo dark">
+          <span class="dlab">批量操作条 · clear 变体的典型用法</span>
+          <div class="bulkbar glass clear" style="flex:1">
+            <span style="font-size:12px;font-weight:600;color:#fff">3 项已选择</span>
+            <span class="bt" style="margin-left:auto">移动</span><span class="bt">共享</span><span class="bt" style="color:#ff9c94">删除</span>
+          </div>
+        </div>
+        <p class="demo-note">表格卡、Bento、定价三卡等大块布局模板见 <a href="web.html" style="color:var(--lg-blue-deep)">网页端案例页 02 章</a>；手机端列表、相册、播放器见手机端 06 章。</p>
+        <h4>两端通用</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.list / .lrow</td><td>inset grouped 列表；.ico 彩色图标块、.body、.val、.chev</td></tr>
+          <tr><td>.notice</td><td>通知卡（.ni 图标 / .nb 正文 / .nt 时间）</td></tr>
+          <tr><td>.card / .cover</td><td>内容卡（.ct 标题 / .cs 正文 / .cfoot 页脚）；封面 .c1–.c4 四色，.cv-t 压字</td></tr>
+          <tr><td>.steps / .stp</td><td>步骤条；.done 绿 / .now 蓝 / 未开始透明，.stp-line.fill 染色连线</td></tr>
+          <tr><td>.tl / .tl-row</td><td>时间线；.tl-dot 圆点、.tl-txt 文案 + small 时间</td></tr>
+          <tr><td>.empty / .ei</td><td>空态：图标 + 解释 + 动作</td></tr>
+        </table>
+        <h4>手机端专属</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.phone / .screen</td><td>393×852 手机壳（演示用）</td></tr>
+          <tr><td>.screen-scroll</td><td>屏幕滚动区；自动预留顶部 68 / 底部安全区</td></tr>
+          <tr><td>.cardfeed / .photo-card</td><td>卡片流与渐变照片卡（pc1–pc4）</td></tr>
+          <tr><td>.album</td><td>3 列相册网格（不加玻璃，保滚动性能）</td></tr>
+          <tr><td>.miniplayer</td><td>迷你播放器</td></tr>
+          <tr><td>.actionbar</td><td>底部主操作条（价格 + 双按钮）</td></tr>
+          <tr><td>.keypad</td><td>数字键盘</td></tr>
+        </table>
+        <h4>网页端专属</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.appframe</td><td>应用框架：176px 侧栏 + 主区（.af-side/.af-nav/.af-head/.af-body/.af-tile）</td></tr>
+          <tr><td>.bento / .bc</td><td>Bento 网格；.s2 跨 2 列、.s2r 跨 2 行、.fill 品牌色主卡</td></tr>
+          <tr><td>.tablecard / .gtable</td><td>玻璃表格卡；.pill.ok/.wait/.stop 状态徽章</td></tr>
+          <tr><td>.formgrid</td><td>两列表单布局；.full 整行</td></tr>
+          <tr><td>.pricing / .pricecard</td><td>定价三卡；.hi 推荐卡上移 6px</td></tr>
+          <tr><td>.medialist / .mrow</td><td>媒体列表；hover 才铺玻璃</td></tr>
+          <tr><td>.metric / .avs</td><td>指标卡 / 头像组</td></tr>
+          <tr><td>.toolbar / .dock</td><td>工具条 / Dock 图标条</td></tr>
+          <tr><td>.bulkbar</td><td>批量操作条（配 .glass.clear）</td></tr>
+        </table>
+
+        <h3 id="c-over">6.6 弹层</h3>
+        <div class="demo">
+          <span class="dlab">真实弹层 · 点开试试</span>
+          <button class="btn primary" id="open-alert">打开玻璃弹窗</button>
+          <button class="btn" id="open-toast">弹一条 Toast</button>
+          <span class="tip-wrap"><button class="btn sm">悬停出气泡</button><span class="tip glass">这就是 Tooltip</span></span>
+          <div class="dd right">
+            <button class="btn sm">下拉菜单 ⌄</button>
+            <div class="menu glass">
+              <div class="mi">导出 PNG<span class="k">⌘E</span></div>
+              <div class="mi">导出 SVG</div>
+              <div class="sep-line"></div>
+              <div class="mi danger">删除<span class="k">⌫</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo col">
+          <span class="dlab">弹窗内容结构 · 由上方按钮打开</span>
+          <dialog class="alert" id="demo-dialog">
+            <h3>移动到回收站？</h3>
+            <p>「Glass Button」将被移除，30 天内可恢复。</p>
+            <div class="acts"><button class="btn ghost" id="cancel-dialog">取消</button><button class="btn danger" id="ok-dialog">移入</button></div>
+          </dialog>
+        </div>
+        <div class="demo col">
+          <span class="dlab">命令面板 · ⌘K</span>
+          <div class="cmdk glass">
+            <div class="ck-in"><span style="color:var(--lg-ink-3);font-size:13px">⌕</span><input type="text" placeholder="搜索组件、页面或命令" aria-label="命令搜索"><kbd>⌘K</kbd></div>
+            <div class="ck-g">组件</div>
+            <div class="ck-i on"><span>◧</span>Glass Button<span class="k">B</span></div>
+            <div class="ck-i"><span>▭</span>Glass Card<span class="k">C</span></div>
+            <div class="ck-g">命令</div>
+            <div class="ck-i"><span>◐</span>切换明暗主题<span class="k">⌘⇧L</span></div>
+          </div>
+        </div>
+        <p class="demo-note">「打开玻璃弹窗」调用原生 <code class="inline">dialog.showModal()</code>，自带焦点圈定与 Esc 关闭；手机端的 Sheet / ActionSheet / 控制中心见 <a href="mobile.html" style="color:var(--lg-blue-deep)">手机端 07 章</a>。</p>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>dialog.alert</td><td>玻璃弹窗：regular + 背景压暗模糊；原生 &lt;dialog&gt;</td></tr>
+          <tr><td>.sheet</td><td>底部抽屉：抓手条 + 标题 + 说明 + 按钮组</td></tr>
+          <tr><td>.actionsheet</td><td>操作表：每项独立玻璃；.danger 红、.cancel 加粗</td></tr>
+          <tr><td>.control-center / .ccg</td><td>控制中心：4 列网格 + thin 内嵌格子；唯一允许玻璃嵌套的场景</td></tr>
+          <tr><td>.toast</td><td>顶部通知；用 LiquidGlass.toast() 或手写结构</td></tr>
+          <tr><td>.tip-wrap / .tip</td><td>悬停提示气泡</td></tr>
+        </table>
+
+        <h3 id="c-fb">6.7 反馈</h3>
+        <div class="demo col">
+          <span class="dlab">行内横幅 · 只染 15% 色</span>
+          <div class="banner info"><span class="bi">i</span><span><b>新版本可用</b> · 刷新后生效</span></div>
+          <div class="banner ok"><span class="bi">✓</span><span><b>已保存</b> · 同步到云端</span></div>
+          <div class="banner warn"><span class="bi">!</span><span><b>连接不稳定</b> · 第 2 次重试</span></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">进度 / 环形 / 加载 / 骨架</span>
+          <div class="progress" style="flex:1;min-width:140px"><div class="bar"><div class="fill" style="width:68%"></div></div></div>
+          <div class="ring" style="--val:72%">72%</div>
+          <div class="lg-row" style="gap:8px"><span class="spinner"></span><span style="font-size:12px;font-weight:600;color:var(--lg-ink-2)">生成中</span></div>
+          <div class="sk" style="width:76px;height:11px"></div>
+          <div class="sk" style="width:56px;height:56px;border-radius:14px"></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">徽章 / 状态点 / 状态 pill</span>
+          <span class="badge glass"><span class="dot" style="background:var(--lg-green)"></span>运行中</span>
+          <span class="badge glass"><span class="dot" style="background:var(--lg-orange)"></span>警告<span class="n">3</span></span>
+          <span class="pill ok">在线</span><span class="pill wait">离开</span><span class="pill stop">未激活</span><span class="pill info">Beta</span>
+        </div>
+        <p class="demo-note">骨架屏只动背景位置，布局完全静止；转圈只用于 ≤3 秒等待，更长等待用进度条或骨架。</p>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.banner.info/.ok/.warn</td><td>行内横幅：15% 染色底，文字保持深色</td></tr>
+          <tr><td>.sk</td><td>骨架块：高光左扫右（1.5s），只动背景位置</td></tr>
+          <tr><td>.progress / .fill</td><td>进度条；.fill.solid/.ok/.warn 三色</td></tr>
+          <tr><td>.ring</td><td>环形进度：--val 控制比例</td></tr>
+          <tr><td>.spinner</td><td>加载转圈；≤3 秒的等待才用</td></tr>
+          <tr><td>.badge / .n / .dot</td><td>玻璃徽章 + 数字角标 / 状态点</td></tr>
+          <tr><td>.pill.ok/.wait/.stop/.info</td><td>淡底状态 pill</td></tr>
+        </table>
+
+        <h3 id="c-ext">6.8 扩展组件</h3>
+        <div class="demo col">
+          <span class="dlab">上传区 · 已挂两个文件，第二个是拖入悬停态</span>
+          <div class="dropzone">
+            <span class="dz-ico">↑</span>
+            <b>拖拽文件到这里</b>
+            <small>或点击选择 · 支持 PNG / JPG / SVG，单个 ≤ 10MB</small>
+            <div class="dz-files"><span class="dz-file">cover.png <i>1.2MB</i></span><span class="dz-file">glass.svg <i>24KB</i></span></div>
+          </div>
+          <div class="dropzone is-over">
+            <span class="dz-ico" style="color:var(--lg-green);background:rgba(52,199,89,.14)">↓</span>
+            <b>松开即可上传</b>
+            <small>悬停 / 拖入时描边转品牌色</small>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">日期选择 · 今天描边、选中填色</span>
+          <div class="datepicker glass">
+            <div class="dp-head"><button aria-label="上个月">‹</button><span>2026 年 10 月</span><button aria-label="下个月">›</button></div>
+            <div class="dp-grid">
+              <span class="dw">日</span><span class="dw">一</span><span class="dw">二</span><span class="dw">三</span><span class="dw">四</span><span class="dw">五</span><span class="dw">六</span>
+              <button class="mute">27</button><button class="mute">28</button><button class="mute">29</button><button class="mute">30</button><button>1</button><button>2</button><button>3</button>
+              <button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button>10</button>
+              <button>11</button><button>12</button><button>13</button><button>14</button><button>15</button><button>16</button><button>17</button>
+              <button>18</button><button>19</button><button class="today">21</button><button class="on">22</button><button>23</button><button>24</button>
+              <button>25</button><button>26</button><button>27</button><button>28</button><button>29</button><button>30</button><button>31</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;flex:1;min-width:180px;align-items:center">
+            <div class="dots"><button aria-label="第 1 张"></button><button aria-label="第 2 张"></button><button class="on" aria-label="第 3 张"></button><button aria-label="第 4 张"></button></div>
+            <div class="lg-row" style="flex-wrap:wrap;gap:8px;justify-content:center">
+              <span class="avatar">林</span>
+              <span class="avatar" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">陈<span class="st"></span></span>
+              <span class="avatar" style="background:linear-gradient(140deg,#ff6482,#ff375f)">苏<span class="st away"></span></span>
+              <span class="avatar lg" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">周<span class="st off"></span></span>
+            </div>
+            <span style="font-size:11px;color:var(--lg-ink-3)">头像 36 / 56px，状态点绿·橙·灰</span>
+          </div>
+        </div>
+        <p class="demo-note">命令面板（⌘K）的完整演示在上面 6.6 弹层；看板、收件箱、登录分屏、文章阅读四套布局模板见 <a href="web.html" style="color:var(--lg-blue-deep)">网页端案例页 02 章</a>。</p>
+
+        <h3 id="c-tpl">6.9 模板组件（glass-templates.css）</h3>
+        <p>这一层是「整页模板的积木」，按需引入。核心思路：<b>壳和表格用玻璃，图表与卡片放在玻璃内容底上</b>——数据永远可读，玻璃只负责气质。</p>
+        <div class="demo col">
+          <span class="dlab">后台模板积木 · KPI 卡 / 柱状图 / 趋势条（hover 柱子试试）</span>
+          <div class="bento" style="grid-template-columns:1fr 1fr;max-width:420px">
+            <div class="bc glass"><span class="lab">今日 GMV</span><span class="big">¥46,210</span><span class="sub">↑ 12.4% 较昨日</span></div>
+            <div class="bc glass"><span class="lab">订单量</span><span class="big">1,284</span><span class="sub">↑ 8.1% 较昨日</span></div>
+          </div>
+          <div class="tablecard glass" style="padding-bottom:10px">
+            <div class="tc-head">
+              <span class="t">近 7 日 GMV</span>
+              <div class="chart-legend"><span><i></i>本周期</span><span class="w"><i></i>促销日</span></div>
+            </div>
+            <div class="chart" aria-hidden="true" style="max-width:420px">
+              <div class="bar"><i style="height:46%"></i><b>10/15</b></div>
+              <div class="bar"><i style="height:58%"></i><b>10/16</b></div>
+              <div class="bar"><i style="height:66%"></i><b>10/17</b></div>
+              <div class="bar warn"><i style="height:88%"></i><b>10/18</b></div>
+              <div class="bar"><i style="height:61%"></i><b>10/19</b></div>
+              <div class="bar"><i style="height:74%"></i><b>10/20</b></div>
+              <div class="bar"><i style="height:83%"></i><b>今天</b></div>
+            </div>
+            <div style="padding:8px 8px 0">
+              <div class="trend-row"><span class="tr-n">数码配件</span><span class="tr-bar"><i style="width:86%"></i></span><span class="tr-v">38%</span><span class="tr-d up">+4.2%</span></div>
+              <div class="trend-row"><span class="tr-n">家居生活</span><span class="tr-bar"><i style="width:62%"></i></span><span class="tr-v">27%</span><span class="tr-d up">+1.8%</span></div>
+              <div class="trend-row"><span class="tr-n">服饰鞋包</span><span class="tr-bar"><i style="width:44%"></i></span><span class="tr-v">19%</span><span class="tr-d down">-0.6%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo col">
+          <span class="dlab">店铺模板积木 · 商品卡（点 + 加购会弹 Toast）</span>
+          <div class="shop-grid" style="max-width:560px">
+            <div class="prod-card glass">
+              <div class="cover c1" style="aspect-ratio:1/.86"><span class="cv-t">新品</span></div>
+              <div class="pc-body">
+                <span class="pc-cat">器皿 · 陶瓷</span>
+                <b class="pc-name">山影茶壶 · 一壶两杯套装</b>
+                <div class="pc-row">
+                  <span class="pc-rate"><b>★</b>4.9 · 326</span>
+                  <span class="price">¥368</span>
+                  <button class="pc-add" data-toast="已加入购物车" aria-label="加入购物车">+</button>
+                </div>
+              </div>
+            </div>
+            <div class="prod-card glass">
+              <div class="cover c3" style="aspect-ratio:1/.86"><span class="cv-t">热卖</span></div>
+              <div class="pc-body">
+                <span class="pc-cat">织物 · 亚麻</span>
+                <b class="pc-name">雾灰亚麻桌旗 190cm</b>
+                <div class="pc-row">
+                  <span class="pc-rate"><b>★</b>4.8 · 512</span>
+                  <span class="price">¥158</span>
+                  <button class="pc-add" data-toast="已加入购物车" aria-label="加入购物车">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-note">完整页面：<a href="admin.html" style="color:var(--lg-blue-deep)">后台模板 admin.html</a> · <a href="landing.html" style="color:var(--lg-blue-deep)">官网 landing.html</a> · <a href="shop.html" style="color:var(--lg-blue-deep)">店铺 shop.html</a> · <a href="starter.html" style="color:var(--lg-blue-deep)">起步骨架 starter.html</a></p>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.admin-shell / .admin-main / .admin-topbar</td><td>后台三件套：sticky 侧栏壳（224px）/ 主内容区 / 顶栏（搜索 + 账户 .at-me）</td></tr>
+          <tr><td>.bento &gt; .bc（.lab/.big/.sub）</td><td>KPI 指标卡：标签 / 大数字 / 同比，玻璃底</td></tr>
+          <tr><td>.chart &gt; .bar（.warn）</td><td>纯 CSS 柱状图，柱高写 i 的 height；.warn 标促销日</td></tr>
+          <tr><td>.chart-legend（.w）</td><td>图表图例，.w 为弱色系列</td></tr>
+          <tr><td>.trend-row（.tr-n/.tr-bar/.tr-v/.tr-d.up/.down）</td><td>品类趋势条：名称 / 占比条 / 数值 / 同比涨跌（绿涨红跌）</td></tr>
+          <tr><td>.table-foot（.tf-info + .pager）</td><td>表格底栏：条数信息 + 分页</td></tr>
+          <tr><td>.hero（.h-badge/.grad/.h-sub/.h-cta/.h-note）</td><td>官网首屏：大标题（.grad 渐变字）+ 副标 + 双按钮</td></tr>
+          <tr><td>.features &gt; .feature（.fi）</td><td>官网特性网格，自适应用户数</td></tr>
+          <tr><td>.cta-band</td><td>收尾转化横幅，玻璃大圆角面板</td></tr>
+          <tr><td>.filter-bar（.f-sort）</td><td>店铺筛选条：chips + 排序</td></tr>
+          <tr><td>.shop-grid &gt; .prod-card</td><td>商品网格 + 商品卡（.cover 图 / .pc-body / .pc-add 加购钮）</td></tr>
+          <tr><td>.cart-btn（.cart-n）</td><td>吸底购物车按钮，.cart-n 数字角标</td></tr>
+          <tr><td>.promo-band</td><td>促销横幅</td></tr>
+          <tr><td>.auth-form / .auth-hero</td><td>认证页：右侧表单栈 / 左侧氛围区</td></tr>
+          <tr><td>.sec-label / .tpl-foot / .logo-row</td><td>章节小标 / 模板页脚 / 客户 Logo 行</td></tr>
+        </table>
+        <div class="callout ok">
+          <span class="ci">✓</span>
+          <span><b>要点</b>：图表类组件（.chart / .trend-row）是纯 CSS，无 JS 依赖；柱高、占比条直接写 <code class="inline">style="height:46%"</code> 即可接入任何数据源。整页模板直接从 admin / landing / shop 三页拷贝改造，比拼积木更快。</span>
+        </div>
+      </section>
+
+      <!-- 07 动效 -->
+      <section id="s7">
+        <h2><span class="num">07</span>动效规范</h2>
+        <p>液态玻璃的性格是「Q 弹但不夸张」——所有动效都收敛在两套缓动曲线里。</p>
+        <table class="api">
+          <tr><th>场景</th><th>参数</th><th>说明</th></tr>
+          <tr><td>按压 / 回弹</td><td>.45s spring（.34,1.7,.64,1）</td><td>按压果冻挤压 1.04/.96，松手弹簧回弹；hover 静止</td></tr>
+          <tr><td>开关旋钮</td><td>.35s spring</td><td>位移 26px，允许轻微过冲</td></tr>
+          <tr><td>弹层出场</td><td>.45s spring</td><td>从 -22px 落下 + 0.92 缩放</td></tr>
+          <tr><td>骨架 / 进度</td><td>1.5s / 2.6s ease-in-out</td><td>循环但幅度克制</td></tr>
+          <tr><td>Tab 切换</td><td>.35s spring</td><td>背景块滑动，不闪烁</td></tr>
+        </table>
+        <div class="callout">
+          <span class="ci">i</span>
+          <span>当系统开启「减弱动态效果」时，库内全部动画自动退化为瞬时切换（<code class="inline">prefers-reduced-motion</code>），无需额外代码。</span>
+        </div>
+      </section>
+
+      <!-- 08 无障碍 -->
+      <section id="s8">
+        <h2><span class="num">08</span>无障碍</h2>
+        <h3>已内置</h3>
+        <ul>
+          <li><b>键盘焦点</b>：全局 <code class="inline">:focus-visible</code> 2.5px 蓝色外框，只在键盘导航时出现，不干扰鼠标用户</li>
+          <li><b>命中区</b>：手机端全部 ≥44px；桌面 ≥32px；滑块旋钮本身就是 44px</li>
+          <li><b>减少透明度</b>：系统开启 <code class="inline">prefers-reduced-transparency</code> 时，所有玻璃自动退回 #f7f7fa 不透明底</li>
+          <li><b>减少动效</b>：<code class="inline">prefers-reduced-motion</code> 全量降级</li>
+          <li><b>暗色对比</b>：暗色 Token 的文本层级（f5f5f7 / a1a1a6 / 6e6e73）满足 WCAG AA 正文对比</li>
+        </ul>
+        <h3>接入方需要补的</h3>
+        <ul>
+          <li>图标按钮加 <code class="inline">aria-label</code>（案例页都写了）</li>
+          <li>开关 / 分段保留原生 <code class="inline">input</code>，不要改成 div + JS 模拟</li>
+          <li>弹窗用原生 <code class="inline">dialog</code>，获得免费的空间导航与 Esc 关闭</li>
+          <li>Toast 加 <code class="inline">role="status"</code>（LiquidGlass.toast 已内置）</li>
+          <li>彩色背景上的正文，交付前跑一次对比度检查（≥4.5:1）</li>
+        </ul>
+      </section>
+
+      <!-- 09 性能 -->
+      <section id="s9">
+        <h2><span class="num">09</span>性能预算</h2>
+        <p><code class="inline">backdrop-filter</code> 是本库唯一的昂贵属性。经验预算：</p>
+        <table class="api">
+          <tr><th>设备档</th><th>同屏玻璃数量上限</th><th>备注</th></tr>
+          <tr><td>旗舰手机</td><td>≤ 12</td><td>滚动区内的玻璃卡片要控制</td></tr>
+          <tr><td>中端手机</td><td>≤ 8</td><td>相册九宫格这类批量内容绝不套玻璃</td></tr>
+          <tr><td>桌面</td><td>≤ 20</td><td>视口大，重绘区域也大，同样要克制</td></tr>
+        </table>
+        <h3>规则</h3>
+        <ul>
+          <li><b>不嵌套</b>：玻璃里放玻璃会让模糊互相吃色、成本翻倍。唯一例外是控制中心（用 .glass.thin 内嵌）</li>
+          <li><b>长列表不套玻璃</b>：列表行用透明 + 发丝线，只有「组」的容器是玻璃</li>
+          <li><b>滚动区域</b>：滚动内容从玻璃下方穿过是安全的；但不要让玻璃本身滚动（模糊区域持续变化最贵）</li>
+          <li><b>不要加 will-change: backdrop-filter</b>：会强制常驻合成层，得不偿失</li>
+          <li><b>折射滤镜</b>只在 Chromium 启用；Safari / Firefox 自动回落到纯磨砂，不额外付出成本</li>
+        </ul>
+      </section>
+
+      <!-- 10 兼容 -->
+      <section id="s10">
+        <h2><span class="num">10</span>兼容与降级</h2>
+        <table class="api">
+          <tr><th>浏览器</th><th>磨砂</th><th>折射</th><th>说明</th></tr>
+          <tr><td>Chrome / Edge 76+</td><td>✓</td><td>✓</td><td>完整体验（glass.js 挂透镜层后）</td></tr>
+          <tr><td>Safari 9+ / iOS</td><td>✓</td><td>—</td><td>-webkit- 前缀已内置，自动降级为磨砂</td></tr>
+          <tr><td>Firefox 103+</td><td>✓</td><td>—</td><td>同上</td></tr>
+          <tr><td>不支持 backdrop-filter</td><td>—</td><td>—</td><td>@supports 兜底：底色升至 93% 白，保可读性</td></tr>
+        </table>
+        <p>三层降级由 CSS 完成，接入方无需写任何判断代码：</p>
+        <ul>
+          <li>第 1 层：<code class="inline">.has-lg-lens</code>（glass.js 检测 <code class="inline">filter:url()</code> 支持且 body 带 <code class="inline">data-lens="on"</code>）→ 开折射：JS 抓取玻璃背后的壁纸，贴回盒内最外一圈并施加位移滤镜，中心仍交给 backdrop-filter</li>
+          <li>第 2 层：默认规则 → 磨砂 + 描边 + 高光 + 投影</li>
+          <li>第 3 层：<code class="inline">@supports not (backdrop-filter)</code> → 高不透明度纯色底</li>
+        </ul>
+        <div class="callout warn">
+          <span class="ci">!</span>
+          <span>父级的 <code class="inline">filter</code>、<code class="inline">isolation:isolate</code>、<code class="inline">contain</code> 会<b>截断 backdrop 采样链</b>，让玻璃变成灰块。排查顺序：先看祖先有没有这三个属性。</span>
+        </div>
+      </section>
+
+      <!-- 11 定制 -->
+      <section id="s11">
+        <h2><span class="num">11</span>定制主题</h2>
+        <p>换品牌色只需要覆盖 Token，不要改组件规则：</p>
+<pre class="code"><span class="c">/* 你的 theme.css —— 在 glass-core.css 之后引入 */</span>
+<span class="t">:root</span> {
+  --lg-blue: #7c5cff;        <span class="c">/* 品牌紫 */</span>
+  --lg-blue-deep: #5a3ce0;
+  --lg-radius: 20px;         <span class="c">/* 更收敛的圆角 */</span>
+  --lg-blur: 14px;           <span class="c">/* 更轻的磨砂 */</span>
+}
+<span class="t">[data-theme="dark"]</span> {
+  --lg-blue: #9b85ff;
+}</pre>
+        <p>品牌色替换后，按钮、开关、焦点环、进度条、chip、选中态会<b>全部自动跟随</b>——组件规则里引用的都是 Token。</p>
+        <h3>换玻璃「性格」的三个旋钮</h3>
+        <ul>
+          <li><b>--lg-blur</b>：越大越「磨砂」，小了会更「透」</li>
+          <li><b>--lg-fill-1 / 2</b>：控制白度。降到 .4/.1 接近 clear，升到 .8/.6 接近毛玻璃实底</li>
+          <li><b>--lg-sheen</b>：镜面感强弱。暗色场景 0.5 左右，否则会「发光」</li>
+        </ul>
+      </section>
+
+      <!-- 12 清单 -->
+      <section id="s12">
+        <h2><span class="num">12</span>接入检查清单</h2>
+        <p>发布前逐项过一遍，全部满足才算「液态玻璃正确接入」：</p>
+        <ul class="checklist">
+          <li>每块玻璃底下都有可折射的内容（照片 / 彩色 / 网格），没有「白框玻璃」</li>
+          <li>玻璃只出现在控制层；正文与表格区使用近乎不透明的底</li>
+          <li>同屏玻璃数量在预算内；长列表与相册网格未套玻璃</li>
+          <li>没有玻璃嵌玻璃（控制中心除外，且内层用 .thin）</li>
+          <li>body 加了 web 或 mobile 类，密度与端匹配</li>
+          <li>手机端可点元素全部 ≥44px；输入框字号 ≥15px</li>
+          <li>每个图标按钮有 aria-label；开关/分段保留原生 input</li>
+          <li>暗色模式下检查过：logo、文字、高光不发「发光塑料」感</li>
+          <li>Safari 上验证过磨砂降级正常（无折射但可读）</li>
+          <li>低端机上试过滚动：无卡顿、无闪烁</li>
+          <li>键盘 Tab 走一遍：焦点环清晰可见</li>
+          <li>系统开启「减弱透明度 / 减弱动效」后仍可正常使用</li>
+        </ul>
+      </section>
+
+      <!-- 13 FAQ -->
+      <section id="s13">
+        <h2><span class="num">13</span>常见问题</h2>
+        <h3>玻璃显示成灰块 / 白块</h3>
+        <p>按顺序检查：<b>① 祖先有没有 <code class="inline">filter</code>、<code class="inline">isolation:isolate</code>、<code class="inline">contain</code></b>（会截断 backdrop 采样链）；② 玻璃底下是不是纯白背景（没有可折射内容）；③ 是否嵌套了玻璃（互相吃色）。90% 的问题出在第一条。</p>
+        <h3>hover 没有任何反应</h3>
+        <p>检查是否有人写了「hover 加白」——浅色底上叠白等于零反馈。本库的 hover 是<b>中性加深 + 上浮 2px + 光斑</b>；如果你自定义了 hover，请遵循同一方向。</p>
+        <h3>Safari 上边缘没有折射</h3>
+        <p>预期行为。折射滤镜（feDisplacementMap）只有 Chromium 支持，Safari / Firefox 自动回落到纯磨砂。不要为补齐折射而引入图片模拟，降级本身就是分层体验。</p>
+        <h3>滚动时玻璃区域闪烁</h3>
+        <p>通常是玻璃元素本身在滚动（模糊区域持续重绘）。让玻璃<b>固定</b>、让内容从它下方穿过；或减少同屏玻璃数量。</p>
+        <h3>暗色模式下组件发「发光塑料」感</h3>
+        <p>把 <code class="inline">--lg-sheen</code> 降到 0.5 以下、检查是否忘了引暗色 Token（只有 <code class="inline">[data-theme="dark"]</code> 覆盖段生效才会出现半亮半暗）。</p>
+        <h3>能用在 React / Vue 项目里吗</h3>
+        <p>可以，只是 CSS。把 <code class="inline">glass/</code> 放进静态资源，或在入口文件 import 两个 CSS；<code class="inline">glass.js</code> 在 <code class="inline">useEffect</code> / <code class="inline">onMounted</code> 里加载一次即可。注意组件类名不要与框架 UI 库重名冲突（前缀 <code class="inline">lg-</code> 的工具类除外）。</p>
+        <h3>如何只取一部分组件</h3>
+        <p>core 里的组件块互相独立（每个区块顶部有注释分隔线），整块剪切即可；但 <code class="inline">:root</code> Token 段与 <code class="inline">.glass</code> 基类是所有组件的前置依赖，必须保留。</p>
+      </section>
+
+      <!-- 14 速查 -->
+      <section id="s14">
+        <h2><span class="num">14</span>类名速查表</h2>
+        <p>全部 130+ 类名一页索引，按「文件 → 章节」排列。括号内是所在文件：<b>core</b> / <b>mobile</b> / <b>web</b> / <b>templates</b> / <b>stage</b>。</p>
+<pre class="code"><span class="c">── 基类（core）──────────────────────────────</span>
+.glass  .glass.thin  .glass.clear  .glass.tinted  .glass.pressable  .glass.fx-lift
+.lg-row  .lg-col  .lg-grow  .lg-muted  .lg-mono  .lg-sr-only
+
+<span class="c">── 按钮（core）──────────────────────────────</span>
+.btn  .primary  .tinted  .ghost  .danger  .sm  .icon
+.btn.loading  .btn.loading.light  .splitbtn(.sm)  .fab
+
+<span class="c">── 表单（core）──────────────────────────────</span>
+.field(.ok/.err)  .searchbar(.s-ico/.s-clear)  .selectbox(.caret)
+.ta  .combo(.pre)  .chips/.chip(.on/.x)  .strength(i.a1/a2/a3)
+.fieldgroup(.fl/.hint/.msg.ok)  .dropzone(.is-over/.dz-ico/.dz-file)
+
+<span class="c">── 控件（core）──────────────────────────────</span>
+.sw(.sm/.mini/.blue)  .seg(.lg)  .slider(.blue)  .stepper(.val)
+.check(.round)  .tile  .rate(.off/.lg)  .swatches
+
+<span class="c">── 反馈（core）──────────────────────────────</span>
+.banner(.info/.ok/.warn)  .sk  .progress(.fill.solid/.ok/.warn)
+.ring(--val)  .spinner(.sm/.dark)  .badge(.dot/.n)
+.pill(.ok/.wait/.stop/.info)  .toast(.ti/.out)  .tip-wrap/.tip
+
+<span class="c">── 扩展（core）──────────────────────────────</span>
+.cmdk(.ck-in/.ck-g/.ck-i/.k)  .datepicker(.dp-head/.dp-grid)
+.avatar(.lg/.st.away/.st.off)  .dots(.light)
+.tl(.tl-row/.tl-dot/.tl-txt)  .steps(.stp.done/.now/.stp-line.fill)
+.card(.ct/.cs/.cfoot)  .cover(.c1-c4/.cv-t)  .notice(.ni/.nb/.nt)  .empty(.ei)
+
+<span class="c">── 弹层（core）──────────────────────────────</span>
+dialog.alert  .sheet(.grab/.sheet-acts)  .actionsheet(.as-item/.as-cancel)
+.control-center(.ccg/.wide/.horiz/.cc-round/.cc-name/.cc-slider)
+
+<span class="c">── 手机端（mobile）──────────────────────────</span>
+.phone  .screen(.tint-a…tint-e)  .screen-scroll  .statusbar
+.navbar(.float/.leading)  .large-title  .tabbar(.float)
+.list(.list-head)/.lrow(.ico/.body/.val/.chev/.dot)
+.cardfeed/.photo-card(pc1-4)  .album  .miniplayer  .keypad
+.actionbar  .mock  .auth  .chat(.chat-day/.typing/.bub.me/.them)
+.chat-input(.ci-btn.send)  .player(.p-cover/.p-ctrl/.play)
+.wallet-stack/.wallet-card  .quick-acts  .weather-hero  .wx-grid/.wx-card/.wx-hours
+
+<span class="c">── 网页端（web）─────────────────────────────</span>
+.topbar-web(.is-scrolled)  .pagehead(.ph-l/.ph-r/.crumbs)
+.utabs(.on)  .pager(.gap)  .acc  .dd(.menu/.mi/.k/.right)
+.suggest(.sg/.sy/.k)  .sidebar  .appframe(.af-side/.af-nav/.af-head/.af-body/.af-tile)
+.bento(.bc/.s2/.s2r/.fill)  .tablecard(.tc-head)/.gtable(.who/.num)
+.formgrid(.fg/.fl/.full/.acts/.inp)  .pricing/.pricecard(.hi/.pc-ribbon)
+.medialist/.mrow(.thumb/.mb/.mact)  .metric  .avs(.av/.more)
+.toolbar  .dock(.app.a1-a5)  .bulkbar(.bt)
+.authsplit(.as-art/.as-form)  .article(.art-body/.art-toc)
+.kanban(.kcol/.kcard/.kbar)  .inbox(.ib-list/.ib-item/.ib-read)
+
+<span class="c">── 模板扩展（templates，按需引入）───────────</span>
+.admin-shell(.admin-main/.admin-topbar/.at-search/.at-me)  .kpi-row
+.chart(.bar/.bar.warn)  .chart-legend(.w)  .trend-row(.tr-n/.tr-bar/.tr-v/.tr-d.up/.down)
+.table-foot(.tf-info)  .hero(.h-badge/.h-sub/.h-cta/.h-note/.grad)
+.features/.feature(.fi)  .cta-band  .logo-row  .sec-label
+.filter-bar(.f-sort)  .shop-grid  .prod-card(.pc-body/.pc-cat/.pc-name/.pc-row/.pc-rate/.pc-add)
+.cart-btn(.cart-n)  .promo-band  .auth-form/.auth-hero  .tpl-foot(.f-brand)
+
+<span class="c">── 展示台（stage，业务不用）───────────────────</span>
+.sitebar  .hero  .sec-head  .specs/.spec(.span2)  .stage(.a-.d)
+.wrap  .cap  .note-box  .theme-toggle  .kbd</pre>
+        <div class="callout ok">
+          <span class="ci">✓</span>
+          <span>全部类名未加任何业务前缀，接入时如担心冲突，可用 PostCSS / 命名空间包装（如 <code class="inline">.lgk .btn</code>）一次性加作用域。</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="sitefoot">
+    Lumi Glass v1.1 · MIT 风格，可自由用于个人与商业项目<br>
+    案例索引：<a href="mobile.html">手机端</a> · <a href="web.html">网页端</a> · <a href="white.html">白底合辑</a> · <a href="index.html">深色原版</a>
+  </footer>
+</main>
+
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+<script>
+  // 目录高亮
+  (function () {
+    var links = [].slice.call(document.querySelectorAll('.docs-toc a'));
+    var map = {};
+    links.forEach(function (a) {
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) map[id] = a;
+    });
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          links.forEach(function (a) { a.classList.remove('on'); });
+          var a = map[en.target.id];
+          if (a) a.classList.add('on');
+        }
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    Object.keys(map).forEach(function (id) { obs.observe(document.getElementById(id)); });
+  })();
+
+  // 交互演示：弹窗与 Toast
+  (function () {
+    var dlg = document.getElementById('demo-dialog');
+    var open = document.getElementById('open-alert');
+    if (dlg && open) {
+      open.addEventListener('click', function () { dlg.showModal(); });
+      document.getElementById('cancel-dialog').addEventListener('click', function () { dlg.close(); });
+      document.getElementById('ok-dialog').addEventListener('click', function () {
+        LiquidGlass.toast('已移入回收站');
+        dlg.close();
+      });
+    }
+    var tb = document.getElementById('open-toast');
+    if (tb) tb.addEventListener('click', function () { LiquidGlass.toast('这是一条玻璃 Toast · 2.4 秒后消失'); });
+    document.querySelectorAll('[data-toast]').forEach(function (b) {
+      b.addEventListener('click', function () { LiquidGlass.toast(b.getAttribute('data-toast')); });
+    });
+  })();
+</script>
+</body>
+</html>

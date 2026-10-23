@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lumi Glass · 纯 CSS 液态玻璃组件库。手机端 / 网页端双套组件、9 个可直接改用的页面模板、完整中文文档，作者赵鑫飞。">
+<title>Lumi Glass · 纯 CSS 液态玻璃组件库</title>
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<link rel="stylesheet" href="glass/glass-templates.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+
+<style>
+  /* ---------- 背景层：动态壁纸 canvas（glass.js 绘制）----------
+     JS 不可用时退回静态底色，保证页面不至于白板 */
+  .page-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, #ebe8f0, #e6e3eb 55%, #e0dde8);
+  }
+  [data-theme="dark"] .page-bg {
+    background: linear-gradient(180deg, #141018, #1a1420 55%, #121018);
+  }
+  body[data-wallpaper] .page-bg { background: var(--lg-page); opacity: 0; }  /* 壁纸接管后隐藏 */
+  .glass-wallpaper {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+  }
+  main { position: relative; z-index: 1; }
+
+  /* ---------- 品牌标识：鑫（三金） ---------- */
+  .mark-xin {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0;
+    background: linear-gradient(140deg, #ffd27a, #f5a623 60%, #e8853a);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .55), 0 4px 12px -4px rgba(245, 166, 35, .6);
+  }
+  [data-theme="dark"] .mark-xin { box-shadow: inset 0 1px 1px rgba(255, 255, 255, .3), 0 4px 14px -4px rgba(255, 159, 10, .6); }
+
+  /* ---------- Hero：不再叠局部渐变 ----------
+     动态壁纸本身会漂移，hero 区的 clear 玻璃直接折射
+     壁纸的移动光斑 —— 静态色斑叠多了就是「AI 渐变脸」 */
+  .hero {
+    position: relative;
+    border-radius: 36px;
+  }
+
+  /* ---------- Hero 内嵌组件演示台 ---------- */
+  .h-demo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px 22px;
+    width: min(760px, 100%);
+    margin: 26px auto 0;
+    padding: 24px 26px;
+    border-radius: 24px;
+  }
+  .h-demo .hd-g { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+  .h-demo .hd-note {
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--lg-ink-3);
+  }
+  .h-demo .sw { vertical-align: middle; }
+  .h-demo .seg { margin: 0; }
+
+  /* ---------- 「一眼看懂」三步 ---------- */
+  .steps3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+  .steps3 .s3 {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 18px 18px 16px;
+    border-radius: 20px;
+  }
+  .steps3 .s3 .n {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(140deg, #5ac8fa, #0a84ff);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .5), 0 4px 10px -4px rgba(10, 132, 255, .8);
+  }
+  .steps3 .s3 b { font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
+  .steps3 .s3 p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--lg-ink-2); }
+  .steps3 .s3 code { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; }
+
+  /* ---------- 模板卡片 ---------- */
+  .tpl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+  .tpl-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 0 14px;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--lg-ink);
+    transition: transform .35s var(--lg-ease-spring), box-shadow .35s;
+  }
+  .tpl-card:hover { transform: translateY(-4px); }
+  .tpl-card .tc-cover {
+    height: 108px;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -.2px;
+  }
+  .tpl-card .tc-body { display: flex; flex-direction: column; gap: 5px; padding: 12px 15px 0; }
+  .tpl-card .tc-body b { font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
+  .tpl-card .tc-body p { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--lg-ink-2); }
+  .tpl-card .tc-go {
+    margin-top: 3px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--lg-blue-deep);
+  }
+  [data-theme="dark"] .tpl-card .tc-go { color: #7ab8ff; }
+  .tc-cover.c-admin { background: linear-gradient(140deg, #5ac8fa, #0a84ff 70%); }
+  .tc-cover.c-shop  { background: linear-gradient(140deg, #8a94ad, #4a5568 60%, #2c3345); }
+  .tc-cover.c-start { background: linear-gradient(140deg, #4cd964, #28a745 70%); }
+
+  /* ---------- 数字指标 ---------- */
+  .stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 16px 10px;
+    border-radius: 18px;
+    text-align: center;
+  }
+  .stat b { font-size: 24px; font-weight: 800; letter-spacing: -.8px; background: linear-gradient(140deg, var(--lg-ink), var(--lg-ink-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat small { font-size: 11px; font-weight: 600; color: var(--lg-ink-2); }
+
+  @media (max-width: 900px) {
+    .steps3, .tpl-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body class="web" data-wallpaper="aurora">
+
+<div class="page-bg" aria-hidden="true"></div>
+
+<!-- ================= 浮动玻璃顶栏 ================= -->
+<header class="topbar-web glass">
+  <a class="brand" href="landing.html"><span class="mark"></span>Lumi Glass</a>
+  <span class="tag">产品官网</span>
+  <nav data-site-nav="landing"></nav>
+  <div class="topbar-actions">
+    <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+    <a class="btn sm primary" href="#get">立即获取</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= Hero：一眼看懂 ================= -->
+  <section class="hero">
+    <span class="h-badge glass"><span class="dot"></span>v1.1 开源发布 · MIT 许可，免费商用</span>
+    <h1>Lumi Glass<br>让网页拥有 <span class="grad">iOS 液态玻璃</span>质感</h1>
+    <p class="h-sub">一套<b>纯 CSS</b> 的 Liquid Glass 组件库：手机端、网页端双套组件，9 个可直接改用的页面模板，明暗双主题，零构建、零依赖——拷进项目三行代码就能用。</p>
+    <div class="h-cta">
+      <a class="btn primary" href="docs.html">阅读使用文档 →</a>
+      <a class="btn" href="starter.html">从起步模板开始</a>
+    </div>
+    <p class="h-note">无需安装 · 无框架限制 · React / Vue / 静态页面通用</p>
+
+    <div class="hero-cc">
+      <div class="cc-grid">
+        <div class="cc-card lg lg-regular lg-surface" data-glass="card" data-frost="1" data-tint="0.2">
+          <div class="cc-row">
+            <span class="cc-ico" style="background:linear-gradient(135deg,#5ac8fa,#0a84ff)">📶</span><b>Wi-Fi</b>
+            <label class="sw"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div class="cc-row">
+            <span class="cc-ico" style="background:linear-gradient(135deg,#4cd964,#28a745)">B</span><b>蓝牙</b>
+            <label class="sw"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div class="cc-row">
+            <span class="cc-ico" style="background:linear-gradient(135deg,#bf5af2,#7d3cf0)">☾</span><b>专注模式</b>
+            <label class="sw"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+          </div>
+        </div>
+        <div class="cc-card lg lg-regular lg-surface cc-weather" data-glass="card" data-frost="1" data-tint="0.2">
+          <h4>天气</h4>
+          <div class="deg">21°</div>
+          <span>杭州 · 多云</span>
+        </div>
+        <div class="cc-card lg lg-regular lg-surface cc-now" data-glass="card" data-frost="1" data-tint="0.2">
+          <div class="cc-cover">♫</div>
+          <div class="tt"><b>静水流深</b><span>环境光电台</span></div>
+          <button class="cc-play" onclick="showToast('▶ 正在播放 静水流深')" aria-label="播放">▶</button>
+        </div>
+        <div class="cc-card lg lg-regular lg-surface cc-msg" data-glass="card" data-frost="1" data-tint="0.2">
+          <h4>信息</h4>
+          <p>「这套玻璃组件的手感真细腻，边框上还会亮起一圈光 ✨」</p>
+        </div>
+      </div>
+      <div class="hero-dock lg lg-regular lg-sheet" data-glass="sheet" data-frost="1" data-tint="0.28" role="group" aria-label="Dock 演示">
+        <button class="dapp a1" onclick="showToast('已打开 液态玻璃')">⌘</button>
+        <button class="dapp a2" onclick="showToast('已打开 天气')">☀</button>
+        <button class="dapp a3" onclick="showToast('已打开 信息')">💬</button>
+        <button class="dapp a4" onclick="showToast('已打开 音乐')">♫</button>
+        <button class="dapp a5" onclick="showToast('已打开 设置')">⚙</button>
+      </div>
+    </div>
+
+    <!-- 数字指标 -->
+    <div class="stat-row" style="width:min(760px,100%);margin:16px auto 0">
+      <div class="stat glass clear"><b>120+</b><small>组件类名</small></div>
+      <div class="stat glass clear"><b>9</b><small>页面模板</small></div>
+      <div class="stat glass clear"><b>0</b><small>构建依赖</small></div>
+      <div class="stat glass clear"><b>~20KB</b><small>gzip 后 CSS</small></div>
+    </div>
+  </section>
+
+  <!-- ================= 一眼看懂：这是什么 ================= -->
+  <section id="what" class="wrap">
+    <div class="sec-label">
+      <h4>三步用起来</h4>
+      <p>不需要懂设计，也不需要改配置</p>
+    </div>
+    <div class="steps3">
+      <div class="s3 glass">
+        <span class="n">1</span>
+        <b>拷贝 glass 目录</b>
+        <p>把 <code>glass/</code> 文件夹整个复制进你的项目，它是全部内容。</p>
+      </div>
+      <div class="s3 glass">
+        <span class="n">2</span>
+        <b>引入三个文件</b>
+        <p>core + web（或 mobile）+ js，加起来三行 <code>&lt;link&gt;</code>。</p>
+      </div>
+      <div class="s3 glass">
+        <span class="n">3</span>
+        <b>照抄类名</b>
+        <p>写 <code>class="glass"</code> 就有玻璃，<code>class="btn primary"</code> 就有主按钮。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 页面模板 ================= -->
+  <section id="templates" class="wrap">
+    <div class="sec-label">
+      <h4>拿来即用的页面模板</h4>
+      <p>不是组件陈列，是改改文案就能上线的完整页面</p>
+    </div>
+    <div class="tpl-grid">
+      <a class="tpl-card glass" href="admin.html">
+        <div class="tc-cover c-admin">后端管理台 · Nebula</div>
+        <div class="tc-body">
+          <b>Admin 管理后台</b>
+          <p>侧栏导航、KPI 指标、柱状图表、数据表格与分页——最常见的后台骨架。</p>
+          <span class="tc-go">打开模板 →</span>
+        </div>
+      </a>
+      <a class="tpl-card glass" href="shop.html">
+        <div class="tc-cover c-shop">电商店铺 · 山物集</div>
+        <div class="tc-body">
+          <b>Shop 商城店铺</b>
+          <p>促销横幅、闪购、筛选栏、商品网格与购物车演示，替换商品数据即可营业。</p>
+          <span class="tc-go">打开模板 →</span>
+        </div>
+      </a>
+      <a class="tpl-card glass" href="starter.html">
+        <div class="tc-cover c-start">起步模板 · Starter</div>
+        <div class="tc-body">
+          <b>Starter 通用起步页</b>
+          <p>页面骨架 + 注释标注的三段替换顺序，从这里开始改成你的产品。</p>
+          <span class="tc-go">打开模板 →</span>
+        </div>
+      </a>
+    </div>
+    <p style="margin:12px 0 0;text-align:center;font-size:12px;color:var(--lg-ink-2)">
+      另有 <a href="mobile.html" style="color:var(--lg-blue-deep);font-weight:600">手机端 9 套页面案例</a> 与 <a href="web.html" style="color:var(--lg-blue-deep);font-weight:600">网页端 9 套布局案例</a> 可以直接抄结构。
+    </p>
+  </section>
+
+  <!-- ================= 特性 ================= -->
+  <section id="features" class="wrap">
+    <div class="sec-label">
+      <h4>为什么是 Lumi Glass</h4>
+      <p>把 Apple HIG 的 Liquid Glass 规范，翻译成网页能直接用的 CSS</p>
+    </div>
+    <div class="features">
+      <div class="feature glass">
+        <span class="fi" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">◈</span>
+        <b>三层真实配方</b>
+        <p>不是「磨砂白贴图」：backdrop 模糊提饱和 + SVG 折射滤镜 + 镜面高光边缘，和 iOS 同一套原理。</p>
+      </div>
+      <div class="feature glass">
+        <span class="fi" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">◐</span>
+        <b>明暗双主题</b>
+        <p>一个 <code>data-theme="dark"</code> 属性全站切换，Token 级适配，跟随系统也可选。</p>
+      </div>
+      <div class="feature glass">
+        <span class="fi" style="background:linear-gradient(140deg,#4cd964,#28a745)">⇄</span>
+        <b>两端各一套密度</b>
+        <p>手机端命中区 ≥44px、网页端桌面密度；同一套 HTML 思维，两种舞台。</p>
+      </div>
+      <div class="feature glass">
+        <span class="fi" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">⚡</span>
+        <b>零构建零依赖</b>
+        <p>没有 npm、没有打包、没有运行时框架——纯 CSS 文件 + 一个可选的小脚本。</p>
+      </div>
+      <div class="feature glass">
+        <span class="fi" style="background:linear-gradient(140deg,#ff6482,#ff375f)">♿</span>
+        <b>无障碍内建</b>
+        <p>减弱透明度 / 减弱动效时自动降级为实底，键盘焦点环完整，对比度达标。</p>
+      </div>
+      <div class="feature glass">
+        <span class="fi" style="background:linear-gradient(140deg,#8e8e93,#48484a)">📖</span>
+        <b>中文文档齐全</b>
+        <p>设计原理、Token 表、90+ 类名速查、性能预算、接入检查清单，全部中文。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 获取 ================= -->
+  <section id="get" class="wrap">
+    <div class="sec-label">
+      <h4>获取与接入</h4>
+      <p>MIT 许可，个人与商业项目免费使用</p>
+    </div>
+    <div class="steps3">
+      <div class="s3 glass">
+        <span class="n">📚</span>
+        <b>先读文档</b>
+        <p>5 分钟看完接入步骤与核心概念：<a href="docs.html" style="color:var(--lg-blue-deep);font-weight:700">docs.html →</a></p>
+      </div>
+      <div class="s3 glass">
+        <span class="n">🧩</span>
+        <b>挑一个模板改</b>
+        <p>后台用 <a href="admin.html" style="color:var(--lg-blue-deep);font-weight:700">admin</a>、店铺用 <a href="shop.html" style="color:var(--lg-blue-deep);font-weight:700">shop</a>、通用用 <a href="starter.html" style="color:var(--lg-blue-deep);font-weight:700">starter</a>。</p>
+      </div>
+      <div class="s3 glass">
+        <span class="n">🎨</span>
+        <b>换上你的品牌色</b>
+        <p>改 4 个 Token 变量即可全站换色，文档「定制主题」一章有示例。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA ================= -->
+  <section class="wrap" style="margin-top:34px">
+    <div class="cta-band">
+      <div>
+        <h3>下一屏，就从一块玻璃开始</h3>
+        <p>打开起步模板，10 分钟把你的页面换上液态玻璃。</p>
+      </div>
+      <div class="h-cta">
+        <a class="btn primary" href="starter.html">打开起步模板 →</a>
+        <a class="btn" style="background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff" href="docs.html">查阅文档</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 页脚 ================= -->
+  <footer class="wrap">
+    <footer class="tpl-foot">
+      <span class="f-brand"><span class="m"></span>Lumi Glass</span>
+      <span>© 2026 赵鑫飞 · Lumi Glass v1.1 · MIT License</span>
+      <nav>
+        <a href="docs.html">使用文档</a>
+        <a href="mobile.html">手机端</a>
+        <a href="web.html">网页端</a>
+        <a href="admin.html">管理台</a>
+        <a href="shop.html">店铺</a>
+      </nav>
+    </footer>
+  </footer>
+</main>
+
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+<div class="toast-zone" id="toast-zone"></div>
+
+<!-- 壁纸调音台：饱和度现场对比（0 = 全灰白，2 = 浓郁） -->
+<div class="wp-tune glass" id="wpTune" role="group" aria-label="壁纸调音台">
+  <button class="wt-head" id="wpTuneHead" type="button" aria-expanded="true">
+    <span class="wt-dot"></span>壁纸调音台
+  </button>
+  <div class="wt-body" id="wpTuneBody">
+    <label class="wt-row">
+      <span>饱和度</span>
+      <input id="wpSat" type="range" min="0" max="200" step="5" value="100" aria-label="壁纸饱和度">
+      <output id="wpSatVal">100%</output>
+    </label>
+    <p class="wt-tip">往左拉到 0 全灰白，往右拉浓郁——玻璃折射会更明显。</p>
+  </div>
+</div>
+<style>
+  .wp-tune {
+    position: fixed; left: 20px; bottom: 20px; z-index: 120;
+    width: 232px; padding: 12px 14px 11px; border-radius: 20px;
+  }
+  .wt-head {
+    display: flex; align-items: center; gap: 7px; width: 100%;
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font: inherit; font-size: 12.5px; font-weight: 700; color: var(--lg-ink);
+  }
+  .wt-dot { width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, #8ee3f5, #0a84ff); }
+  .wt-head[aria-expanded="false"] ~ .wt-body { display: none; }
+  .wt-body { margin-top: 10px; }
+  .wt-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--lg-ink-2); }
+  .wt-row span { flex: none; }
+  .wt-row output { flex: none; width: 38px; text-align: right;
+    font-variant-numeric: tabular-nums; font-weight: 700; color: var(--lg-ink); }
+  .wp-tune input[type=range] { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none;
+    height: 4px; border-radius: 2px; background: rgba(0,0,0,.16); outline: none; cursor: pointer; }
+  .wp-tune input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.28), 0 0 0 .5px rgba(0,0,0,.06);
+    transition: transform .3s cubic-bezier(.34,1.7,.64,1); }
+  .wp-tune input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .wp-tune input[type=range]:active::-webkit-slider-thumb { transform: scale(1.05); }
+  .wt-tip { margin: 8px 0 0; font-size: 10.5px; line-height: 1.5; color: var(--lg-ink-3); }
+  @media (max-width: 640px) { .wp-tune { left: 12px; bottom: 12px; width: 196px; } }
+</style>
+<script>
+(function(){
+  var input = document.getElementById('wpSat'), val = document.getElementById('wpSatVal');
+  if (!input || !window.LiquidGlass) return;
+  var cur = LiquidGlass.getWallpaperSaturation ? LiquidGlass.getWallpaperSaturation() : 1;
+  input.value = Math.round(cur * 100);
+  val.textContent = Math.round(cur * 100) + '%';
+  input.addEventListener('input', function () {
+    var v = input.value / 100;
+    val.textContent = input.value + '%';
+    LiquidGlass.setWallpaperSaturation(v);
+  });
+  var head = document.getElementById('wpTuneHead');
+  head.addEventListener('click', function () {
+    var open = head.getAttribute('aria-expanded') !== 'false';
+    head.setAttribute('aria-expanded', String(!open));
+  });
+})();
+</script>
+<script>
+function showToast(msg){
+  var z=document.getElementById('toast-zone');
+  var t=document.createElement('div'); t.className='toast glass';
+  t.innerHTML='<span class="ti">✓</span><span></span>';
+  t.lastChild.textContent=msg;
+  z.appendChild(t);
+  setTimeout(function(){ t.classList.add('out'); setTimeout(function(){ t.remove(); },380); },2200);
+}
+</script>
+</body>
+</html>

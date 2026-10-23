@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文档全量组件自检 · Lumi Glass</title>
+<meta name="description" content="Lumi Glass 液态玻璃组件库 · 内部自检页：全量组件结构与 WebGL 液态层回归测试，正式交付请使用 docs.html">
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<link rel="stylesheet" href="glass/glass-mobile.css">
+<link rel="stylesheet" href="glass/glass-templates.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-stage.css">
+<style>
+  .page-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(480px 360px at 10% 15%, rgba(120, 180, 255, .5), transparent 60%),
+      radial-gradient(420px 320px at 90% 80%, rgba(200, 120, 255, .4), transparent 58%),
+      linear-gradient(155deg, #e8eaf2, #d0d6e4);
+  }
+  [data-theme="dark"] .page-bg {
+    background:
+      radial-gradient(480px 360px at 10% 15%, rgba(80, 120, 200, .35), transparent 60%),
+      radial-gradient(420px 320px at 90% 80%, rgba(140, 80, 200, .28), transparent 58%),
+      linear-gradient(155deg, #12141c, #0b0d12);
+  }
+  .catalog { position: relative; z-index: 1; width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 20px 0 100px; }
+  .catalog h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: -.4px; }
+  .catalog .lead { margin: 0 0 18px; font-size: 14px; line-height: 1.7; color: var(--lg-ink-2); }
+  .toc { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+  .toc a { padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--lg-ink-2); background: rgba(255,255,255,.35); border: 1px solid var(--lg-line); }
+  [data-theme="dark"] .toc a { background: rgba(255,255,255,.06); }
+  .toc a:hover { color: var(--lg-ink); }
+  .summary { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px 16px; margin-bottom: 18px; border-radius: 16px; border: 1px solid var(--lg-line); background: rgba(255,255,255,.4); }
+  [data-theme="dark"] .summary { background: rgba(255,255,255,.06); }
+  #test-log { margin: 0 0 24px; padding: 0; list-style: none; font-size: 13px; border: 1px solid var(--lg-line); border-radius: 14px; overflow: hidden; }
+  #test-log li { display: flex; gap: 10px; padding: 8px 14px; border-bottom: 1px solid rgba(60,60,67,.08); }
+  #test-log li:last-child { border-bottom: none; }
+  #test-log .st { width: 52px; flex: none; font-size: 11px; font-weight: 700; }
+  #test-log .st.pass { color: var(--lg-green); }
+  #test-log .st.fail { color: var(--lg-red); }
+  #test-log .st.warn { color: var(--lg-orange); }
+  .sec { margin-top: 36px; }
+  .sec > h2 { margin: 0 0 12px; font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+  .sec > p.hint { margin: 0 0 12px; font-size: 13px; color: var(--lg-ink-2); line-height: 1.65; }
+  .demo { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 18px 20px; margin-bottom: 14px; border-radius: 16px; background: rgba(251,251,253,.72); border: 1px solid var(--lg-line); }
+  [data-theme="dark"] .demo { background: rgba(255,255,255,.04); }
+  .demo.col { flex-direction: column; align-items: stretch; }
+  .demo .dlab { flex-basis: 100%; margin-bottom: -4px; font-size: 9.5px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--lg-ink-3); }
+  .demo.dark { background: radial-gradient(280px 200px at 20% 18%, rgba(255,196,90,.75), transparent 62%), radial-gradient(300px 220px at 82% 78%, rgba(94,92,230,.8), transparent 64%), linear-gradient(150deg, #23283a, #12141d); border: none; color: #fff; }
+  .demo.dark .dlab { color: rgba(255,255,255,.55); }
+  .demo.grow > *:not(.dlab) { flex: 1 1 auto; }
+  .demo-note { margin: -6px 0 14px; font-size: 12px; color: var(--lg-ink-3); line-height: 1.6; }
+  .spring-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .glass-strip { display: flex; flex-wrap: wrap; gap: 10px; }
+  .glass-strip .g { padding: 12px 14px; border-radius: 14px; font-size: 12px; font-weight: 600; }
+  .phone-row { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+  .catalog h3 { margin: 28px 0 10px; font-size: 17px; font-weight: 700; }
+  .catalog h4 { margin: 20px 0 8px; font-size: 14px; font-weight: 700; color: var(--lg-ink-2); }
+  .pill.ok { color: var(--lg-green); font-weight: 600; }
+  .pill.fail { color: var(--lg-red); font-weight: 600; }
+
+  .specs.phones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; }
+  @media (max-width: 980px) { .specs.phones { grid-template-columns: 1fr; } }
+  .specs.phones .spec .stage { padding: 26px 20px; align-items: flex-start; }
+  .cap { font-size: 12.5px; line-height: 1.55; color: var(--lg-ink-2); margin: 8px 0 0; }
+  .cap b { color: var(--lg-ink); font-weight: 600; }
+</style>
+</head>
+<body class="web">
+<div class="page-bg" aria-hidden="true"></div>
+
+<header class="topbar-web glass" id="test-topbar">
+  <a class="brand" href="docs.html"><span class="mark"></span>全量自检</a>
+  <span class="tag">§06 组件 + §07 弹簧</span>
+  <nav data-site-nav="docs"></nav>
+  <div class="topbar-actions">
+    <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+    <a class="btn sm primary" href="docs.html">文档</a>
+  </div>
+</header>
+
+<main class="catalog">
+  <p style="margin:0 0 8px;font-size:13px"><a href="docs.html" style="color:var(--lg-blue-deep)">← 使用文档</a></p>
+  <h1>文档全量组件 &amp; 动效自检</h1>
+  <p class="lead">本页与 <code>docs.html</code> §06 使用<b>同一套 demo 结构</b>（按钮 / 表单 / 控件 / 导航 / 容器 / 弹层 / 反馈 / 扩展 / 模板），并单独列出 §07 <b>弹簧阻尼</b>（<code>glass.js</code> 的 <code>sprStart</code>）。已引 <code>glass-lg</code> + 液态引擎 + WebGL；<b>不包含壁纸调音</b>。</p>
+
+  <nav class="toc" aria-label="组件目录">
+    <a href="#t-spring">弹簧</a><a href="#t-glass">玻璃基类</a><a href="#c-btn">6.1 按钮</a>
+    <a href="#c-form">6.2 表单</a><a href="#c-ctrl">6.3 控件</a><a href="#c-nav">6.4 导航</a>
+    <a href="#c-box">6.5 容器</a><a href="#c-over">6.6 弹层</a><a href="#c-fb">6.7 反馈</a>
+    <a href="#c-ext">6.8 扩展</a><a href="#c-tpl">6.9 模板</a><a href="#t-web">网页布局</a><a href="#t-mobile">手机端</a>
+  </nav>
+
+  <div class="summary glass">
+    <span class="pill" id="sum-text">运行中…</span>
+    <button type="button" class="btn sm" id="rerun">重新检测</button>
+  </div>
+  <ul id="test-log" aria-live="polite"></ul>
+
+  <section class="sec" id="t-spring" data-test-section="spring">
+    <h2>§07 弹簧与阻尼（glass.js）</h2>
+    <p class="hint"><b>按住</b>下列控件：阻尼弹簧 ωn≈26、按下 ζ≈0.28（目标 scale≈1.12）、松开 ζ≈0.55 回弹至 1；期间挂 <code>.lg-springing</code> 避免与 CSS :active 打架。滑块/WebGL 旋钮另有引擎侧弹簧。</p>
+    <div class="demo spring-grid">
+      <span class="dlab">SPRING_SEL 抽样 · 请按住体验</span>
+      <button type="button" class="btn primary" id="spring-demo-btn">主按钮</button>
+      <button type="button" class="btn ghost">幽灵</button>
+      <button type="button" class="fab" aria-label="新建">＋</button>
+      <div class="seg"><input type="radio" name="sprseg" id="spr1" checked><label for="spr1">日</label><input type="radio" name="sprseg" id="spr2"><label for="spr2">周</label></div>
+      <div class="stepper"><button type="button" aria-label="减">−</button><span class="val">2</span><button type="button" aria-label="加">＋</button></div>
+      <label class="sw blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+      <span class="chip on">标签</span>
+      <label class="tile"><input type="checkbox" checked><span class="face warm">📶</span></label>
+      <label class="check"><input type="checkbox" checked><span class="box">✓</span>复选</label>
+    </div>
+    <div class="demo">
+      <span class="dlab">悬停抬升 · fx-lift（CSS 弹簧曲线 --lg-ease-spring）</span>
+      <div class="glass pressable fx-lift" style="padding:18px 20px;border-radius:18px;max-width:320px">
+        <strong>玻璃卡片</strong>
+        <p style="margin:6px 0 0;font-size:13px;color:var(--lg-ink-2)">悬停上浮 + 光斑；按压走 JS 弹簧。</p>
+      </div>
+      <div class="slider blue" style="min-width:200px"><div class="rail"></div><input type="range" min="0" max="100" value="50" aria-label="滑块弹簧"></div>
+      <div class="slider rainbow" style="min-width:200px"><div class="rail"></div><div class="thumb thumb-rainbow" aria-hidden="true"></div><input type="range" min="0" max="100" value="40" aria-label="彩虹轨"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="t-glass" data-test-section="glass-base">
+    <h2>玻璃基类（core）</h2>
+    <div class="demo glass-strip">
+      <div class="glass g">.glass</div>
+      <div class="glass thin g">.thin</div>
+      <div class="glass clear g">.clear</div>
+      <div class="glass tinted g">.tinted</div>
+      <div class="glass overlay g">.overlay</div>
+      <div class="glass pressable g">.pressable</div>
+    </div>
+  </section>
+
+  <section class="sec" id="t-web" data-test-section="web-layout">
+    <h2>网页端布局（glass-web.css）</h2>
+    <p class="hint">文档 §06 未逐块展开的大布局，在此抽样；完整见 <a href="web.html">web.html</a>。</p>
+    <div class="demo col">
+      <div class="pagehead glass" style="padding:14px 16px;border-radius:16px">
+        <div class="crumbs"><a href="#">首页</a><span>›</span><span>自检</span></div>
+        <div class="ph-l"><h2 style="margin:0;font-size:20px">页面头 .pagehead</h2></div>
+        <div class="ph-r"><button class="btn sm primary">导出</button></div>
+      </div>
+      <div class="lg-row" style="gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <aside class="sidebar glass" style="width:200px;padding:12px;border-radius:16px">
+          <a href="#" class="on">概览</a><a href="#">成员</a><a href="#">设置</a>
+        </aside>
+        <div class="bento glass" style="flex:1;min-width:240px;padding:12px;border-radius:16px;grid-template-columns:1fr 1fr;display:grid;gap:10px">
+          <div class="bc glass"><span class="lab">Bento</span><span class="big">128</span></div>
+          <div class="bc glass fill"><span class="lab">主卡</span><span class="big">.fill</span></div>
+        </div>
+      </div>
+      <div class="tablecard glass" style="padding:12px;border-radius:16px;max-width:480px">
+        <div class="tc-head"><span class="t">表格卡 .tablecard</span></div>
+        <table class="gtable" style="width:100%;font-size:12px"><tr><td class="who">林一</td><td class="num">42</td></tr></table>
+        <div class="table-foot"><span class="tf-info">共 1 条</span><div class="pager"><button class="on">1</button></div></div>
+      </div>
+      <div class="toolbar glass" style="padding:8px 12px;border-radius:14px"><button class="btn sm">筛选</button><button class="btn sm ghost">排序</button></div>
+      <div class="dock glass"><button class="app a1" aria-label="应用1"></button><button class="app a2" aria-label="应用2"></button><button class="app a3" aria-label="应用3"></button></div>
+      <div class="formgrid glass" style="padding:14px;border-radius:16px">
+        <div class="fg"><span class="fl">名称</span><input class="field inp" value="Lumi"></div>
+        <div class="fg"><span class="fl">类型</span><input class="field inp" value="组件库"></div>
+      </div>
+      <div class="pricing" style="max-width:720px">
+        <div class="pricecard glass"><span class="pc-ribbon">推荐</span><b>Pro</b><p>¥99/月</p><button class="btn sm primary">订阅</button></div>
+        <div class="pricecard glass hi"><b>Team</b><p>¥299/月</p><button class="btn sm">联系</button></div>
+        <div class="pricecard glass"><b>Free</b><p>¥0</p><button class="btn sm ghost">开始</button></div>
+      </div>
+      <div class="medialist glass" style="max-width:420px">
+        <div class="mrow"><span class="thumb"></span><span class="mb"><b>媒体行</b><small>.medialist</small></span><button class="mact btn sm">打开</button></div>
+      </div>
+      <div class="empty glass" style="padding:24px;text-align:center;border-radius:16px"><span class="ei">📭</span><p>空态 .empty</p><button class="btn sm">刷新</button></div>
+    </div>
+  </section>
+
+  <section class="sec" id="t-mobile" data-test-section="mobile">
+    <h2>手机端 · 9 套页面模板（mobile.html §01）</h2>
+    <p class="hint">与 <a href="mobile.html">mobile.html</a> 相同结构；壳内开关/滑块走 WebGL 液态层（业务档 <code>data-lg-profile="app"</code> 也不再关闭控件）。</p>
+    <div class="specs phones">
+
+      <!-- 首页 -->
+      <div class="spec">
+        <div class="stage a">
+          <div class="phone">
+            <div class="screen tint-a">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">今日</span>
+                <div class="acts">
+                  <button aria-label="搜索">⌕</button>
+                  <button aria-label="更多">⋯</button>
+                </div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px">
+                <div class="large-title glass">
+                  <div class="eyebrow">Wednesday, Oct 21</div>
+                  <h2>早上好，林一</h2>
+                  <p>今天有 3 个待办 · 2 条新消息</p>
+                </div>
+                <div class="searchbar glass">
+                  <span class="s-ico">⌕</span>
+                  <input type="search" placeholder="搜索照片、文件、成员" aria-label="搜索">
+                </div>
+                <div class="cardfeed">
+                  <div class="photo-card pc1">今日精选<small>摄影 · 24 张</small></div>
+                  <div class="photo-card pc2">设计笔记<small>液态玻璃的折射逻辑</small></div>
+                  <div class="photo-card pc3">Ambient Glass<small>正在播放</small></div>
+                </div>
+                <div class="list glass">
+                  <div class="lrow"><span class="ico blue">◎</span><span class="body">本周目标<small>78 / 100 已完成</small></span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico green">✓</span><span class="body">待办事项</span><span class="val">3</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico purple">◈</span><span class="body">共享空间</span><span class="val">12 人</span><span class="chev">›</span></div>
+                </div>
+                <div class="miniplayer glass">
+                  <span class="art"></span>
+                  <span class="meta"><b>Ambient Glass</b><small>Field Recordings</small></span>
+                  <span class="ctrl"><button aria-label="上一首">⏮</button><button aria-label="播放">▶</button><button aria-label="下一首">⏭</button></span>
+                </div>
+              </div>
+              <div class="tabbar glass float">
+                <input type="radio" name="dt-tb-home" id="dt-tb-h1" checked><label for="dt-tb-h1"><span class="ico">⌂</span>首页</label>
+                <input type="radio" name="dt-tb-home" id="dt-tb-h2"><label for="dt-tb-h2"><span class="ico">◎</span>发现</label>
+                <input type="radio" name="dt-tb-home" id="dt-tb-h3"><label for="dt-tb-h3"><span class="ico">▣</span>相册</label>
+                <input type="radio" name="dt-tb-home" id="dt-tb-h4"><label for="dt-tb-h4"><span class="ico">✉</span>消息</label>
+                <input type="radio" name="dt-tb-home" id="dt-tb-h5"><label for="dt-tb-h5"><span class="ico">☺</span>我的</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>内容流首页</b> · 大标题在滚动初期提供身份感，搜索与卡片都是玻璃；底部 Tab Bar 悬浮，内容可滚动到其下方</p>
+      </div>
+
+      <!-- 设置页 -->
+      <div class="spec">
+        <div class="stage b">
+          <div class="phone">
+            <div class="screen tint-b">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">设置</span>
+                <div class="acts"><button aria-label="编辑">编辑</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px">
+                <div class="list glass">
+                  <div class="list-head">Apple 账户</div>
+                  <div class="lrow">
+                    <span class="ico blue" style="width:38px;height:38px;border-radius:50%;font-size:15px">林</span>
+                    <span class="body" style="font-size:15px">林一<small>Apple ID · iCloud+</small></span>
+                    <span class="chev">›</span>
+                  </div>
+                </div>
+
+                <div class="list glass">
+                  <div class="list-head">连接</div>
+                  <div class="lrow"><span class="ico blue">✈</span><span class="body">飞行模式</span><label class="sw mini blue"><input type="checkbox"><span class="track"></span><span class="knob"></span></label></div>
+                  <div class="lrow"><span class="ico blue">✦</span><span class="body">无线局域网</span><span class="val">Studio-5G</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico gray">ᛒ</span><span class="body">蓝牙<small>AirPods Pro 已连接</small></span><span class="val">已连接</span><span class="chev">›</span></div>
+                </div>
+
+                <div class="list glass">
+                  <div class="list-head">通用</div>
+                  <div class="lrow"><span class="ico orange">◐</span><span class="body">专注模式<small>22:00 自动开启</small></span><label class="sw mini"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label></div>
+                  <div class="lrow"><span class="ico green">▤</span><span class="body">软件更新</span><span class="val">1 项</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico gray">ⓘ</span><span class="body">关于本机</span><span class="val">18.1</span><span class="chev">›</span></div>
+                </div>
+
+                <div class="list glass">
+                  <div class="lrow"><span class="ico red">⏻</span><span class="body" style="color:var(--lg-red)">退出登录</span></div>
+                </div>
+                <p style="padding:4px 8px 0;font-size:11px;line-height:1.6;color:var(--lg-ink-2)">玻璃只包裹「组」，组内行保持透明——这样整组看起来是一块材质，而不是一排小方块。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>设置页</b> · inset grouped 列表：整组一颗玻璃，行间一条发丝线；开关用 44×26 的 mini 档</p>
+      </div>
+
+      <!-- 详情页 -->
+      <div class="spec">
+        <div class="stage c">
+          <div class="phone">
+            <div class="screen tint-c">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">商品详情</span>
+                <div class="acts"><button aria-label="收藏">♡</button><button aria-label="分享">↗</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px;padding-bottom:132px">
+                <div class="photo-card pc3" style="height:230px;font-size:16px;border-radius:26px">Ambient Glass 桌面灯<small>磨砂玻璃 · 三档色温</small></div>
+                <div style="padding:4px 6px 0">
+                  <h3 style="font-size:22px;letter-spacing:-.6px">Ambient Glass</h3>
+                  <p style="margin-top:4px;font-size:13px;color:var(--lg-ink-2)">手工吹制的磨砂灯罩，内置 2700K–5000K 无级调光。灯体本身是一块厚玻璃，光线从内部折射出来。</p>
+                </div>
+                <div class="glass" style="padding:14px 16px;border-radius:18px;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600">
+                    <span class="rate" style="font-size:14px">★★★★<span class="off">★</span></span>
+                    <span style="color:var(--lg-ink-2);font-weight:500">4.8 · 128 条评价</span>
+                  </div>
+                  <div class="chips">
+                    <span class="chip on">暖光</span><span class="chip">冷光</span><span class="chip">自然光</span>
+                  </div>
+                  <div class="lrow" style="border-top:none;padding:4px 0;min-height:auto">
+                    <span class="body" style="font-size:13px">数量</span>
+                    <span class="stepper glass sm" style="margin-left:auto">
+                      <button aria-label="减少">−</button><span class="val">1</span><button aria-label="增加">+</button>
+                    </span>
+                  </div>
+                </div>
+                <div class="list glass">
+                  <div class="lrow"><span class="ico green">✓</span><span class="body">现货 · 顺丰包邮</span><span class="chev">›</span></div>
+                  <div class="lrow"><span class="ico blue">↺</span><span class="body">7 天无理由退货</span><span class="chev">›</span></div>
+                </div>
+              </div>
+              <div class="actionbar glass">
+                <span class="ab-info"><b>¥ 268</b><small>含运费</small></span>
+                <button class="btn sm ghost">加入清单</button>
+                <button class="btn sm primary">加入购物车</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>详情页</b> · 底部操作条用 regular 玻璃（不是 clear），因为下方是白底内容；价格与主按钮分离，避免误触</p>
+      </div>
+
+      <!-- 相册页 -->
+      <div class="spec">
+        <div class="stage d">
+          <div class="phone">
+            <div class="screen tint-a">
+              <div class="statusbar glass" style="color:#fff">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">最近项目</span>
+                <div class="acts"><button aria-label="选择">选择</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:116px">
+                <div class="large-title glass">
+                  <div class="eyebrow">2026 · 十月</div>
+                  <h2>最近项目</h2>
+                  <p>1,284 张照片 · 36 段视频</p>
+                </div>
+                <div class="album">
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="miniplayer glass">
+                  <span class="art"></span>
+                  <span class="meta"><b>山脊航拍</b><small>4K · 00:42</small></span>
+                  <span class="ctrl"><button aria-label="播放">▶</button><button aria-label="更多">⋯</button></span>
+                </div>
+              </div>
+              <div class="tabbar glass float">
+                <input type="radio" name="dt-tb-alb" id="dt-tb-a1"><label for="dt-tb-a1"><span class="ico">⌂</span>首页</label>
+                <input type="radio" name="dt-tb-alb" id="dt-tb-a2"><label for="dt-tb-a2"><span class="ico">◎</span>发现</label>
+                <input type="radio" name="dt-tb-alb" id="dt-tb-a3" checked><label for="dt-tb-a3"><span class="ico">▣</span>相册</label>
+                <input type="radio" name="dt-tb-alb" id="dt-tb-a4"><label for="dt-tb-a4"><span class="ico">✉</span>消息</label>
+                <input type="radio" name="dt-tb-alb" id="dt-tb-a5"><label for="dt-tb-a5"><span class="ico">☺</span>我的</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>相册页</b> · 九宫格本身不加玻璃（会拖慢滚动），只让标题与播放器浮起来——性能优先的取舍</p>
+      </div>
+
+      <!-- 登录 / 注册 -->
+      <div class="spec">
+        <div class="stage b">
+          <div class="phone">
+            <div class="screen tint-e">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="auth">
+                <div class="auth-hero">
+                  <div class="eyebrow">Studio Account</div>
+                  <h2>欢迎回来<br>继续你的创作</h2>
+                  <p>一个账号同步全部项目、素材与协作记录。</p>
+                </div>
+                <div class="auth-form">
+                  <input class="field" type="email" value="linyi@studio.design" aria-label="邮箱">
+                  <input class="field" type="password" value="glass2026" aria-label="密码">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:1px 3px;font-size:11.5px;color:var(--lg-ink-2)">
+                    <label class="check"><input type="checkbox" checked><span class="box"></span>保持登录</label>
+                    <a href="#" style="font-weight:600;color:var(--lg-blue-deep);text-decoration:none">忘记密码？</a>
+                  </div>
+                  <button class="btn primary">登录</button>
+                </div>
+                <div class="auth-alt"><span>或使用</span></div>
+                <div class="social">
+                  <button class="btn" aria-label="用 Apple 登录"></button>
+                  <button class="btn" aria-label="用微信登录">✆</button>
+                  <button class="btn" aria-label="用 Google 登录">G</button>
+                </div>
+                <div class="auth-foot">还没有账号？<a href="#">立即注册</a><br>继续即表示同意服务条款与隐私政策</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>登录 / 注册</b> · 表单用 regular 玻璃，第三方登录降为轻量 .btn；整页只有一颗主按钮，其余全部退到次级</p>
+      </div>
+
+      <!-- 聊天会话 -->
+      <div class="spec">
+        <div class="stage c">
+          <div class="phone">
+            <div class="screen tint-b">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="avatar" style="width:26px;height:26px;font-size:10px;background:linear-gradient(140deg,#ffd60a,#ff9f0a)">陈</span>
+                <span class="t" style="text-align:left;margin-left:-4px">陈默<small style="display:block;font-size:9px;font-weight:500;color:var(--lg-ink-3)">在线</small></span>
+                <div class="acts"><button aria-label="语音通话">✆</button><button aria-label="更多">⋯</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:112px;padding-bottom:88px">
+                <div class="chat">
+                  <span class="chat-day">今天 14:20</span>
+                  <div class="bub them glass">玻璃按钮的 hover 我看还是有点糊，是不是 backdrop 采样被父级截断了？</div>
+                  <div class="bub them glass">我把 z-index 和 isolation 都去掉了，还是没变化 😑</div>
+                  <div class="bub me">先看祖先有没有 filter / contain，这两个最容易把采样链掐断<span><time>14:22</time></span></div>
+                  <div class="bub me">另外 hover 不要「加白」，在浅色底上叠白等于没反馈，改成中性加深 + 上浮 2px<span><time>14:22</time></span></div>
+                  <div class="bub them glass">好了！就是 contain 的问题 🎉</div>
+                  <div class="bub them glass typing" aria-label="对方正在输入"><i></i><i></i><i></i></div>
+                </div>
+              </div>
+              <div class="chat-input glass">
+                <button class="ci-btn" aria-label="添加附件">＋</button>
+                <input type="text" placeholder="发消息…" aria-label="消息输入框">
+                <button class="ci-btn" aria-label="语音">◉</button>
+                <button class="ci-btn send" aria-label="发送">↑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>聊天会话</b> · 自己的气泡用实色品牌渐变（保证文字对比），对方气泡是玻璃；输入条吸底悬浮，键盘弹出时整体上移</p>
+      </div>
+
+      <!-- 音乐播放器 -->
+      <div class="spec">
+        <div class="stage d">
+          <div class="phone">
+            <div class="screen tint-d">
+              <div class="statusbar glass" style="color:#fff">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="screen-scroll" style="padding:104px 20px 26px;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;color:#fff">
+                  <button class="btn icon ghost" style="color:#fff;background:none;border:none" aria-label="收起">⌄</button>
+                  <span style="font-size:9.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.7">正在播放 · 专辑</span>
+                  <button class="btn icon ghost" style="color:#fff;background:none;border:none" aria-label="更多">⋯</button>
+                </div>
+                <div class="player glass clear" style="color:#fff">
+                  <div class="p-cover"></div>
+                  <div class="p-meta">
+                    <div class="pm-t">
+                      <b>Ambient Glass</b>
+                      <small style="color:rgba(255,255,255,.7)">Field Recordings · 2026</small>
+                    </div>
+                    <button aria-label="收藏" style="color:rgba(255,255,255,.8)">♡</button>
+                  </div>
+                  <div class="p-seek">
+                    <div class="progress" style="background:rgba(255,255,255,.24)"><span class="fill" style="width:42%;background:#fff"></span></div>
+                    <div class="p-time" style="color:rgba(255,255,255,.6)"><span>1:42</span><span>−3:58</span></div>
+                  </div>
+                  <div class="p-ctrl">
+                    <button aria-label="上一首" style="color:#fff">⏮</button>
+                    <button aria-label="后退 15 秒" style="color:#fff;font-size:13px">↺15</button>
+                    <button class="play" aria-label="播放">▶</button>
+                    <button aria-label="前进 15 秒" style="color:#fff;font-size:13px">15↻</button>
+                    <button aria-label="下一首" style="color:#fff">⏭</button>
+                  </div>
+                  <div class="p-foot" style="color:rgba(255,255,255,.55)">
+                    <span>无损 · 24bit</span>
+                    <span>AirPods Pro</span>
+                    <span>♾</span>
+                  </div>
+                </div>
+                <div class="glass" style="padding:12px 14px;border-radius:16px;display:flex;gap:10px;align-items:center;color:#fff">
+                  <span style="font-size:15px">⌁</span>
+                  <span style="flex:1;font-size:11.5px;line-height:1.5;color:rgba(255,255,255,.8)">下一首：Glass Horizon · 来自「深夜缓冲」</span>
+                  <span style="font-size:11px;opacity:.6">跳过</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>全屏播放器</b> · 唯一适合 .glass.clear 的地方：封面与深色氛围仍要透出来；文字反白，进度条改白</p>
+      </div>
+
+      <!-- 钱包 -->
+      <div class="spec">
+        <div class="stage a">
+          <div class="phone">
+            <div class="screen tint-e">
+              <div class="statusbar glass">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="navbar glass float">
+                <button class="back" aria-label="返回">‹</button>
+                <span class="t">钱包</span>
+                <div class="acts"><button aria-label="添加">＋</button></div>
+              </div>
+              <div class="screen-scroll" style="padding-top:112px">
+                <div style="padding:2px 4px 4px">
+                  <div style="font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--lg-ink-3)">总余额</div>
+                  <div style="font-size:32px;font-weight:800;letter-spacing:-1.2px;font-variant-numeric:tabular-nums">¥ 12,480<span style="font-size:15px;font-weight:600;color:var(--lg-ink-3)">.60</span></div>
+                </div>
+                <div class="wallet-stack">
+                  <div class="wallet-card">
+                    <div class="wc-top">
+                      <b>STUDIO CASH</b>
+                      <span class="wc-chip"></span>
+                    </div>
+                    <div class="wc-num">•••• •••• •••• 4821</div>
+                    <div class="wc-bot">
+                      <div><small>持卡人</small><b>LIN YI</b></div>
+                      <div><small>有效期</small><b>09 / 29</b></div>
+                      <span class="wc-brand">◎</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="quick-acts">
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">↑</span>转账</a>
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#4cd964,#25a244)">↓</span>收款</a>
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">▤</span>账单</a>
+                  <a href="#" class="glass"><span class="qi" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">＋</span>充值</a>
+                </div>
+                <div class="list glass">
+                  <div class="list-head">最近交易</div>
+                  <div class="lrow"><span class="ico blue">◫</span><span class="body">Figma 订阅<small>今天 09:12 · 自动扣款</small></span><span class="val" style="color:var(--lg-ink)">−¥ 128</span></div>
+                  <div class="lrow"><span class="ico green">↙</span><span class="body">项目结算<small>昨天 18:40 · 星河科技</small></span><span class="val" style="color:var(--lg-green)">+¥ 8,600</span></div>
+                  <div class="lrow"><span class="ico orange">☕</span><span class="body">Blue Bottle<small>昨天 08:26</small></span><span class="val" style="color:var(--lg-ink)">−¥ 42</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>钱包 / 支付</b> · 卡片本身不做玻璃（要压住背景、保证卡号可读），只让快捷入口与账单组浮起来；叠片用伪元素做出「一叠卡」的厚度</p>
+      </div>
+
+      <!-- 天气 -->
+      <div class="spec">
+        <div class="stage d">
+          <div class="phone">
+            <div class="screen tint-d">
+              <div class="statusbar glass" style="color:#fff">
+                <span>9:41</span>
+                <span class="sig" style="margin-left:auto"><i></i><i></i><i></i><i></i></span>
+                <span class="bat"></span>
+              </div>
+              <div class="screen-scroll" style="padding:100px 18px 26px;gap:10px">
+                <div class="weather-hero">
+                  <div class="wx-city">杭州 · 西湖区</div>
+                  <div class="wx-temp">21°</div>
+                  <div class="wx-desc">多云转晴</div>
+                  <div class="wx-range">最高 24° · 最低 15°</div>
+                </div>
+                <div class="wx-hours glass">
+                  <div class="wh now"><span>现在</span><span class="wi">☁</span><b>21°</b></div>
+                  <div class="wh"><span>16时</span><span class="wi">☁</span><b>22°</b></div>
+                  <div class="wh"><span>17时</span><span class="wi">☀</span><b>23°</b></div>
+                  <div class="wh"><span>18时</span><span class="wi">☀</span><b>21°</b></div>
+                  <div class="wh"><span>19时</span><span class="wi">☾</span><b>19°</b></div>
+                  <div class="wh"><span>20时</span><span class="wi">☾</span><b>18°</b></div>
+                </div>
+                <div class="wx-grid">
+                  <div class="wx-card glass"><span class="wx-l">◈ 空气质量</span><span class="wx-v">32</span><span>优 · 适合开窗</span></div>
+                  <div class="wx-card glass"><span class="wx-l">☂ 降水概率</span><span class="wx-v">10%</span><span>未来 6 小时</span></div>
+                  <div class="wx-card glass"><span class="wx-l">≋ 湿度</span><span class="wx-v">58%</span><span>体感 20°</span></div>
+                  <div class="wx-card glass"><span class="wx-l">➤ 风速</span><span class="wx-v">3.2<small style="font-size:10px"> m/s</small></span><span>东南风</span></div>
+                </div>
+                <div class="list glass">
+                  <div class="lrow"><span class="ico blue">◐</span><span class="body">日出 / 日落</span><span class="val">06:12 · 17:38</span></div>
+                  <div class="lrow"><span class="ico purple">☾</span><span class="body">月相</span><span class="val">上弦月</span></div>
+                </div>
+                <div class="dots" style="justify-content:center;padding:6px 0"><button class="on" aria-label="第 1 页"></button><button aria-label="第 2 页"></button><button aria-label="第 3 页"></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>天气</b> · 彩色氛围背景上密集浮起 6 块玻璃，接近性能上限；小时预报用横向滚动条，内部不再嵌套玻璃</p>
+      </div>
+
+    
+    <div class="demo col" style="margin-top:20px">
+      <span class="dlab">弹层抽样（mobile §07）</span>
+      <p class="hint" style="margin:0 0 10px">完整弹层 demo 见 mobile.html 第 07 章；此处保留 Sheet / ActionSheet / 控制中心结构。</p>
+      <div class="sheet glass" style="position:relative;max-width:360px;border-radius:22px 22px 0 0">
+        <div class="grab"></div><h4 style="margin:0">底部 Sheet</h4>
+        <div class="sheet-acts"><button type="button" class="btn sm primary">确定</button></div>
+      </div>
+      <div class="actionsheet glass" style="max-width:320px;padding:8px;border-radius:18px">
+        <button type="button" class="as-item">复制</button><button type="button" class="as-item danger">删除</button><button type="button" class="as-item cancel">取消</button>
+      </div>
+    </div>
+    </div><!-- /.specs.phones -->
+  </section>
+
+  <section class="sec" data-test-section="docs-components">    <h2>§06 组件参考（与文档 demo 一致）</h2>
+<h3 id="c-btn">6.1 按钮</h3>
+        <div class="demo">
+          <span class="dlab">变体 · Variant</span>
+          <button class="btn">常规</button>
+          <button class="btn primary">主操作</button>
+          <button class="btn tinted">着墨</button>
+          <button class="btn ghost">幽灵</button>
+          <button class="btn danger">删除</button>
+          <button class="btn sm">小号</button>
+          <button class="btn icon" aria-label="搜索">⌕</button>
+          <button class="btn" disabled>禁用</button>
+          <span class="tip-wrap"><button class="btn icon" aria-label="带提示">?</button><span class="tip glass">悬停提示气泡</span></span>
+        </div>
+        <div class="demo">
+          <span class="dlab">复合形态 · Compound</span>
+          <button class="btn primary loading" aria-label="加载中">保存中</button>
+          <div class="splitbtn"><button>导出</button><button class="more" aria-label="更多导出格式">⌄</button></div>
+          <button class="fab" aria-label="新建">＋</button>
+          <button class="btn primary" data-toast="已保存到「设计系统」">点我弹 Toast →</button>
+        </div>
+        <div class="demo dark">
+          <span class="dlab">暗色舞台 · Dark Stage</span>
+          <button class="btn">常规</button>
+          <button class="btn primary">主操作</button>
+          <button class="btn tinted">着墨</button>
+          <button class="btn ghost" style="color:rgba(255,255,255,.85)">幽灵</button>
+          <button class="btn danger">删除</button>
+        </div>
+        <p class="demo-note">loading 态宽度不变（文字隐藏、旋转描边替代）；点「点我弹 Toast」触发真实反馈。<a href="mobile.html" style="color:var(--lg-blue-deep)">案例页</a>还有分裂按钮的展开菜单与 FAB 子操作。</p>
+<pre class="code">&lt;<span class="t">button</span> class=<span class="a">"btn primary"</span>&gt;保存&lt;/<span class="t">button</span>&gt;
+&lt;<span class="t">button</span> class=<span class="a">"btn primary loading"</span> aria-label=<span class="a">"加载中"</span>&gt;保存&lt;/<span class="t">button</span>&gt;</pre>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.btn</td><td>玻璃按钮基类，高 46（桌面 40 / 手机 50）</td></tr>
+          <tr><td>.primary</td><td>主操作，蓝色玻璃；一屏最多一颗</td></tr>
+          <tr><td>.tinted</td><td>薄染品牌色的次级主操作</td></tr>
+          <tr><td>.danger</td><td>破坏性操作，系统红</td></tr>
+          <tr><td>.ghost</td><td>极轻；用于玻璃面板内部</td></tr>
+          <tr><td>.sm / .icon</td><td>36px 小号 / 正方形图标钮</td></tr>
+          <tr><td>.loading</td><td>加载中：隐藏文字，旋转描边替代（宽度不变）</td></tr>
+          <tr><td>.splitbtn</td><td>分裂按钮：主操作 + ⌄ 菜单合成一颗玻璃</td></tr>
+          <tr><td>.fab</td><td>58px 悬浮圆钮</td></tr>
+        </table>
+        <div class="callout ok">
+          <span class="ci">✓</span>
+          <span><b>要点</b>：hover 上浮 2px + 光斑；active 回缩 4%；禁用降透明度，<b>不要</b>换成灰实底。</span>
+        </div>
+
+        <h3 id="c-form">6.2 表单输入</h3>
+        <p>规则：外壳玻璃、内核透明。<code class="inline">.field:focus</code> 只加 4px 蓝色光环，不改背景。</p>
+        <div class="demo grow">
+          <span class="dlab">输入框 · 校验态只动描边与光环</span>
+          <input class="field" placeholder="默认态">
+          <input class="field ok" value="可用的用户名">
+          <input class="field err" value="该邮箱已被注册">
+          <input class="field" type="password" value="glass2026" aria-label="密码">
+        </div>
+        <div class="demo grow">
+          <span class="dlab">搜索 / 下拉 / 多行 / 组合</span>
+          <div class="searchbar glass"><span class="s-ico">⌕</span><input type="search" placeholder="搜索组件…" aria-label="搜索"><button class="s-clear" aria-label="清空">✕</button></div>
+          <div class="selectbox"><select aria-label="排序方式"><option>按更新时间</option><option>按名称</option><option>按使用频率</option></select><span class="caret">⌄</span></div>
+          <div class="combo glass"><span class="pre">https://</span><input placeholder="studio.design/lin" aria-label="站点地址"><button class="btn primary sm">检查</button></div>
+          <textarea class="ta" rows="2" placeholder="多行文本，只允许纵向拉伸…"></textarea>
+        </div>
+        <div class="demo col">
+          <span class="dlab">标签组 · 密码强度 · 字段组 · 上传</span>
+          <div class="chips">
+            <span class="chip on">全部<span class="x">✕</span></span>
+            <span class="chip">组件<span class="x">✕</span></span>
+            <span class="chip">模板<span class="x">✕</span></span>
+            <span class="chip">＋ 新标签</span>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+            <div style="min-width:190px">
+              <div class="strength"><i class="a1"></i><i class="a2"></i><i></i><i></i></div>
+              <div style="font-size:10.5px;color:var(--lg-ink-3);margin-top:3px">密码强度：中等</div>
+            </div>
+            <div class="fieldgroup" style="flex:1;min-width:200px">
+              <span class="fl">工作邮箱</span>
+              <input class="field" value="lin@studio.design">
+              <span class="hint">仅用于团队邀请，不会公开</span>
+            </div>
+          </div>
+          <div class="dropzone">
+            <span class="dz-ico">↑</span>
+            <b>拖拽文件到这里</b>
+            <small>或点击选择 · 支持 PNG / JPG / SVG，单个 ≤ 10MB</small>
+            <div class="dz-files"><span class="dz-file">cover.png <i>1.2MB</i></span><span class="dz-file">glass.svg <i>24KB</i></span></div>
+          </div>
+        </div>
+        <p class="demo-note">校验态不换底色不抖动，只换描边、光环和提示文字——错误反馈不需要打断用户。</p>
+<pre class="code">&lt;<span class="t">input</span> class=<span class="a">"field"</span> placeholder=<span class="a">"用户名或邮箱"</span>&gt;
+&lt;<span class="t">input</span> class=<span class="a">"field err"</span> value=<span class="a">"该邮箱已被注册"</span>&gt;
+
+&lt;<span class="t">div</span> class=<span class="a">"searchbar glass"</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"s-ico"</span>&gt;⌕&lt;/<span class="t">span</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"search"</span> placeholder=<span class="a">"搜索"</span>&gt;
+  &lt;<span class="t">button</span> class=<span class="a">"s-clear"</span>&gt;✕&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">div</span>&gt;
+
+<span class="c">&lt;!-- 组合输入：前缀 + 输入 + 内嵌按钮同处一颗玻璃 --&gt;</span>
+&lt;<span class="t">div</span> class=<span class="a">"combo glass"</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"pre"</span>&gt;https://&lt;/<span class="t">span</span>&gt;
+  &lt;<span class="t">input</span>&gt;
+  &lt;<span class="t">button</span> class=<span class="a">"btn primary sm"</span>&gt;检查&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">div</span>&gt;</pre>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.field</td><td>文本输入；变体 .ok / .err 只改描边与光环</td></tr>
+          <tr><td>.searchbar</td><td>搜索框，全圆 24；含 .s-ico / .s-clear</td></tr>
+          <tr><td>.selectbox</td><td>玻璃下拉：去系统外观 + 自绘 .caret</td></tr>
+          <tr><td>.ta</td><td>多行文本；只允许纵向 resize</td></tr>
+          <tr><td>.combo</td><td>组合输入容器</td></tr>
+          <tr><td>.chips / .chip</td><td>标签组；.on 染品牌色；.x 是删除符</td></tr>
+          <tr><td>.strength i.a1/a2/a3</td><td>密码强度四段条（空 / 弱 / 中 / 强）</td></tr>
+          <tr><td>.fieldgroup</td><td>字段组：label + 控件 + .hint / .msg</td></tr>
+        </table>
+
+        <h3 id="c-ctrl">6.3 控件</h3>
+        <div class="demo">
+          <span class="dlab">开关三档 · 开启态染品牌色</span>
+          <label class="sw blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          <label class="sw"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+          <label class="sw sm blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          <label class="sw mini"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          <span style="font-size:11px;color:var(--lg-ink-3)">62 / 52 / 44px 三档</span>
+        </div>
+        <div class="demo">
+          <span class="dlab">分段 · 步进 · 滑块</span>
+          <div class="seg"><input type="radio" name="dseg" id="dseg1" checked><label for="dseg1">日</label><input type="radio" name="dseg" id="dseg2"><label for="dseg2">周</label><input type="radio" name="dseg" id="dseg3"><label for="dseg3">月</label></div>
+          <div class="stepper"><button aria-label="减少">−</button><span class="val">1</span><button aria-label="增加">＋</button></div>
+          <div class="slider" style="min-width:170px"><div class="rail"></div><input type="range" min="0" max="100" value="46" aria-label="色温"></div>
+          <div class="slider blue" style="min-width:170px"><div class="rail"></div><input type="range" min="0" max="100" value="72" aria-label="音量"></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">复选 · 磁贴 · 评分 · 色板</span>
+          <label class="check"><input type="checkbox" checked><span class="box">✓</span>接收通知</label>
+          <label class="check round"><input type="radio" name="dchk" checked><span class="box">●</span>自动</label>
+          <label class="tile"><input type="checkbox" checked><span class="face">✦</span></label>
+          <div class="rate" aria-label="4 分">★★★★<span class="off">★</span></div>
+          <div class="swatches">
+            <input type="radio" name="dsw" id="dsw1" checked><label for="dsw1" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></label>
+            <input type="radio" name="dsw" id="dsw2"><label for="dsw2" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></label>
+            <input type="radio" name="dsw" id="dsw3"><label for="dsw3" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)"></label>
+          </div>
+        </div>
+        <p class="demo-note">全部由原生 <code class="inline">input</code> 驱动——点击试试；键盘 Tab 也能到达每一个控件。</p>
+<pre class="code"><span class="c">&lt;!-- 开关：input:checked 驱动，三档尺寸 --&gt;</span>
+&lt;<span class="t">label</span> class=<span class="a">"sw blue"</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"checkbox"</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"track"</span>&gt;&lt;/<span class="t">span</span>&gt;
+  &lt;<span class="t">span</span> class=<span class="a">"knob"</span>&gt;&lt;/<span class="t">span</span>&gt;
+&lt;/<span class="t">label</span>&gt;
+
+<span class="c">&lt;!-- 分段控制 --&gt;</span>
+&lt;<span class="t">div</span> class=<span class="a">"seg"</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"radio"</span> name=<span class="a">"v"</span> id=<span class="a">"v1"</span> checked&gt;&lt;<span class="t">label</span> <span class="t">for</span>=<span class="a">"v1"</span>&gt;日&lt;/<span class="t">label</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="a">"radio"</span> name=<span class="a">"v"</span> id=<span class="a">"v2"</span>&gt;&lt;<span class="t">label</span> <span class="t">for</span>=<span class="a">"v2"</span>&gt;周&lt;/<span class="t">label</span>&gt;
+&lt;/<span class="t">div</span>&gt;</pre>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.sw</td><td>开关 62×36；.sm 52×30；.mini 44×26；.blue 蓝色开启</td></tr>
+          <tr><td>.seg</td><td>分段控制，radio + label 驱动</td></tr>
+          <tr><td>.slider</td><td>滑块；默认彩轨，.blue 为系统灰细轨；旋钮 44px</td></tr>
+          <tr><td>.stepper</td><td>步进器（− / 值 / +）</td></tr>
+          <tr><td>.check</td><td>复选/单选；.round 圆形；input:checked 驱动</td></tr>
+          <tr><td>.tile</td><td>62px 磁贴开关；选中默认系统蓝，<code class="inline">.face.warm</code> 为橙色（如 Wi‑Fi 📶）</td></tr>
+          <tr><td>.rate</td><td>文字星评分；.off 未点亮</td></tr>
+          <tr><td>.swatches</td><td>色板，选中双层光环</td></tr>
+        </table>
+
+        <h3 id="c-nav">6.4 导航</h3>
+        <div class="demo col">
+          <span class="dlab">下划线 Tab + 分页器（可点击）</span>
+          <nav class="utabs"><a href="#" class="on">概览</a><a href="#">成员</a><a href="#">日志</a><a href="#">设置</a></nav>
+          <div class="pager"><button aria-label="上一页">‹</button><button>1</button><button class="on">2</button><button>3</button><span class="gap">…</span><button>12</button><button aria-label="下一页">›</button></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">折叠面板</span>
+          <div class="acc" style="flex:1;min-width:240px">
+            <details open><summary>玻璃何时降级？<span class="ar">›</span></summary><p>父级存在 filter / isolation:isolate / contain 时，backdrop 采样链会被截断，玻璃退化为灰块。</p></details>
+            <details><summary>控制中心为什么可以嵌套？<span class="ar">›</span></summary><p>内层固定使用 .glass.thin，模糊减半，避免两层互相吃色。</p></details>
+          </div>
+          <div class="dd" style="flex:none">
+            <button class="btn sm">下拉菜单 ⌄</button>
+            <div class="menu glass">
+              <div class="mi">重命名<span class="k">⌘R</span></div>
+              <div class="mi">复制<span class="k">⌘C</span></div>
+              <div class="sep-line"></div>
+              <div class="mi danger">删除<span class="k">⌫</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">搜索建议（输入框聚焦查看）</span>
+          <div style="flex:1;min-width:260px">
+            <div class="searchbar glass"><span class="s-ico">⌕</span><input type="search" placeholder="试试聚焦这颗搜索框" aria-label="搜索"></div>
+            <div class="suggest glass">
+              <div class="sg"><span class="sy">⌕</span>液态玻璃设计规范<span class="k">文档</span></div>
+              <div class="sg"><span class="sy">⌕</span>玻璃材质的最佳实践<span class="k">文档</span></div>
+              <div class="sg"><span class="sy">↩</span>glass materials<span class="k">搜索</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-note">手机端的 navbar / tabbar / large-title 见 <a href="mobile.html" style="color:var(--lg-blue-deep)">手机端案例页</a>，桌面浮动顶栏与侧栏见 <a href="web.html" style="color:var(--lg-blue-deep)">网页端案例页</a>。</p>
+        <h4>手机端</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.navbar</td><td>52px 胶囊导航；.float 悬浮于屏幕内容上</td></tr>
+          <tr><td>.large-title</td><td>大标题页头（eyebrow + 34px 标题 + 说明）</td></tr>
+          <tr><td>.tabbar</td><td>底部 Tab Bar；.float 吸底并预留安全区；radio 驱动</td></tr>
+          <tr><td>.statusbar</td><td>状态栏（演示用）</td></tr>
+        </table>
+        <h4>网页端</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.topbar-web</td><td>1120px 浮动胶囊顶栏；滚动 8px 自动 .is-scrolled 加厚</td></tr>
+          <tr><td>.pagehead / .crumbs</td><td>页面头部（面包屑 + 标题 + 操作组）</td></tr>
+          <tr><td>.utabs</td><td>下划线页面 Tab；.on 有 2.5px 渐变下划线</td></tr>
+          <tr><td>.pager</td><td>玻璃分页器；.on 白玻璃浮起</td></tr>
+          <tr><td>.acc</td><td>原生 details 折叠面板；箭头旋转 90°</td></tr>
+          <tr><td>.dd / .menu / .mi</td><td>下拉菜单；:hover 与 :focus-within 双通道展开；.right 右对齐</td></tr>
+          <tr><td>.suggest / .sg</td><td>搜索建议列表</td></tr>
+          <tr><td>.sidebar</td><td>218px 通用侧栏</td></tr>
+        </table>
+
+        <h3 id="c-box">6.5 容器与布局</h3>
+        <div class="demo">
+          <span class="dlab">inset grouped 列表 + 通知卡</span>
+          <div class="list glass" style="flex:1;min-width:250px">
+            <div class="list-head">账户</div>
+            <div class="lrow"><span class="ico blue">林</span><span class="body">林一<small>个人账户</small></span><span class="val">Pro</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico green">✓</span><span class="body">已完成</span><span class="val">128</span><span class="chev">›</span></div>
+            <div class="lrow"><span class="ico red">⏻</span><span class="body" style="color:var(--lg-red)">退出登录</span></div>
+          </div>
+          <div style="flex:1;min-width:250px">
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">✉</span>
+              <span class="nb"><b>你被邀请加入「设计系统」</b><small>林一 · 2 分钟前</small></span>
+              <span class="nt">新</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">指标卡 / 头像组 / 时间线 / 步骤条</span>
+          <div class="metric glass"><span class="mk">今日请求</span><span class="mv">12,840</span><span class="md">较昨日 <em>＋18.2%</em></span></div>
+          <div class="avs"><span class="av av1">林</span><span class="av av2">陈</span><span class="av av3">苏</span><span class="av more">＋6</span></div>
+          <div class="tl" style="min-width:210px">
+            <div class="tl-row"><span class="tl-dot" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></span><span class="tl-txt">林一 发布了 v3.4<small>12 分钟前</small></span></div>
+            <div class="tl-row"><span class="tl-dot" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></span><span class="tl-txt">陈默 提交了 6 个组件<small>1 小时前</small></span></div>
+          </div>
+          <div class="steps" style="min-width:220px">
+            <div class="stp done"><span class="b">✓</span><span class="lab">提交</span></div>
+            <div class="stp-line fill"></div>
+            <div class="stp now"><span class="b">2</span><span class="lab">审核</span></div>
+            <div class="stp-line"></div>
+            <div class="stp"><span class="b">3</span><span class="lab">发布</span></div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">内容卡 + 渐变封面 · .card 故意不做玻璃，保证正文可读</span>
+          <div class="card" style="flex:1;min-width:250px">
+            <div class="cover c2"><span class="cv-t">PROJECT · 设计系统</span></div>
+            <div style="padding-top:10px">
+              <div class="ct">Q4 设计系统改版</div>
+              <div class="cs">组件库 v2 已进入灰度，本周完成 12 个核心组件的验收。</div>
+              <div class="cfoot"><span>进度 68%</span><span style="margin-left:auto"><button class="btn sm">查看</button></span></div>
+            </div>
+          </div>
+          <div class="card" style="flex:1;min-width:250px">
+            <div class="cover c4"><span class="cv-t">WEEKLY · 数据</span></div>
+            <div style="padding-top:10px">
+              <div class="ct">数据周报 · 第 42 周</div>
+              <div class="cs">请求量环比 ＋18.2%，错误率降至 0.6%。</div>
+              <div class="cfoot"><span>周一 09:00 自动生成</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo dark">
+          <span class="dlab">批量操作条 · clear 变体的典型用法</span>
+          <div class="bulkbar glass clear" style="flex:1">
+            <span style="font-size:12px;font-weight:600;color:#fff">3 项已选择</span>
+            <span class="bt" style="margin-left:auto">移动</span><span class="bt">共享</span><span class="bt" style="color:#ff9c94">删除</span>
+          </div>
+        </div>
+        <p class="demo-note">表格卡、Bento、定价三卡等大块布局模板见 <a href="web.html" style="color:var(--lg-blue-deep)">网页端案例页 02 章</a>；手机端列表、相册、播放器见手机端 06 章。</p>
+        <h4>两端通用</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.list / .lrow</td><td>inset grouped 列表；.ico 彩色图标块、.body、.val、.chev</td></tr>
+          <tr><td>.notice</td><td>通知卡（.ni 图标 / .nb 正文 / .nt 时间）</td></tr>
+          <tr><td>.card / .cover</td><td>内容卡（.ct 标题 / .cs 正文 / .cfoot 页脚）；封面 .c1–.c4 四色，.cv-t 压字</td></tr>
+          <tr><td>.steps / .stp</td><td>步骤条；.done 绿 / .now 蓝 / 未开始透明，.stp-line.fill 染色连线</td></tr>
+          <tr><td>.tl / .tl-row</td><td>时间线；.tl-dot 圆点、.tl-txt 文案 + small 时间</td></tr>
+          <tr><td>.empty / .ei</td><td>空态：图标 + 解释 + 动作</td></tr>
+        </table>
+        <h4>手机端专属</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.phone / .screen</td><td>393×852 手机壳（演示用）</td></tr>
+          <tr><td>.screen-scroll</td><td>屏幕滚动区；自动预留顶部 68 / 底部安全区</td></tr>
+          <tr><td>.cardfeed / .photo-card</td><td>卡片流与渐变照片卡（pc1–pc4）</td></tr>
+          <tr><td>.album</td><td>3 列相册网格（不加玻璃，保滚动性能）</td></tr>
+          <tr><td>.miniplayer</td><td>迷你播放器</td></tr>
+          <tr><td>.actionbar</td><td>底部主操作条（价格 + 双按钮）</td></tr>
+          <tr><td>.keypad</td><td>数字键盘</td></tr>
+        </table>
+        <h4>网页端专属</h4>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.appframe</td><td>应用框架：176px 侧栏 + 主区（.af-side/.af-nav/.af-head/.af-body/.af-tile）</td></tr>
+          <tr><td>.bento / .bc</td><td>Bento 网格；.s2 跨 2 列、.s2r 跨 2 行、.fill 品牌色主卡</td></tr>
+          <tr><td>.tablecard / .gtable</td><td>玻璃表格卡；.pill.ok/.wait/.stop 状态徽章</td></tr>
+          <tr><td>.formgrid</td><td>两列表单布局；.full 整行</td></tr>
+          <tr><td>.pricing / .pricecard</td><td>定价三卡；.hi 推荐卡上移 6px</td></tr>
+          <tr><td>.medialist / .mrow</td><td>媒体列表；hover 才铺玻璃</td></tr>
+          <tr><td>.metric / .avs</td><td>指标卡 / 头像组</td></tr>
+          <tr><td>.toolbar / .dock</td><td>工具条 / Dock 图标条</td></tr>
+          <tr><td>.bulkbar</td><td>批量操作条（配 .glass.clear）</td></tr>
+        </table>
+
+        <h3 id="c-over">6.6 弹层</h3>
+        <div class="demo">
+          <span class="dlab">真实弹层 · 点开试试</span>
+          <button class="btn primary" id="open-alert-demo">打开玻璃弹窗</button>
+          <button class="btn" id="open-toast-demo">弹一条 Toast</button>
+          <span class="tip-wrap"><button class="btn sm">悬停出气泡</button><span class="tip glass">这就是 Tooltip</span></span>
+          <div class="dd right">
+            <button class="btn sm">下拉菜单 ⌄</button>
+            <div class="menu glass">
+              <div class="mi">导出 PNG<span class="k">⌘E</span></div>
+              <div class="mi">导出 SVG</div>
+              <div class="sep-line"></div>
+              <div class="mi danger">删除<span class="k">⌫</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo col">
+          <span class="dlab">弹窗内容结构 · 由上方按钮打开</span>
+          <dialog class="alert" id="test-dialog">
+            <h3>移动到回收站？</h3>
+            <p>「Glass Button」将被移除，30 天内可恢复。</p>
+            <div class="acts"><button class="btn ghost" id="cancel-dialog-demo">取消</button><button class="btn danger" id="ok-dialog-demo">移入</button></div>
+          </dialog>
+        </div>
+        <div class="demo col">
+          <span class="dlab">命令面板 · ⌘K</span>
+          <div class="cmdk glass">
+            <div class="ck-in"><span style="color:var(--lg-ink-3);font-size:13px">⌕</span><input type="text" placeholder="搜索组件、页面或命令" aria-label="命令搜索"><kbd>⌘K</kbd></div>
+            <div class="ck-g">组件</div>
+            <div class="ck-i on"><span>◧</span>Glass Button<span class="k">B</span></div>
+            <div class="ck-i"><span>▭</span>Glass Card<span class="k">C</span></div>
+            <div class="ck-g">命令</div>
+            <div class="ck-i"><span>◐</span>切换明暗主题<span class="k">⌘⇧L</span></div>
+          </div>
+        </div>
+        <p class="demo-note">「打开玻璃弹窗」调用原生 <code class="inline">dialog.showModal()</code>，自带焦点圈定与 Esc 关闭；手机端的 Sheet / ActionSheet / 控制中心见 <a href="mobile.html" style="color:var(--lg-blue-deep)">手机端 07 章</a>。</p>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>dialog.alert</td><td>玻璃弹窗：regular + 背景压暗模糊；原生 &lt;dialog&gt;</td></tr>
+          <tr><td>.sheet</td><td>底部抽屉：抓手条 + 标题 + 说明 + 按钮组</td></tr>
+          <tr><td>.actionsheet</td><td>操作表：每项独立玻璃；.danger 红、.cancel 加粗</td></tr>
+          <tr><td>.control-center / .ccg</td><td>控制中心：4 列网格 + thin 内嵌格子；唯一允许玻璃嵌套的场景</td></tr>
+          <tr><td>.toast</td><td>顶部通知；用 LiquidGlass.toast() 或手写结构</td></tr>
+          <tr><td>.tip-wrap / .tip</td><td>悬停提示气泡</td></tr>
+        </table>
+
+        <h3 id="c-fb">6.7 反馈</h3>
+        <div class="demo col">
+          <span class="dlab">行内横幅 · 只染 15% 色</span>
+          <div class="banner info"><span class="bi">i</span><span><b>新版本可用</b> · 刷新后生效</span></div>
+          <div class="banner ok"><span class="bi">✓</span><span><b>已保存</b> · 同步到云端</span></div>
+          <div class="banner warn"><span class="bi">!</span><span><b>连接不稳定</b> · 第 2 次重试</span></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">进度 / 环形 / 加载 / 骨架</span>
+          <div class="progress" style="flex:1;min-width:140px"><div class="bar"><div class="fill" style="width:68%"></div></div></div>
+          <div class="ring" style="--val:72%">72%</div>
+          <div class="lg-row" style="gap:8px"><span class="spinner"></span><span style="font-size:12px;font-weight:600;color:var(--lg-ink-2)">生成中</span></div>
+          <div class="sk" style="width:76px;height:11px"></div>
+          <div class="sk" style="width:56px;height:56px;border-radius:14px"></div>
+        </div>
+        <div class="demo">
+          <span class="dlab">徽章 / 状态点 / 状态 pill</span>
+          <span class="badge glass"><span class="dot" style="background:var(--lg-green)"></span>运行中</span>
+          <span class="badge glass"><span class="dot" style="background:var(--lg-orange)"></span>警告<span class="n">3</span></span>
+          <span class="pill ok">在线</span><span class="pill wait">离开</span><span class="pill stop">未激活</span><span class="pill info">Beta</span>
+        </div>
+        <p class="demo-note">骨架屏只动背景位置，布局完全静止；转圈只用于 ≤3 秒等待，更长等待用进度条或骨架。</p>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.banner.info/.ok/.warn</td><td>行内横幅：15% 染色底，文字保持深色</td></tr>
+          <tr><td>.sk</td><td>骨架块：高光左扫右（1.5s），只动背景位置</td></tr>
+          <tr><td>.progress / .fill</td><td>进度条；.fill.solid/.ok/.warn 三色</td></tr>
+          <tr><td>.ring</td><td>环形进度：--val 控制比例</td></tr>
+          <tr><td>.spinner</td><td>加载转圈；≤3 秒的等待才用</td></tr>
+          <tr><td>.badge / .n / .dot</td><td>玻璃徽章 + 数字角标 / 状态点</td></tr>
+          <tr><td>.pill.ok/.wait/.stop/.info</td><td>淡底状态 pill</td></tr>
+        </table>
+
+        <h3 id="c-ext">6.8 扩展组件</h3>
+        <div class="demo col">
+          <span class="dlab">上传区 · 已挂两个文件，第二个是拖入悬停态</span>
+          <div class="dropzone">
+            <span class="dz-ico">↑</span>
+            <b>拖拽文件到这里</b>
+            <small>或点击选择 · 支持 PNG / JPG / SVG，单个 ≤ 10MB</small>
+            <div class="dz-files"><span class="dz-file">cover.png <i>1.2MB</i></span><span class="dz-file">glass.svg <i>24KB</i></span></div>
+          </div>
+          <div class="dropzone is-over">
+            <span class="dz-ico" style="color:var(--lg-green);background:rgba(52,199,89,.14)">↓</span>
+            <b>松开即可上传</b>
+            <small>悬停 / 拖入时描边转品牌色</small>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="dlab">日期选择 · 今天描边、选中填色</span>
+          <div class="datepicker glass">
+            <div class="dp-head"><button aria-label="上个月">‹</button><span>2026 年 10 月</span><button aria-label="下个月">›</button></div>
+            <div class="dp-grid">
+              <span class="dw">日</span><span class="dw">一</span><span class="dw">二</span><span class="dw">三</span><span class="dw">四</span><span class="dw">五</span><span class="dw">六</span>
+              <button class="mute">27</button><button class="mute">28</button><button class="mute">29</button><button class="mute">30</button><button>1</button><button>2</button><button>3</button>
+              <button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button>10</button>
+              <button>11</button><button>12</button><button>13</button><button>14</button><button>15</button><button>16</button><button>17</button>
+              <button>18</button><button>19</button><button class="today">21</button><button class="on">22</button><button>23</button><button>24</button>
+              <button>25</button><button>26</button><button>27</button><button>28</button><button>29</button><button>30</button><button>31</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;flex:1;min-width:180px;align-items:center">
+            <div class="dots"><button aria-label="第 1 张"></button><button aria-label="第 2 张"></button><button class="on" aria-label="第 3 张"></button><button aria-label="第 4 张"></button></div>
+            <div class="lg-row" style="flex-wrap:wrap;gap:8px;justify-content:center">
+              <span class="avatar">林</span>
+              <span class="avatar" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">陈<span class="st"></span></span>
+              <span class="avatar" style="background:linear-gradient(140deg,#ff6482,#ff375f)">苏<span class="st away"></span></span>
+              <span class="avatar lg" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">周<span class="st off"></span></span>
+            </div>
+            <span style="font-size:11px;color:var(--lg-ink-3)">头像 36 / 56px，状态点绿·橙·灰</span>
+          </div>
+        </div>
+        <p class="demo-note">命令面板（⌘K）的完整演示在上面 6.6 弹层；看板、收件箱、登录分屏、文章阅读四套布局模板见 <a href="web.html" style="color:var(--lg-blue-deep)">网页端案例页 02 章</a>。</p>
+
+        <h3 id="c-tpl">6.9 模板组件（glass-templates.css）</h3>
+        <p>这一层是「整页模板的积木」，按需引入。核心思路：<b>壳和表格用玻璃，图表与卡片放在玻璃内容底上</b>——数据永远可读，玻璃只负责气质。</p>
+        <div class="demo col">
+          <span class="dlab">后台模板积木 · KPI 卡 / 柱状图 / 趋势条（hover 柱子试试）</span>
+          <div class="bento" style="grid-template-columns:1fr 1fr;max-width:420px">
+            <div class="bc glass"><span class="lab">今日 GMV</span><span class="big">¥46,210</span><span class="sub">↑ 12.4% 较昨日</span></div>
+            <div class="bc glass"><span class="lab">订单量</span><span class="big">1,284</span><span class="sub">↑ 8.1% 较昨日</span></div>
+          </div>
+          <div class="tablecard glass" style="padding-bottom:10px">
+            <div class="tc-head">
+              <span class="t">近 7 日 GMV</span>
+              <div class="chart-legend"><span><i></i>本周期</span><span class="w"><i></i>促销日</span></div>
+            </div>
+            <div class="chart" aria-hidden="true" style="max-width:420px">
+              <div class="bar"><i style="height:46%"></i><b>10/15</b></div>
+              <div class="bar"><i style="height:58%"></i><b>10/16</b></div>
+              <div class="bar"><i style="height:66%"></i><b>10/17</b></div>
+              <div class="bar warn"><i style="height:88%"></i><b>10/18</b></div>
+              <div class="bar"><i style="height:61%"></i><b>10/19</b></div>
+              <div class="bar"><i style="height:74%"></i><b>10/20</b></div>
+              <div class="bar"><i style="height:83%"></i><b>今天</b></div>
+            </div>
+            <div style="padding:8px 8px 0">
+              <div class="trend-row"><span class="tr-n">数码配件</span><span class="tr-bar"><i style="width:86%"></i></span><span class="tr-v">38%</span><span class="tr-d up">+4.2%</span></div>
+              <div class="trend-row"><span class="tr-n">家居生活</span><span class="tr-bar"><i style="width:62%"></i></span><span class="tr-v">27%</span><span class="tr-d up">+1.8%</span></div>
+              <div class="trend-row"><span class="tr-n">服饰鞋包</span><span class="tr-bar"><i style="width:44%"></i></span><span class="tr-v">19%</span><span class="tr-d down">-0.6%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo col">
+          <span class="dlab">店铺模板积木 · 商品卡（点 + 加购会弹 Toast）</span>
+          <div class="shop-grid" style="max-width:560px">
+            <div class="prod-card glass">
+              <div class="cover c1" style="aspect-ratio:1/.86"><span class="cv-t">新品</span></div>
+              <div class="pc-body">
+                <span class="pc-cat">器皿 · 陶瓷</span>
+                <b class="pc-name">山影茶壶 · 一壶两杯套装</b>
+                <div class="pc-row">
+                  <span class="pc-rate"><b>★</b>4.9 · 326</span>
+                  <span class="price">¥368</span>
+                  <button class="pc-add" data-toast="已加入购物车" aria-label="加入购物车">+</button>
+                </div>
+              </div>
+            </div>
+            <div class="prod-card glass">
+              <div class="cover c3" style="aspect-ratio:1/.86"><span class="cv-t">热卖</span></div>
+              <div class="pc-body">
+                <span class="pc-cat">织物 · 亚麻</span>
+                <b class="pc-name">雾灰亚麻桌旗 190cm</b>
+                <div class="pc-row">
+                  <span class="pc-rate"><b>★</b>4.8 · 512</span>
+                  <span class="price">¥158</span>
+                  <button class="pc-add" data-toast="已加入购物车" aria-label="加入购物车">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-note">完整页面：<a href="admin.html" style="color:var(--lg-blue-deep)">后台模板 admin.html</a> · <a href="landing.html" style="color:var(--lg-blue-deep)">官网 landing.html</a> · <a href="shop.html" style="color:var(--lg-blue-deep)">店铺 shop.html</a> · <a href="starter.html" style="color:var(--lg-blue-deep)">起步骨架 starter.html</a></p>
+        <table class="api">
+          <tr><th>类名</th><th>说明</th></tr>
+          <tr><td>.admin-shell / .admin-main / .admin-topbar</td><td>后台三件套：sticky 侧栏壳（224px）/ 主内容区 / 顶栏（搜索 + 账户 .at-me）</td></tr>
+          <tr><td>.bento &gt; .bc（.lab/.big/.sub）</td><td>KPI 指标卡：标签 / 大数字 / 同比，玻璃底</td></tr>
+          <tr><td>.chart &gt; .bar（.warn）</td><td>纯 CSS 柱状图，柱高写 i 的 height；.warn 标促销日</td></tr>
+          <tr><td>.chart-legend（.w）</td><td>图表图例，.w 为弱色系列</td></tr>
+          <tr><td>.trend-row（.tr-n/.tr-bar/.tr-v/.tr-d.up/.down）</td><td>品类趋势条：名称 / 占比条 / 数值 / 同比涨跌（绿涨红跌）</td></tr>
+          <tr><td>.table-foot（.tf-info + .pager）</td><td>表格底栏：条数信息 + 分页</td></tr>
+          <tr><td>.hero（.h-badge/.grad/.h-sub/.h-cta/.h-note）</td><td>官网首屏：大标题（.grad 渐变字）+ 副标 + 双按钮</td></tr>
+          <tr><td>.features &gt; .feature（.fi）</td><td>官网特性网格，自适应用户数</td></tr>
+          <tr><td>.cta-band</td><td>收尾转化横幅，玻璃大圆角面板</td></tr>
+          <tr><td>.filter-bar（.f-sort）</td><td>店铺筛选条：chips + 排序</td></tr>
+          <tr><td>.shop-grid &gt; .prod-card</td><td>商品网格 + 商品卡（.cover 图 / .pc-body / .pc-add 加购钮）</td></tr>
+          <tr><td>.cart-btn（.cart-n）</td><td>吸底购物车按钮，.cart-n 数字角标</td></tr>
+          <tr><td>.promo-band</td><td>促销横幅</td></tr>
+          <tr><td>.auth-form / .auth-hero</td><td>认证页：右侧表单栈 / 左侧氛围区</td></tr>
+          <tr><td>.sec-label / .tpl-foot / .logo-row</td><td>章节小标 / 模板页脚 / 客户 Logo 行</td></tr>
+        </table>
+        <div class="callout ok">
+          <span class="ci">✓</span>
+          <span><b>要点</b>：图表类组件（.chart / .trend-row）是纯 CSS，无 JS 依赖；柱高、占比条直接写 <code class="inline">style="height:46%"</code> 即可接入任何数据源。整页模板直接从 admin / landing / shop 三页拷贝改造，比拼积木更快。</span>
+        </div>
+      </section>
+
+</main>
+
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+<script>
+(function () {
+  "use strict";
+  var logEl = document.getElementById("test-log");
+  var sumText = document.getElementById("sum-text");
+  var results = [];
+
+  function log(st, name, detail) {
+    results.push({ st: st, name: name });
+    var li = document.createElement("li");
+    li.innerHTML = '<span class="st ' + st + '">' + (st === "pass" ? "PASS" : st === "warn" ? "WARN" : "FAIL") + '</span><span><b>' + name + '</b>' + (detail ? " — " + detail : "") + "</span>";
+    logEl.appendChild(li);
+  }
+  function pass(n, ok, d) { log(ok ? "pass" : "fail", n, d || ""); }
+  function warn(n, ok, d) { log(ok ? "pass" : "warn", n, d || ""); }
+
+  var REQUIRED = [
+    ["#c-btn", ".btn.primary"],
+    ["#c-form", ".field"],
+    ["#c-ctrl", ".sw"],
+    ["#c-nav", ".utabs"],
+    ["#c-box", ".list.glass"],
+    ["#c-over", ".cmdk"],
+    ["#c-fb", ".banner"],
+    ["#c-ext", ".datepicker"],
+    ["#c-tpl", ".chart"],
+    ["#t-spring", "#spring-demo-btn"],
+    ["#t-glass", ".glass.thin"],
+    ["#t-web", ".sidebar"],
+    ["#t-web", ".tablecard"],
+    ["#t-mobile", ".phone"],
+    ["#t-mobile", ".chat"],
+    ["#t-mobile", ".player"],
+    ["#t-mobile", ".wallet-stack"],
+    ["#t-mobile", ".weather-hero"]
+  ];
+
+  function runTests() {
+    logEl.innerHTML = "";
+    results = [];
+    REQUIRED.forEach(function (pair) {
+      var root = document.querySelector(pair[0]);
+      pass("区块 " + pair[0] + " · " + pair[1], root && root.querySelector(pair[1]));
+    });
+    var phones = document.querySelectorAll("#t-mobile .phone");
+    pass("手机模板 9 套", phones.length === 9, "实测 " + phones.length + " 台");
+    pass("LiquidGlass", typeof window.LiquidGlass === "object");
+    try { LiquidGlass.refresh(); pass("LiquidGlass.refresh", true); } catch (e) { pass("LiquidGlass.refresh", false, String(e)); }
+    warn("html.lg-on", document.documentElement.classList.contains("lg-on"));
+    warn("LiquidGlassRuntime", typeof window.LiquidGlassRuntime === "object");
+    var btn = document.getElementById("spring-demo-btn");
+    if (btn && window.PointerEvent) {
+      btn.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 1, clientX: 20, clientY: 20, buttons: 1 }));
+      pass("弹簧 lg-springing", btn.classList.contains("lg-springing"));
+      btn.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 1 }));
+    } else pass("弹簧 lg-springing", false, "无 PointerEvent");
+    var bar = document.getElementById("test-topbar");
+    window.scrollTo(0, 200);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        pass("顶栏 is-scrolled", bar && bar.classList.contains("is-scrolled"));
+        window.scrollTo(0, 0);
+        var fail = results.filter(function (r) { return r.st === "fail"; }).length;
+        var warnN = results.filter(function (r) { return r.st === "warn"; }).length;
+        var ok = results.filter(function (r) { return r.st === "pass"; }).length;
+        sumText.textContent = fail ? "失败 " + fail + " · 通过 " + ok : "全部通过 " + ok + (warnN ? "（警告 " + warnN + "）" : "");
+        sumText.className = "pill " + (fail ? "fail" : "ok");
+      });
+    });
+  }
+
+  document.getElementById("rerun").addEventListener("click", runTests);
+  document.querySelectorAll("[data-toast]").forEach(function (b) {
+    b.addEventListener("click", function () { LiquidGlass.toast(b.getAttribute("data-toast")); });
+  });
+  var dlg = document.getElementById("test-dialog");
+  var openA = document.getElementById("open-alert-demo");
+  if (openA && dlg) {
+    openA.addEventListener("click", function () { dlg.showModal(); });
+    var c = document.getElementById("cancel-dialog-demo");
+    var o = document.getElementById("ok-dialog-demo");
+    if (c) c.addEventListener("click", function () { dlg.close(); });
+    if (o) o.addEventListener("click", function () { LiquidGlass.toast("已移入回收站"); dlg.close(); });
+  }
+  var ot = document.getElementById("open-toast-demo");
+  if (ot) ot.addEventListener("click", function () { LiquidGlass.toast("玻璃 Toast 自检"); });
+
+  window.addEventListener("load", function () { setTimeout(runTests, 500); });
+})();
+</script>
+</body>
+</html>

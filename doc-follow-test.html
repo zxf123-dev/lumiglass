@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>照文档接入验证 · Lumi Glass</title>
+
+<!-- ============================================================
+     文档 §02「快速开始」第 1 步：引样式
+     ============================================================ -->
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<link rel="stylesheet" href="glass/glass-templates.css">
+
+<!-- 文档 §02 第 4 步（可选）：官网级液态动效 -->
+<link rel="stylesheet" href="glass/glass-lg.css">
+
+<style>
+  /* ============================================================
+     下面只有页面骨架，没有任何组件样式。
+     文档 §02 没有给「业务页容器类」（.wrap 在 §14 里标注为
+     stage 展示台、业务不用），所以这里按 starter.html 的官方做法
+     自建一个宽度容器 —— 这是本页唯一自己写的 CSS。
+     ============================================================ */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 26px 0 60px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+  .pad { padding: 20px; }
+  .sect {
+    font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--lg-ink-3); margin: 30px 0 10px;
+  }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+</style>
+</head>
+
+<!-- 文档 §02 第 2 步：给容器加平台类（web = 桌面密度）
+     文档 §02 第 4 步：data-wallpaper="aurora" 启用动态壁纸 -->
+<body class="web" data-wallpaper="aurora">
+
+<!-- ============================================================
+     §05 尺寸速查：.topbar-web.glass 全站统一顶栏
+     nav[data-site-nav] + site-topbar.js
+     §04 明暗双主题：data-theme-toggle 按钮切换
+     ============================================================ -->
+<header class="topbar-web glass">
+  <a class="brand" href="doc-follow-test.html"><span class="mark"></span>Doc Test</a>
+  <span class="tag">照文档搭的</span>
+  <nav data-site-nav="starter"></nav>
+  <div class="topbar-actions">
+    <button class="btn sm" data-theme-toggle aria-label="切换明暗">☾</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- §02「最小示例」原样复制 -->
+  <div class="sec">
+    <p class="sect">§02 最小示例</p>
+    <div class="glass" style="padding:20px;border-radius:20px">
+      <h3>我的第一块玻璃</h3>
+      <p>把它放在有内容的背景上，折射才会出现。</p>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       §03 五种材质：blur 越低折射越明显
+       ========================================================== -->
+  <p class="sect">§03 五种材质</p>
+  <div class="grid2">
+    <div class="glass clear pad"><b>clear</b><br><small>2px · 白 10%</small></div>
+    <div class="glass pad"><b>默认 glass</b><br><small>16px · 白 42%</small></div>
+    <div class="glass tinted pad"><b>tinted</b><br><small>12px · 主色染 55%</small></div>
+    <div class="glass thin pad"><b>thin</b><br><small>10px · 白 16%</small></div>
+    <div class="glass overlay pad"><b>overlay</b><br><small>24px · 白 72%</small></div>
+    <div class="glass lg-sheen pad"><b>.lg-sheen</b><br><small>追光镜面（移动鼠标试试）</small></div>
+  </div>
+
+  <!-- ==========================================================
+       §06 6.1 按钮 —— 原样复制文档示例
+       ========================================================== -->
+  <p class="sect">§06 6.1 按钮</p>
+  <div class="glass pad row">
+    <button class="btn">常规</button>
+    <button class="btn primary">主操作</button>
+    <button class="btn tinted">着墨</button>
+    <button class="btn ghost">幽灵</button>
+    <button class="btn danger">删除</button>
+    <button class="btn sm">小号</button>
+    <button class="btn icon" aria-label="搜索">⌕</button>
+    <button class="btn" disabled>禁用</button>
+    <span class="tip-wrap"><button class="btn icon" aria-label="带提示">?</button><span class="tip glass">悬停提示气泡</span></span>
+  </div>
+  <div class="glass pad row" style="margin-top:10px">
+    <button class="btn primary loading" aria-label="加载中">保存中</button>
+    <div class="splitbtn"><button>导出</button><button class="more" aria-label="更多导出格式">⌄</button></div>
+    <button class="fab" aria-label="新建">＋</button>
+    <button class="btn primary" data-toast="已保存到「设计系统」">点我弹 Toast →</button>
+  </div>
+
+  <!-- ==========================================================
+       §06 6.2 表单输入
+       ========================================================== -->
+  <p class="sect">§06 6.2 表单</p>
+  <div class="glass pad">
+    <div class="row">
+      <input class="field" placeholder="默认态" style="min-width:180px">
+      <input class="field ok" value="可用的用户名" style="min-width:180px">
+      <input class="field err" value="该邮箱已被注册" style="min-width:180px">
+      <input class="field" type="password" value="glass2026" aria-label="密码" style="min-width:180px">
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="searchbar glass" style="min-width:230px"><span class="s-ico">⌕</span><input type="search" placeholder="搜索组件…" aria-label="搜索"><button class="s-clear" aria-label="清空">✕</button></div>
+      <div class="selectbox"><select aria-label="排序方式"><option>按更新时间</option><option>按名称</option><option>按使用频率</option></select><span class="caret">⌄</span></div>
+      <div class="combo glass"><span class="pre">https://</span><input placeholder="studio.design/lin" aria-label="站点地址"><button class="btn primary sm">检查</button></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="chips">
+        <span class="chip on">全部<span class="x">✕</span></span>
+        <span class="chip">组件<span class="x">✕</span></span>
+        <span class="chip">＋ 新标签</span>
+      </div>
+    </div>
+    <div class="fieldgroup" style="margin-top:12px;max-width:320px">
+      <span class="fl">工作邮箱</span>
+      <input class="field" value="lin@studio.design">
+      <span class="hint">仅用于团队邀请，不会公开</span>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       §06 6.3 控件
+       ========================================================== -->
+  <p class="sect">§06 6.3 控件</p>
+  <div class="glass pad">
+    <div class="row">
+      <label class="sw blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+      <label class="sw"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+      <label class="sw sm blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+      <label class="sw mini"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+      <span style="font-size:11px;color:var(--lg-ink-3)">62 / 52 / 44px 三档</span>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div class="seg"><input type="radio" name="dseg" id="dseg1" checked><label for="dseg1">日</label><input type="radio" name="dseg" id="dseg2"><label for="dseg2">周</label><input type="radio" name="dseg" id="dseg3"><label for="dseg3">月</label></div>
+      <div class="stepper"><button aria-label="减少">−</button><span class="val">1</span><button aria-label="增加">＋</button></div>
+      <div class="slider" style="min-width:170px"><div class="rail"></div><input type="range" min="0" max="100" value="46" aria-label="色温"></div>
+      <div class="slider blue" style="min-width:170px"><div class="rail"></div><input type="range" min="0" max="100" value="72" aria-label="音量"></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <label class="check"><input type="checkbox" checked><span class="box">✓</span>接收通知</label>
+      <label class="check round"><input type="radio" name="dchk" checked><span class="box">●</span>自动</label>
+      <label class="tile"><input type="checkbox" checked><span class="face">✦</span></label>
+      <div class="rate" aria-label="4 分">★★★★<span class="off">★</span></div>
+      <div class="swatches">
+        <input type="radio" name="dsw" id="dsw1" checked><label for="dsw1" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></label>
+        <input type="radio" name="dsw" id="dsw2"><label for="dsw2" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></label>
+        <input type="radio" name="dsw" id="dsw3"><label for="dsw3" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)"></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       §06 6.4 导航
+       ========================================================== -->
+  <p class="sect">§06 6.4 导航</p>
+  <div class="glass pad">
+    <nav class="utabs"><a href="#" class="on">概览</a><a href="#">成员</a><a href="#">日志</a><a href="#">设置</a></nav>
+    <div class="pager" style="margin-top:14px"><button aria-label="上一页">‹</button><button>1</button><button class="on">2</button><button>3</button><span class="gap">…</span><button>12</button><button aria-label="下一页">›</button></div>
+  </div>
+
+  <!-- ==========================================================
+       §06 6.7 反馈
+       ========================================================== -->
+  <p class="sect">§06 6.7 反馈</p>
+  <div class="glass pad">
+    <div class="banner info"><span class="bi">i</span><span>这是一条信息横幅 .banner.info</span></div>
+    <div class="banner ok" style="margin-top:8px"><span class="bi">✓</span><span>同步完成 .banner.ok</span></div>
+    <div class="banner warn" style="margin-top:8px"><span class="bi">!</span><span>存储将满 .banner.warn</span></div>
+    <div class="row" style="margin-top:14px">
+      <span class="pill ok">运行中</span>
+      <span class="pill wait">等待</span>
+      <span class="pill stop">已停用</span>
+      <span class="pill info">信息</span>
+      <span class="badge n">12</span>
+      <span class="spinner"></span>
+    </div>
+    <div class="progress" style="margin-top:14px"><div class="fill" style="width:62%"></div></div>
+  </div>
+
+  <!-- ==========================================================
+       §06 6.9 模板组件
+       ========================================================== -->
+  <p class="sect">§06 6.9 模板组件</p>
+  <div class="grid2">
+    <div class="bento" style="grid-template-columns:1fr 1fr">
+      <div class="bc glass"><span class="lab">今日 GMV</span><span class="big">¥46,210</span><span class="sub">↑ 12.4% 较昨日</span></div>
+      <div class="bc glass"><span class="lab">订单量</span><span class="big">1,284</span><span class="sub">↑ 8.1% 较昨日</span></div>
+    </div>
+    <div class="tablecard glass">
+      <div class="tc-head">
+        <span class="t">近 7 日 GMV</span>
+        <div class="chart-legend"><span><i></i>本周期</span><span class="w"><i></i>促销日</span></div>
+      </div>
+      <div class="chart" aria-hidden="true">
+        <div class="bar"><i style="height:46%"></i><b>10/15</b></div>
+        <div class="bar"><i style="height:58%"></i><b>10/16</b></div>
+        <div class="bar warn"><i style="height:88%"></i><b>10/18</b></div>
+        <div class="bar"><i style="height:83%"></i><b>今天</b></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ============================================================
+     文档 §02 第 3 步 + 第 4 步：脚本按文档顺序加载
+     ============================================================ -->
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+
+<script>
+  /* 文档 §06 6.1 提到 data-toast 只是演示绑定 */
+  document.querySelectorAll('[data-toast]').forEach(function (b) {
+    b.addEventListener('click', function () { LiquidGlass.toast(b.getAttribute('data-toast')); });
+  });
+</script>
+</body>
+</html>

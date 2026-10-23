@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lumi Glass 页面模板：电商店铺。筛选栏、商品卡网格与促销横幅，直接换成自己的商品即可。">
+<title>电商店铺模板 · Lumi Glass</title>
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<link rel="stylesheet" href="glass/glass-templates.css">
+
+<style>
+  /* ---------- 背景层：暖色电商氛围 ---------- */
+  main { position: relative; z-index: 1; }
+</style>
+</head>
+<body class="web" data-wallpaper="aurora" data-lg-profile="app">
+
+
+<!-- ================= 顶栏：含购物车徽章 ================= -->
+<header class="topbar-web glass">
+  <a class="brand" href="shop.html"><span class="mark"></span>山物集</a>
+  <span class="tag">店铺模板</span>
+  <nav data-site-nav="shop"></nav>
+  <div class="topbar-actions">
+    <div class="dd">
+      <button type="button" class="btn sm">店铺菜单 ⌄</button>
+      <div class="menu glass">
+        <button type="button" class="mi">全部商品</button>
+        <button type="button" class="mi">新品</button>
+        <button type="button" class="mi">家居</button>
+        <button type="button" class="mi">出行</button>
+        <div class="sep-line"></div>
+        <button type="button" class="mi">我的订单</button>
+        <button type="button" class="mi danger">退出</button>
+      </div>
+    </div>
+    <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+    <button class="btn sm cart-btn" id="cart-btn" aria-label="购物车">🛒<span class="cart-n" id="cart-n">3</span></button>
+    <button class="btn sm primary">登录</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= 促销横幅 ================= -->
+  <section class="promo-band">
+    <div class="pb-art">
+      <span class="pb-tag">秋季新品周 · 10.20 – 10.27</span>
+      <h3>山野气，带回家<br>全场新品 8 折起</h3>
+      <p>精选原木与陶土器物，每件都来自山间工坊的手作温度。</p>
+      <div class="pb-cta">
+        <button class="btn primary" onclick="LiquidGlass.toast('已领取 ¥20 新人券 🎉')">领取新人券</button>
+        <button class="btn" style="background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff">看新品</button>
+      </div>
+    </div>
+    <div class="promo-band" style="grid-template-columns:1fr;padding:0;margin:0;max-width:none">
+      <!-- 右列：三张闪购卡 -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div class="prod-card glass">
+          <div class="cover c1" style="aspect-ratio:1/.82"><span class="cv-t">手作陶杯</span></div>
+          <div class="pc-body">
+            <b class="pc-name">云雾纹陶杯 · 对杯</b>
+            <div class="pc-row"><span class="price">¥129<small>¥168</small></span>
+              <button class="pc-add" data-add aria-label="加入购物车">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card glass">
+          <div class="cover c3" style="aspect-ratio:1/.82"><span class="cv-t">胡桃木盘</span></div>
+          <div class="pc-body">
+            <b class="pc-name">黑胡桃果盘 · 中号</b>
+            <div class="pc-row"><span class="price">¥239<small>¥299</small></span>
+              <button class="pc-add" data-add aria-label="加入购物车">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card glass">
+          <div class="cover c2" style="aspect-ratio:1/.82"><span class="cv-t">亚麻盖毯</span></div>
+          <div class="pc-body">
+            <b class="pc-name">粗亚麻午睡毯</b>
+            <div class="pc-row"><span class="price">¥319<small>¥399</small></span>
+              <button class="pc-add" data-add aria-label="加入购物车">+</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 筛选栏 ================= -->
+  <section class="wrap" style="max-width:1160px">
+    <div class="filter-bar glass">
+      <div class="chips">
+        <button class="chip on">全部</button>
+        <button class="chip">器皿</button>
+        <button class="chip">织物</button>
+        <button class="chip">灯具</button>
+        <button class="chip">香氛</button>
+        <button class="chip">文具</button>
+      </div>
+      <div class="f-sort">
+        <div class="selectbox glass" style="width:132px">
+          <select style="height:38px;font-size:12.5px"><option>综合排序</option><option>价格从低到高</option><option>价格从高到低</option><option>销量优先</option></select>
+          <span class="caret">▾</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 商品网格 ================= -->
+  <section class="shop-grid" id="grid">
+    <div class="prod-card glass">
+      <div class="cover c1" style="aspect-ratio:1/.86"><span class="cv-t">新品</span></div>
+      <div class="pc-body">
+        <span class="pc-cat">器皿 · 陶瓷</span>
+        <b class="pc-name">山影茶壶 · 一壶两杯套装</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.9 · 326</span>
+          <span class="price">¥368</span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c2" style="aspect-ratio:1/.86"><span class="cv-t">热卖</span></div>
+      <div class="pc-body">
+        <span class="pc-cat">织物 · 亚麻</span>
+        <b class="pc-name">雾灰亚麻桌旗 190cm</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.8 · 512</span>
+          <span class="price">¥158</span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c3" style="aspect-ratio:1/.86"></div>
+      <div class="pc-body">
+        <span class="pc-cat">灯具 · 黄铜</span>
+        <b class="pc-name">苔原黄铜壁灯 · 暖光</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.7 · 208</span>
+          <span class="price">¥429<small>¥498</small></span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c4" style="aspect-ratio:1/.86"></div>
+      <div class="pc-body">
+        <span class="pc-cat">香氛 · 大豆蜡</span>
+        <b class="pc-name">雪松与苔藓香薰蜡烛 220g</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.9 · 891</span>
+          <span class="price">¥98</span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c3" style="aspect-ratio:1/.86"><span class="cv-t">补货中</span></div>
+      <div class="pc-body">
+        <span class="pc-cat">器皿 · 木作</span>
+        <b class="pc-name">樱木浅口碗 · 两只装</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.6 · 154</span>
+          <span class="price">¥186</span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c1" style="aspect-ratio:1/.86"></div>
+      <div class="pc-body">
+        <span class="pc-cat">文具 · 纸品</span>
+        <b class="pc-name">山径笔记本 · 空白内页</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.8 · 433</span>
+          <span class="price">¥46</span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c4" style="aspect-ratio:1/.86"><span class="cv-t">新品</span></div>
+      <div class="pc-body">
+        <span class="pc-cat">织物 · 羊毛</span>
+        <b class="pc-name">苔绿格纹羊毛围巾</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.7 · 97</span>
+          <span class="price">¥269</span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="prod-card glass">
+      <div class="cover c2" style="aspect-ratio:1/.86"></div>
+      <div class="pc-body">
+        <span class="pc-cat">灯具 · 纸艺</span>
+        <b class="pc-name">云朵和纸吊灯 · 小号</b>
+        <div class="pc-row">
+          <span class="pc-rate"><b>★</b>4.9 · 611</span>
+          <span class="price">¥233<small>¥268</small></span>
+          <button class="pc-add" data-add aria-label="加入购物车">+</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 加载更多 -->
+  <div style="text-align:center;margin-top:20px" class="wrap">
+    <button class="btn" onclick="LiquidGlass.toast('已加载全部 8 件商品（演示）')">加载更多商品</button>
+  </div>
+
+  <!-- ================= 页脚 ================= -->
+  <footer class="wrap">
+    <footer class="tpl-foot">
+      <span class="f-brand"><span class="m"></span>山物集</span>
+      <span>© 2026 山物集 · 电商店铺模板 · Lumi Glass</span>
+      <nav>
+        <a href="#">配送说明</a>
+        <a href="#">退换政策</a>
+        <a href="#">会员权益</a>
+        <a href="#">联系我们</a>
+      </nav>
+    </footer>
+  </footer>
+</main>
+
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+<script>
+  /* 演示交互：加购 +1，角标弹一下；接后端时替换这段即可 */
+  (function () {
+    var n = 3;
+    var badge = document.getElementById('cart-n');
+    [].forEach.call(document.querySelectorAll('[data-add]'), function (btn) {
+      btn.addEventListener('click', function () {
+        n += 1;
+        badge.textContent = n;
+        badge.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.6)' }, { transform: 'scale(1)' }],
+          { duration: 320, easing: 'cubic-bezier(.34,1.7,.64,1)' }
+        );
+        if (window.LiquidGlass) LiquidGlass.toast('已加入购物车 🛒');
+      });
+    });
+  })();
+</script>
+</body>
+</html>

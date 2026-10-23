@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lumi Glass 页面模板：后端管理台。玻璃侧栏、KPI、图表与数据表格，直接改成自己的业务即可。">
+<title>后端管理台模板 · Lumi Glass</title>
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<link rel="stylesheet" href="glass/glass-templates.css">
+
+<style>
+  /* ---------- 背景层：换掉这里就是你的品牌 ---------- */
+</style>
+</head>
+<body class="web" data-wallpaper="aurora" data-lg-profile="app">
+
+<header class="topbar-web glass">
+  <a class="brand" href="landing.html"><span class="mark"></span>Lumi Glass</a>
+  <span class="tag">后台模板</span>
+  <nav data-site-nav="admin"></nav>
+  <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+</header>
+
+<div class="admin-shell">
+
+  <!-- ================= 侧栏：改链接文字即可 ================= -->
+  <aside class="sidebar glass">
+    <div class="sb-t">Nebula 后台</div>
+    <a class="on" href="#">▦ 概览</a>
+    <a href="#">🧾 订单管理 <span class="sb-count">12</span></a>
+    <a href="#">📦 商品管理</a>
+    <a href="#">👥 客户</a>
+    <a href="#">📈 数据分析</a>
+    <div class="sb-t">运营</div>
+    <a href="#">📣 营销活动</a>
+    <a href="#">💬 客服消息 <span class="sb-count">3</span></a>
+    <div class="sb-t">系统</div>
+    <a href="#">⚙ 设置</a>
+    <a href="#">🚪 退出登录</a>
+    <div class="af-foot">v2.4.1 · Nebula Cloud</div>
+  </aside>
+
+  <!-- ================= 主区 ================= -->
+  <main class="admin-main">
+
+    <!-- 顶栏：面包屑 + 搜索 + 用户 -->
+    <div class="admin-topbar glass">
+      <nav class="crumbs"><a href="#">后台</a><span class="sep">/</span><span class="cur">概览</span></nav>
+      <div class="searchbar glass at-search">
+        <span class="s-ico">⌕</span>
+        <input type="search" placeholder="搜索订单、客户或商品…">
+        <button class="s-clear" aria-label="清空">✕</button>
+      </div>
+      <a class="btn sm ghost" href="starter.html">起步模板</a>
+      <a class="btn sm ghost" href="shop.html">店铺模板</a>
+      <a class="btn sm ghost" href="index.html">组件</a>
+      <a class="btn sm ghost" href="landing.html">官网</a>
+      <a class="btn sm ghost" href="docs.html">文档</a>
+      <div class="dd">
+        <button type="button" class="btn sm">菜单 ⌄</button>
+        <div class="menu glass">
+          <button type="button" class="mi">导出数据</button>
+          <button type="button" class="mi">系统设置</button>
+          <div class="sep-line"></div>
+          <button type="button" class="mi danger">退出登录</button>
+        </div>
+      </div>
+      <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+      <div class="avatar">岚</div>
+      <div class="at-me"><span><b>林小岚</b><small>管理员</small></span></div>
+    </div>
+
+    <!-- 页头 -->
+    <div class="pagehead">
+      <div class="ph-l">
+        <nav class="crumbs"><a href="#">数据</a><span class="sep">/</span><span class="cur">经营概览</span></nav>
+        <h3>早上好，小岚 👋</h3>
+        <p>昨天新增订单 <b>128</b> 笔，GMV <b>¥46,210</b>，较前日 <b style="color:#248a3d">+12.4%</b>。</p>
+      </div>
+      <div class="ph-r">
+        <button class="btn">导出报表</button>
+        <button class="btn primary">+ 新建商品</button>
+      </div>
+    </div>
+
+    <!-- KPI 四卡 -->
+    <div class="bento">
+      <div class="bc glass">
+        <span class="lab">今日 GMV</span>
+        <span class="big">¥46,210</span>
+        <span class="sub">↑ 12.4% 较昨日</span>
+      </div>
+      <div class="bc glass">
+        <span class="lab">订单量</span>
+        <span class="big">1,284</span>
+        <span class="sub">↑ 8.1% 较昨日</span>
+      </div>
+      <div class="bc glass">
+        <span class="lab">支付转化率</span>
+        <span class="big">4.8%</span>
+        <span class="sub">↑ 0.3pt 较上周</span>
+      </div>
+      <div class="bc glass">
+        <span class="lab">待发货</span>
+        <span class="big">37</span>
+        <span class="sub">其中 5 单超 24h</span>
+      </div>
+    </div>
+
+    <!-- 图表 + 趋势两列 -->
+    <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px" class="charts-row">
+      <div class="tablecard glass">
+        <div class="tc-head">
+          <span class="t">近 14 日 GMV 走势</span>
+          <div class="chart-legend"><span><i></i>本周期</span><span class="w"><i></i>促销日</span></div>
+          <a class="more" href="#">明细 →</a>
+        </div>
+        <div class="chart" aria-hidden="true">
+          <div class="bar"><i style="height:46%"></i><b>10/8</b></div>
+          <div class="bar"><i style="height:58%"></i><b>10/9</b></div>
+          <div class="bar"><i style="height:41%"></i><b>10/10</b></div>
+          <div class="bar"><i style="height:66%"></i><b>10/11</b></div>
+          <div class="bar"><i style="height:52%"></i><b>10/12</b></div>
+          <div class="bar warn"><i style="height:88%"></i><b>10/13</b></div>
+          <div class="bar"><i style="height:61%"></i><b>10/14</b></div>
+          <div class="bar"><i style="height:49%"></i><b>10/15</b></div>
+          <div class="bar"><i style="height:70%"></i><b>10/16</b></div>
+          <div class="bar"><i style="height:57%"></i><b>10/17</b></div>
+          <div class="bar warn"><i style="height:92%"></i><b>10/18</b></div>
+          <div class="bar"><i style="height:64%"></i><b>10/19</b></div>
+          <div class="bar"><i style="height:74%"></i><b>10/20</b></div>
+          <div class="bar"><i style="height:83%"></i><b>今天</b></div>
+        </div>
+      </div>
+
+      <div class="tablecard glass">
+        <div class="tc-head">
+          <span class="t">品类销售占比</span>
+          <a class="more" href="#">全部 →</a>
+        </div>
+        <div style="padding:6px 8px 2px">
+          <div class="trend-row"><span class="tr-n">数码配件</span><span class="tr-bar"><i style="width:86%"></i></span><span class="tr-v">38%</span><span class="tr-d up">+4.2%</span></div>
+          <div class="trend-row"><span class="tr-n">家居生活</span><span class="tr-bar"><i style="width:62%"></i></span><span class="tr-v">27%</span><span class="tr-d up">+1.8%</span></div>
+          <div class="trend-row"><span class="tr-n">服饰鞋包</span><span class="tr-bar"><i style="width:44%"></i></span><span class="tr-v">19%</span><span class="tr-d down">-0.6%</span></div>
+          <div class="trend-row"><span class="tr-n">美妆个护</span><span class="tr-bar"><i style="width:24%"></i></span><span class="tr-v">10%</span><span class="tr-d up">+2.3%</span></div>
+          <div class="trend-row"><span class="tr-n">食品生鲜</span><span class="tr-bar"><i style="width:13%"></i></span><span class="tr-v">6%</span><span class="tr-d down">-1.1%</span></div>
+        </div>
+        <div class="banner info" style="margin:8px 8px 4px">
+          <span class="bi">i</span>
+          <span><b>周六大促</b> · 10/25 开始，建议提前备货促销日品类</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据表 -->
+    <div class="tablecard glass">
+      <div class="tc-head">
+        <span class="t">最新订单</span>
+        <a class="more" href="#">查看全部 1,284 条 →</a>
+      </div>
+
+      <!-- 工具栏：筛选 + 搜索，按需增删 -->
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 8px 10px">
+        <div class="seg">
+          <input type="radio" name="ord" id="o1" checked><label for="o1">全部</label>
+          <input type="radio" name="ord" id="o2"><label for="o2">待付款</label>
+          <input type="radio" name="ord" id="o3"><label for="o3">待发货</label>
+          <input type="radio" name="ord" id="o4"><label for="o4">已完成</label>
+        </div>
+        <div class="searchbar glass" style="width:210px;margin-left:auto">
+          <span class="s-ico">⌕</span>
+          <input type="search" placeholder="订单号 / 客户">
+        </div>
+        <button class="btn sm">筛选</button>
+      </div>
+
+      <table class="gtable">
+        <thead>
+          <tr><th>订单号</th><th>客户</th><th>状态</th><th class="num">金额</th><th>时间</th><th style="text-align:right">操作</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">#20261021-0412</td>
+            <td><span class="who"><span class="avatar">陈</span>陈晨</span></td>
+            <td><span class="pill wait">待发货</span></td>
+            <td class="num">¥1,299.00</td>
+            <td>10-21 16:42</td>
+            <td style="text-align:right"><button class="btn ghost sm">详情</button> <button class="btn ghost sm">发货</button></td>
+          </tr>
+          <tr>
+            <td class="num">#20261021-0411</td>
+            <td><span class="who"><span class="avatar" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">周</span>周雨桐</span></td>
+            <td><span class="pill ok">已完成</span></td>
+            <td class="num">¥89.00</td>
+            <td>10-21 16:37</td>
+            <td style="text-align:right"><button class="btn ghost sm">详情</button></td>
+          </tr>
+          <tr>
+            <td class="num">#20261021-0410</td>
+            <td><span class="who"><span class="avatar" style="background:linear-gradient(140deg,#ff6482,#ff375f)">王</span>王一诺</span></td>
+            <td><span class="pill stop">已取消</span></td>
+            <td class="num">¥456.00</td>
+            <td>10-21 16:21</td>
+            <td style="text-align:right"><button class="btn ghost sm">详情</button> <button class="btn ghost sm">恢复</button></td>
+          </tr>
+          <tr>
+            <td class="num">#20261021-0409</td>
+            <td><span class="who"><span class="avatar" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)">李</span>李慕白</span></td>
+            <td><span class="pill info">待付款</span></td>
+            <td class="num">¥2,480.00</td>
+            <td>10-21 16:08</td>
+            <td style="text-align:right"><button class="btn ghost sm">详情</button> <button class="btn ghost sm">催付</button></td>
+          </tr>
+          <tr>
+            <td class="num">#20261021-0408</td>
+            <td><span class="who"><span class="avatar" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)">赵</span>赵一鸣</span></td>
+            <td><span class="pill ok">已完成</span></td>
+            <td class="num">¥320.00</td>
+            <td>10-21 15:54</td>
+            <td style="text-align:right"><button class="btn ghost sm">详情</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="table-foot">
+        <span class="tf-info">显示 1–5 / 共 1,284 条</span>
+        <div class="pager">
+          <button disabled>‹</button>
+          <button class="on">1</button>
+          <button>2</button>
+          <button>3</button>
+          <span class="gap">…</span>
+          <button>257</button>
+          <button>›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="tpl-foot">
+      <span class="f-brand"><span class="m"></span>Nebula Cloud</span>
+      <span>© 2026 · 后端管理台模板 · Lumi Glass</span>
+      <nav>
+        <a href="#">帮助中心</a>
+        <a href="#">API 文档</a>
+        <a href="#">服务状态</a>
+      </nav>
+    </footer>
+  </main>
+</div>
+
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+</body>
+</html>

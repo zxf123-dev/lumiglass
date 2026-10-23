@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<!-- 历史存档页：本页样式为 v1.0 之前的内联旧实现（--wash/--rim 旧 Token 体系），
+     未走 glass-core.css 的 --lg-* Token，库升级（暗色 / a11y / 定制）对本页无效。
+     新项目请从 starter.html / docs.html 起步，本页仅作视觉对照参考。 -->
+<meta charset="UTF-8">
+<meta name="description" content="Lumi Glass 液态玻璃组件库 · 白底合辑：亮色环境下的布局组件与完整案例展示">
+<link rel="icon" type="image/svg+xml" href="glass/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iOS 液态玻璃 · 白色背景完整组件库</title>
+<link rel="stylesheet" href="glass/glass-core.css">
+<link rel="stylesheet" href="glass/glass-lg.css">
+<link rel="stylesheet" href="glass/glass-web.css">
+<style>
+/* ============================================================
+   Liquid Glass — 白色背景版 · 完整组件库
+   ------------------------------------------------------------
+   白色页面上玻璃没有可折射的对象，会退化成「白框」。
+   因此采用 HIG 的示意方式：页面纯白，每个组件放在一块彩色
+   展示台（specimen stage）上 —— 玻璃始终有内容可折。
+   配方三层：
+   ① backdrop-filter: blur() saturate()     磨砂底
+   ② SVG feDisplacementMap（backdrop url） 真实折射（Chromium）
+   ③ inset 高光 + 描边 + 投影               镜面与厚度
+   ============================================================ */
+
+:root {
+  --ink: #1d1d1f;
+  --ink-2: #6e6e73;
+  --ink-3: #a1a1a6;
+  --line: #e8e8ed;
+  --page: #ffffff;
+  --blue: #0a84ff;
+  --green: #34c759;
+  --red: #ff3b30;
+  --orange: #ff9f0a;
+  --purple: #bf5af2;
+  --blur: 16px;
+  --sat: 180%;
+  --radius: 24px;
+  --wash: rgba(255,255,255,.42);
+  --rim-hi: rgba(255,255,255,.80);
+  --rim-lo: rgba(255,255,255,.18);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: var(--page);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   玻璃基类
+   ============================================================ */
+.glass {
+  position: relative;
+  border: 1px solid transparent;
+  /* 边框光带：角亮中暗的对角渐变，光从左上穿入、右下穿出 */
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  box-shadow:
+    inset 0 1.5px .5px -.5px rgba(255,255,255,1),      /* 顶部镜面 */
+    inset 0 -1px 1px rgba(255,255,255,.55),            /* 底部回弹光 */
+    inset 1.5px 0 1px -1px rgba(255,255,255,.7),
+    inset -1.5px 0 1px -1px rgba(255,255,255,.7),
+    0 1px 2px rgba(0,0,0,.05),
+    0 16px 34px -16px rgba(22,28,45,.30);
+  transition: transform .45s cubic-bezier(.34,1.7,.64,1), box-shadow .35s;
+}
+
+.card.glass:hover, .pricecard.glass:hover, .metric.glass:hover, .bc:hover {
+  box-shadow:
+    inset 0 1.5px .5px -.5px rgba(255,255,255,1),
+    inset 0 -1px 1px rgba(255,255,255,.45),
+    inset 1.5px 0 1px -1px rgba(255,255,255,.55),
+    inset -1.5px 0 1px -1px rgba(255,255,255,.55),
+    0 1px 2px rgba(0,0,0,.06), 0 26px 52px -22px rgba(22,28,45,.30);
+}
+
+/* clear 变体：更透明，用于照片/视频之上的控制层 */
+.glass.clear {
+  --wash2: rgba(255,255,255,.10);
+  background:
+    linear-gradient(var(--wash2), var(--wash2)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  -webkit-backdrop-filter: blur(2px) saturate(150%);
+  backdrop-filter: blur(2px) saturate(150%);
+  border-color: transparent;
+  box-shadow:
+    inset 0 1px .5px rgba(255,255,255,.95),
+    0 1px 2px rgba(0,0,0,.10),
+    0 16px 34px -16px rgba(22,28,45,.40);
+}
+/* 悬停光效：只提亮边框光带——光贴在边框上，不进盒内（对齐参考站） */
+.glass::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  padding: 1.2px;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 1), rgba(255, 255, 255, .18) 38%, rgba(88, 100, 120, .32) 62%, rgba(255, 255, 255, .9)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s ease-out;
+}
+.glass:hover::after { opacity: 1; }
+
+/* ============================================================
+   页面骨架
+   ============================================================ */
+main { max-width: 1000px; margin: 0 auto; padding: 0 28px 120px; }
+
+/* Hero */
+.hero { padding: 76px 0 60px; border-bottom: 1px solid var(--line); }
+.hero .eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: 2.4px; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 18px;
+}
+.hero h1 { font-size: clamp(38px, 5.4vw, 56px); font-weight: 800; letter-spacing: -1.6px; line-height: 1.08; }
+.hero h1 em { font-style: normal; color: var(--blue); }
+.hero p { margin-top: 20px; font-size: 16.5px; color: var(--ink-2); max-width: 620px; line-height: 1.68; }
+.hero .meta { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+.hero .meta span {
+  font-size: 12px; font-weight: 600; color: var(--ink-2);
+  padding: 6px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fbfbfd;
+}
+
+/* 章节 */
+section { padding-top: 72px; }
+.sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+.sec-head .num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; font-weight: 600; color: var(--ink-3);
+  padding: 3px 8px; border-radius: 7px; background: #f5f5f7;
+}
+.sec-head h2 { font-size: 27px; font-weight: 750; letter-spacing: -.5px; }
+.sec-head .en { font-size: 11.5px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--ink-3); }
+.sec-desc { font-size: 14.5px; color: var(--ink-2); line-height: 1.65; max-width: 660px; margin-bottom: 30px; }
+
+/* 展示台 */
+.specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(392px, 1fr)); gap: 28px; }
+.spec { display: flex; flex-direction: column; gap: 10px; }
+.spec.span2 { grid-column: 1 / -1; }
+.stage {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius);
+  padding: 34px 26px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px;
+  border: 1px solid rgba(0,0,0,.05);
+  min-height: 190px;
+}
+.stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .035;
+}
+.stage.d::before { opacity: .06; }
+.stage.plain { background: #f5f5f7; }
+.stage.a { /* 冷色 */
+  background:
+    radial-gradient(420px 340px at 84% 8%, rgba(100,135,200,.24), transparent 66%),
+    radial-gradient(380px 320px at 6% 92%, rgba(150,130,200,.16), transparent 66%),
+    radial-gradient(300px 260px at 50% 50%, rgba(190,165,125,.12), transparent 64%),
+    linear-gradient(160deg, #f4f5f8, #e9ebf0);
+}
+.stage.b { /* 暖色 */
+  background:
+    radial-gradient(400px 340px at 82% 88%, rgba(190,165,125,.22), transparent 66%),
+    radial-gradient(360px 300px at 10% 12%, rgba(205,150,160,.14), transparent 66%),
+    linear-gradient(160deg, #f4f1ee, #eae6e1);
+}
+.stage.c { /* 绿蓝 */
+  background:
+    radial-gradient(400px 340px at 14% 10%, rgba(115,170,195,.24), transparent 66%),
+    radial-gradient(360px 320px at 86% 90%, rgba(115,160,140,.14), transparent 66%),
+    linear-gradient(160deg, #f1f4f5, #e7ecee);
+}
+.stage.d { /* 深色，用于 clear 变体与暗色控件 */
+  background:
+    radial-gradient(420px 360px at 16% 14%, rgba(150,130,200,.20), transparent 64%),
+    radial-gradient(400px 340px at 84% 84%, rgba(100,135,200,.22), transparent 64%),
+    linear-gradient(150deg, #14171e, #0d0f14);
+}
+.stage.d .cap-on-dark { color: rgba(255,255,255,.8); }
+.stage.d .stage-note { color: rgba(255,255,255,.75); }
+.stage .stage-note {
+  position: absolute; left: 16px; bottom: 12px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: .6px; color: rgba(60,60,67,.5);
+  text-transform: uppercase;
+}
+.cap { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; }
+.cap b { color: var(--ink); font-weight: 600; }
+
+/* 参数表 */
+.tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 26px; }
+.token { padding: 15px 16px; border-radius: 14px; background: #fbfbfd; border: 1px solid var(--line); }
+.token b { display: block; font-size: 12.5px; margin-bottom: 5px; font-weight: 600; }
+.token span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--ink-2); }
+
+/* ============================================================
+   按钮
+   ============================================================ */
+.btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 46px; padding: 0 24px; border-radius: 999px;
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--ink);
+  cursor: pointer;
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  box-shadow:
+    inset 0 1.5px .5px -.5px rgba(255,255,255,1),
+    inset 0 -1px 1px rgba(255,255,255,.6),
+    0 1px 2px rgba(0,0,0,.06),
+    0 8px 18px -8px rgba(22,28,45,.35);
+  transition: transform .45s cubic-bezier(.34,1.7,.64,1), box-shadow .25s, filter .25s;
+}
+.btn:active { transform: scale(1.04, .96); filter: brightness(.97); }
+.btn.sm { height: 36px; padding: 0 16px; font-size: 13.5px; border-radius: 18px; }
+.btn.icon { width: 46px; padding: 0; font-size: 18px; }
+.btn.icon.sm { width: 36px; font-size: 15px; }
+.btn.primary {
+  background:
+    linear-gradient(135deg, rgba(10,132,255,.86), rgba(0,102,220,.66)) padding-box,
+    linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.18) 35%, rgba(255,255,255,.18) 65%, rgba(255,255,255,.78)) border-box;
+  border-color: transparent; color: #fff;
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.9), 0 1px 2px rgba(0,40,120,.2), 0 10px 22px -8px rgba(10,110,230,.7);
+}
+.btn.tinted {
+  background:
+    linear-gradient(135deg, rgba(10,132,255,.22), rgba(10,132,255,.12)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  color: #0060df; border-color: transparent;
+}
+.btn.danger {
+  background:
+    linear-gradient(135deg, rgba(255,59,48,.92), rgba(215,40,32,.75)) padding-box,
+    linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.18) 35%, rgba(255,255,255,.18) 65%, rgba(255,255,255,.78)) border-box;
+  border-color: transparent; color: #fff;
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.8), 0 10px 22px -8px rgba(220,40,30,.65);
+}
+.btn.ghost { background: rgba(255,255,255,.4); box-shadow: inset 0 1px .5px rgba(255,255,255,.9), 0 1px 2px rgba(0,0,0,.05); }
+.fab {
+  width: 58px; height: 58px; border-radius: 50%; font-size: 28px; font-weight: 300;
+  display: grid; place-items: center; cursor: pointer; color: var(--ink);
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: inset 0 1.5px .5px -.5px #fff, 0 1px 2px rgba(0,0,0,.08), 0 16px 30px -12px rgba(22,28,45,.5);
+  transition: transform .45s cubic-bezier(.34,1.7,.64,1);
+}
+.fab:hover { transform: scale(1.06); }
+.fab:active { transform: scale(1.04, .96); }
+
+/* ============================================================
+   控件
+   ============================================================ */
+/* 开关 */
+.sw { position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer; flex: none; }
+.sw input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; margin: 0; }
+.sw .track {
+  position: absolute; inset: 0; border-radius: 999px;
+  background: rgba(0,0,0,.15);
+  border: none;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.95), inset 0 2px 6px rgba(22,28,45,.14), 0 1px 2px rgba(0,0,0,.06);
+  transition: background .35s;
+}
+.sw .knob {
+  position: absolute; top: 2px; left: 2px; width: 36px; height: 28px; border-radius: 999px;
+  border: 1px solid transparent;
+  background-color: #fff;
+  background-image:
+    linear-gradient(rgba(255,255,255,.07), rgba(255,255,255,.07)),
+    linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 35%, rgba(255,255,255,.06) 65%, rgba(255,255,255,.34));
+  background-clip: padding-box, border-box;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -2px rgba(0,0,0,.10);
+  transition: transform .45s cubic-bezier(.34,1.7,.64,1); z-index: 1;
+}
+.sw input:checked ~ .track {
+  background: #22c55e;
+  border-color: rgba(255,255,255,.7);
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.9), 0 4px 12px -2px rgba(52,199,89,.55);
+}
+.sw.blue input:checked ~ .track {
+  background: #0a84ff;
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.9), 0 4px 12px -2px rgba(10,132,255,.55);
+}
+.sw input:checked ~ .knob { transform: translateX(20px); }
+
+/* 滑块 */
+.slider { position: relative; width: 100%; height: 38px; display: flex; align-items: center; }
+.slider .rail {
+  position: absolute; left: 0; right: 0; height: 10px; border-radius: 5px;
+  background: rgba(120,120,128,.30);
+  box-shadow: inset 0 1px 2px rgba(22,28,45,.10), 0 1px 1px rgba(255,255,255,.55);
+}
+.slider.rainbow .rail {
+  height: 16px; border-radius: 8px;
+  background: linear-gradient(90deg, #3a7cf6, #4cd964, #ffd60a, #ff9f0a, #ff375f, #bf5af2);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 4px 12px -3px rgba(90,70,130,.45);
+}
+.slider input[type=range] {
+  position: relative; z-index: 2; -webkit-appearance: none; appearance: none;
+  width: 100%; height: 38px; background: transparent; cursor: grab; margin: 0;
+}
+.slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 44px; height: 28px; border-radius: 999px;
+  background-color: #fff;
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(rgba(255,255,255,.07), rgba(255,255,255,.07)),
+    linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 35%, rgba(255,255,255,.06) 65%, rgba(255,255,255,.34));
+  background-clip: padding-box, border-box;
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  backdrop-filter: blur(10px) saturate(180%);
+  box-shadow: inset 0 2px 2px #fff, inset 0 -2px 4px rgba(255,255,255,.5), 0 1px 2px rgba(0,0,0,.12), 0 8px 18px -6px rgba(22,28,45,.5);
+  transition: transform .2s cubic-bezier(.34,1.7,.64,1);
+}
+.slider input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.08); }
+.slider input[type=range]:active::-webkit-slider-thumb { transform: scale(1.14); }
+.slider input[type=range]::-moz-range-thumb {
+  width: 44px; height: 28px; border-radius: 999px;
+  background: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.9);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -2px rgba(0,0,0,.10);
+}
+.slider.blue .rail { height: 8px; border-radius: 4px; background: rgba(120,120,128,.28); box-shadow: inset 0 1px 3px rgba(0,0,0,.12); }
+
+/* 分段控制 */
+.seg {
+  display: inline-flex; padding: 3px; gap: 2px; border-radius: 18px;
+  background: rgba(120,120,128,.12); border: 1px solid rgba(255,255,255,.55);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  backdrop-filter: blur(8px) saturate(150%);
+  box-shadow: inset 0 1px 3px rgba(22,28,45,.10);
+}
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label {
+  padding: 7px 18px; font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+  border-radius: 15px; cursor: pointer; user-select: none;
+  transition: all .3s cubic-bezier(.34,1.7,.64,1);
+}
+.seg input:checked + label {
+  color: var(--ink);
+  background: linear-gradient(135deg, rgba(255,255,255,.85), rgba(255,255,255,.6));
+  box-shadow: inset 0 1px .5px #fff, 0 1px 2px rgba(0,0,0,.08), 0 3px 8px -2px rgba(22,28,45,.25);
+}
+
+/* 步进器 */
+.stepper { display: inline-flex; align-items: center; border-radius: 14px; overflow: hidden; }
+.stepper button {
+  width: 42px; height: 38px; border: none; background: transparent; cursor: pointer;
+  font-size: 18px; color: var(--ink); transition: background .2s;
+}
+.stepper button:hover { background: rgba(255,255,255,.45); }
+.stepper .val {
+  width: 48px; height: 38px; line-height: 38px; text-align: center;
+  font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums;
+  border-left: 1px solid rgba(60,60,67,.12); border-right: 1px solid rgba(60,60,67,.12);
+}
+
+/* 复选 / 单选 */
+.check { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--ink); }
+.check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.check .box {
+  width: 24px; height: 24px; border-radius: 8px; flex: none;
+  display: grid; place-items: center; font-size: 13px; color: transparent;
+  background: rgba(255,255,255,.55); border: 1px solid rgba(120,120,128,.35);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.9);
+  transition: all .25s cubic-bezier(.34,1.7,.64,1);
+}
+.check input:checked + .box {
+  background: linear-gradient(135deg, #0a84ff, #0060df); border-color: rgba(255,255,255,.55); color: #fff;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 4px 10px -2px rgba(10,132,255,.55);
+  transform: scale(1.04);
+}
+.check.round .box { border-radius: 50%; }
+
+/* 磁贴 */
+.tile { position: relative; display: inline-grid; place-items: center; width: 62px; height: 62px; border-radius: 19px; cursor: pointer; }
+.tile input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; margin: 0; }
+.tile .face {
+  position: absolute; inset: 0; border-radius: 19px; display: grid; place-items: center; font-size: 23px;
+  background: linear-gradient(var(--wash), var(--wash));
+  border: 1px solid rgba(255,255,255,.7);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 1.5px .5px -.5px #fff, 0 1px 2px rgba(0,0,0,.06), 0 6px 14px -6px rgba(22,28,45,.4);
+  transition: all .45s cubic-bezier(.34,1.7,.64,1);
+}
+.tile input:checked ~ .face {
+  background: linear-gradient(135deg, rgba(10,132,255,.92), rgba(0,100,220,.7));
+  border-color: rgba(255,255,255,.6); transform: scale(1.05);
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.85), 0 8px 18px -6px rgba(10,120,240,.7);
+}
+.tile input:checked ~ .face.warm { background: linear-gradient(135deg, rgba(255,159,10,.95), rgba(230,120,0,.75)); box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.85), 0 8px 18px -6px rgba(255,150,10,.7); }
+
+/* ============================================================
+   输入
+   ============================================================ */
+.searchbar { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 18px; border-radius: 24px; width: min(420px, 100%); }
+.searchbar svg { opacity: .45; flex: none; }
+.searchbar input { flex: 1; border: none; outline: none; background: transparent; font: inherit; font-size: 15px; color: var(--ink); }
+.searchbar input::placeholder { color: var(--ink-3); }
+.field {
+  height: 48px; padding: 0 16px; border-radius: 14px; width: min(420px, 100%);
+  font: inherit; font-size: 15px; color: var(--ink); outline: none;
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  box-shadow: inset 0 1.5px .5px -.5px #fff, inset 0 2px 5px rgba(22,28,45,.06), 0 1px 2px rgba(0,0,0,.05);
+  transition: box-shadow .25s, border-color .25s;
+}
+.field::placeholder { color: var(--ink-3); }
+.field:focus { border-color: var(--blue); box-shadow: inset 0 1.5px .5px -.5px #fff, 0 0 0 4px rgba(10,132,255,.22); }
+
+/* ============================================================
+   导航类
+   ============================================================ */
+.navbar {
+  display: flex; align-items: center; gap: 12px;
+  height: 54px; padding: 0 10px 0 20px; border-radius: 27px;
+  width: min(460px, 100%);
+}
+.navbar .t { font-size: 15px; font-weight: 700; }
+.navbar .acts { margin-left: auto; display: flex; gap: 4px; }
+.navbar .acts button {
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+  font-size: 16px; cursor: pointer; color: var(--ink); transition: background .2s;
+}
+.navbar .acts button:hover { background: rgba(255,255,255,.5); }
+
+.large-title { width: min(460px, 100%); padding: 22px 24px; border-radius: 28px; }
+.large-title .mini-nav { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 26px; }
+.large-title .mini-nav .back {
+  display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px 5px 9px; border-radius: 14px;
+  background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.8);
+  box-shadow: inset 0 1px .5px #fff, 0 1px 2px rgba(0,0,0,.06);
+}
+.large-title h3 { font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+.large-title p { font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
+
+.tabbar { display: flex; gap: 2px; padding: 5px; border-radius: 24px; width: min(420px, 100%); }
+.tabbar input { position: absolute; opacity: 0; pointer-events: none; }
+.tabbar label {
+  flex: 1; padding: 9px 0 7px; border-radius: 19px; cursor: pointer; user-select: none;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 10.5px; font-weight: 600; color: var(--ink-2);
+  transition: all .45s cubic-bezier(.34,1.7,.64,1);
+}
+.tabbar label .ico { font-size: 18px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .3s; }
+.tabbar input:checked + label {
+  color: var(--blue);
+  background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,255,255,.62));
+  box-shadow: inset 0 1px .5px #fff, 0 1px 2px rgba(0,0,0,.07), 0 4px 10px -3px rgba(22,28,45,.3);
+}
+.tabbar input:checked + label .ico { filter: none; }
+
+.toolbar { display: flex; gap: 6px; padding: 8px; border-radius: 22px; }
+.toolbar button {
+  width: 42px; height: 42px; border-radius: 15px; border: none; background: transparent;
+  font-size: 17px; cursor: pointer; color: var(--ink); transition: background .2s, transform .2s;
+}
+.toolbar button:hover { background: rgba(255,255,255,.55); transform: translateY(-1px); }
+
+.sidebar { width: 218px; padding: 12px; border-radius: 22px; display: flex; flex-direction: column; gap: 3px; }
+.sidebar .sb-t { font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: var(--ink-3); padding: 8px 12px 6px; text-transform: uppercase; }
+.sidebar a {
+  display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 12px;
+  font-size: 13.5px; font-weight: 500; color: var(--ink); text-decoration: none; transition: background .2s;
+}
+.sidebar a:hover { background: rgba(255,255,255,.45); }
+.sidebar a.on {
+  background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,255,255,.62));
+  box-shadow: inset 0 1px .5px #fff, 0 1px 2px rgba(0,0,0,.06), 0 3px 8px -3px rgba(22,28,45,.3);
+}
+
+.dock { display: flex; gap: 14px; padding: 12px 16px; border-radius: 28px; }
+.dock .app {
+  width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; font-size: 23px;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.65), 0 4px 10px -3px rgba(0,0,0,.35);
+  transition: transform .25s cubic-bezier(.34,1.7,.64,1);
+}
+.dock .app { transition: transform .2s; }
+.dock .app:hover { transform: scale(1.25); }
+.dock .app:hover + .app { transform: scale(1.12); }
+.dock .app:has(+ .app:hover) { transform: scale(1.12); }
+.app.a1 { background: linear-gradient(150deg, #5ac8fa, #0a84ff); }
+.app.a2 { background: linear-gradient(150deg, #ffd60a, #ff9f0a); }
+.app.a3 { background: linear-gradient(150deg, #ff6482, #ff375f); }
+.app.a4 { background: linear-gradient(150deg, #bf5af2, #7d3cf0); }
+.app.a5 { background: linear-gradient(150deg, #4cd964, #28a745); }
+
+.player { display: flex; align-items: center; gap: 13px; padding: 12px 16px; border-radius: 22px; width: min(400px, 100%); }
+.player .art {
+  width: 44px; height: 44px; border-radius: 12px; flex: none;
+  background: linear-gradient(140deg, #ff9f0a, #ff375f 55%, #bf5af2);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.5), 0 3px 8px -2px rgba(0,0,0,.35);
+}
+.player .meta { flex: 1; min-width: 0; }
+.player .meta b { display: block; font-size: 13px; font-weight: 600; }
+.player .meta small { font-size: 11px; color: var(--ink-2); }
+.player .ctrl { display: flex; gap: 4px; }
+.player .ctrl button { width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent; font-size: 15px; cursor: pointer; }
+.player .ctrl button:hover { background: rgba(255,255,255,.45); }
+
+/* ============================================================
+   容器
+   ============================================================ */
+.card { width: min(420px, 100%); padding: 22px; border-radius: var(--radius); }
+.card .cover {
+  height: 118px; border-radius: 16px; margin-bottom: 16px;
+  background:
+    radial-gradient(160px 120px at 20% 25%, rgba(255,255,255,.55), transparent 60%),
+    linear-gradient(120deg, #3a7cf6, #bf5af2 58%, #ff375f);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 8px 18px -8px rgba(140,60,200,.7);
+}
+.card h3 { font-size: 16.5px; font-weight: 700; margin-bottom: 6px; }
+.card p { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 16px; }
+
+.list { width: min(420px, 100%); border-radius: 20px; overflow: hidden; }
+.lrow {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+  font-size: 14px; font-weight: 500; border-top: 1px solid rgba(60,60,67,.10);
+}
+.lrow:first-child { border-top: none; }
+.lrow .ico {
+  width: 29px; height: 29px; border-radius: 8px; flex: none;
+  display: grid; place-items: center; font-size: 14px; color: #fff;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.4);
+}
+.lrow .chev { margin-left: auto; color: var(--ink-3); font-size: 15px; }
+
+.popover { width: 252px; padding: 16px; border-radius: 20px; }
+.popover::before {
+  content: ""; position: absolute; top: -7px; left: 32px; width: 13px; height: 13px;
+  transform: rotate(45deg); border-radius: 2px;
+  background: rgba(255,255,255,.72); border-left: 1px solid rgba(255,255,255,.85); border-top: 1px solid rgba(255,255,255,.85);
+}
+.popover h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.popover p { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; margin-bottom: 12px; }
+
+/* 抽屉 / 操作表的舞台 */
+.mock {
+  position: relative; height: 340px; border-radius: var(--radius); overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  border: 1px solid rgba(0,0,0,.05);
+}
+.mock.a {
+  background:
+    radial-gradient(240px 200px at 20% 15%, #ffd60a, transparent 62%),
+    radial-gradient(260px 220px at 85% 30%, #ff375f, transparent 62%),
+    linear-gradient(160deg, #dbe6f6, #cfd8e8);
+}
+.mock.b {
+  background:
+    radial-gradient(240px 200px at 78% 12%, #bf5af2, transparent 62%),
+    radial-gradient(260px 220px at 15% 70%, #5ac8fa, transparent 62%),
+    linear-gradient(160deg, #e8e4f7, #dfe8f4);
+}
+.mock .mock-title {
+  position: absolute; top: 18px; left: 20px; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,.95); text-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.sheet { margin: 12px; padding: 10px 20px 20px; border-radius: 24px; }
+.sheet .grab { width: 38px; height: 5px; border-radius: 3px; background: rgba(60,60,67,.22); margin: 0 auto 14px; }
+.sheet h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.sheet p { font-size: 13px; color: var(--ink-2); margin-bottom: 14px; }
+.actionsheet { margin: 12px; display: flex; flex-direction: column; gap: 8px; }
+.actionsheet .as-item {
+  padding: 13px; border-radius: 16px; text-align: center; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background .2s;
+}
+.actionsheet .as-item:hover { background: rgba(255,255,255,.55); }
+.actionsheet .as-item.danger { color: var(--red); font-weight: 600; }
+.actionsheet .as-cancel { font-weight: 700; }
+
+.control-center { width: min(430px, 100%); padding: 18px; border-radius: 28px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ccg { padding: 13px; border-radius: 20px; display: flex; flex-direction: column; gap: 10px; }
+.ccg.wide { grid-column: span 2; }
+.ccg.horiz { flex-direction: row; align-items: center; gap: 10px; }
+.cc-round {
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 16px;
+  background: rgba(255,255,255,.32); border: 1px solid rgba(255,255,255,.55); color: var(--ink);
+}
+.cc-round.on { background: linear-gradient(135deg, rgba(10,132,255,.95), rgba(0,100,220,.75)); color: #fff; border-color: rgba(255,255,255,.6); }
+.cc-name { font-size: 11px; font-weight: 600; color: var(--ink-2); line-height: 1.35; }
+.cc-name b { color: var(--ink); font-weight: 700; }
+
+/* ============================================================
+   反馈
+   ============================================================ */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 600;
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+  box-shadow: inset 0 1px .5px #fff, 0 1px 2px rgba(0,0,0,.06);
+}
+.badge .n { min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--red); color: #fff; font-size: 10.5px; display: grid; place-items: center; }
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(52,199,89,.2); }
+
+.progress { width: min(340px, 100%); }
+.progress .bar {
+  height: 10px; border-radius: 5px; overflow: hidden;
+  background: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.6);
+  box-shadow: inset 0 1px 3px rgba(22,28,45,.15);
+}
+.progress .fill { height: 100%; width: 68%; border-radius: 5px; background: linear-gradient(90deg, #0a84ff, #4cd964, #ffd60a); box-shadow: inset 0 1px 1px rgba(255,255,255,.7); animation: fillMove 2.6s cubic-bezier(.4,0,.2,1) infinite alternate; }
+@keyframes fillMove { from { width: 22%; } to { width: 84%; } }
+.ring {
+  width: 78px; height: 78px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 14px; font-weight: 700;
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,.62) 78%, transparent 79%),
+    conic-gradient(var(--blue) 72%, rgba(255,255,255,.35) 0);
+  border: 1px solid rgba(255,255,255,.8);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px .5px #fff, 0 6px 16px -6px rgba(22,28,45,.4);
+}
+
+#toast-zone { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.toast {
+  display: flex; align-items: center; gap: 11px; padding: 12px 19px; border-radius: 23px;
+  font-size: 13.5px; font-weight: 600;
+  animation: toastIn .45s cubic-bezier(.34,1.7,.64,1);
+}
+.toast .ti { width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; color: #fff; background: linear-gradient(135deg, #4cd964, #28a745); }
+.toast.out { animation: toastOut .35s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-22px) scale(.92); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-16px) scale(.95); } }
+
+dialog.alert {
+  margin: auto; /* 抵消全局 reset，恢复原生 dialog 居中 */
+  border: 1px solid transparent; border-radius: 20px;
+  padding: 28px 26px 20px; width: min(330px, calc(100vw - 48px)); text-align: center; color: var(--ink);
+  background:
+    linear-gradient(rgba(255,255,255,.80), rgba(255,255,255,.62)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  backdrop-filter: blur(26px) saturate(180%);
+  box-shadow: inset 0 1.5px .5px -.5px #fff, 0 30px 70px -20px rgba(22,28,45,.55);
+}
+dialog.alert::backdrop { background: rgba(30,35,50,.18); backdrop-filter: blur(6px); }
+dialog.alert h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+dialog.alert p { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin-bottom: 20px; }
+dialog.alert .acts { display: flex; gap: 9px; }
+dialog.alert .acts .btn { flex: 1; }
+
+.tip-wrap { position: relative; display: inline-block; }
+.tip {
+  position: absolute; bottom: calc(100% + 10px); left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  padding: 7px 12px; border-radius: 11px; font-size: 12px; font-weight: 600; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: .25s cubic-bezier(.34,1.7,.64,1);
+}
+.tip-wrap:hover .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============================================================
+   整机演示
+   ============================================================ */
+.phone-wrap { display: flex; justify-content: center; }
+.phone {
+  width: min(390px, 100%); padding: 11px; border-radius: 46px;
+  background: linear-gradient(160deg, #ffffff, #eef0f5);
+  border: 1px solid #e3e5ea;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 40px 80px -30px rgba(22,28,45,.45);
+}
+.screen {
+  position: relative; height: 600px; border-radius: 36px; overflow: hidden;
+  background:
+    radial-gradient(340px 260px at 78% 6%, rgba(120,150,205,.55), transparent 62%),
+    radial-gradient(320px 260px at 12% 30%, rgba(160,165,210,.42), transparent 62%),
+    radial-gradient(340px 280px at 62% 64%, rgba(100,135,200,.5), transparent 64%),
+    radial-gradient(320px 260px at 22% 92%, rgba(140,160,205,.45), transparent 64%),
+    linear-gradient(165deg, #eef1f6, #d7dce6);
+}
+.screen-scroll { height: 100%; overflow-y: auto; padding: 74px 16px 120px; scrollbar-width: none; display: flex; flex-direction: column; gap: 12px; }
+.screen-scroll::-webkit-scrollbar { display: none; }
+.photo-card {
+  border-radius: 20px; height: 96px; padding: 16px; color: #fff;
+  font-size: 13.5px; font-weight: 700; display: flex; flex-direction: column; justify-content: flex-end;
+  text-shadow: 0 1px 4px rgba(0,0,0,.3);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.4), 0 10px 22px -12px rgba(0,0,0,.5);
+}
+.photo-card small { font-size: 11px; font-weight: 500; opacity: .9; margin-top: 2px; }
+.pc1 { background: linear-gradient(140deg, #ff9f0a, #ff375f); }
+.pc2 { background: linear-gradient(140deg, #5ac8fa, #0a84ff); }
+.pc3 { background: linear-gradient(140deg, #bf5af2, #7d3cf0); }
+.pc4 { background: linear-gradient(140deg, #4cd964, #0a84ff); }
+.statusbar {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6;
+  height: 32px; padding: 0 14px; border-radius: 16px;
+  display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600;
+}
+.statusbar .sig { display: flex; gap: 2.5px; align-items: flex-end; }
+.statusbar .sig i { width: 3px; border-radius: 1px; background: currentColor; display: block; }
+.tabbar.float {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 6;
+  width: calc(100% - 24px);
+}
+
+/* ============================================================
+   布局系统 · App Frame / Bento / Media List / Form / Pricing
+   ============================================================ */
+.appframe { width: 100%; display: grid; grid-template-columns: 154px minmax(0, 1fr); gap: 11px; }
+.af-side { border-radius: 18px; padding: 9px; display: flex; flex-direction: column; gap: 2px; }
+.af-brand { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700; padding: 5px 8px 10px; }
+.af-brand .m {
+  width: 15px; height: 15px; border-radius: 5px; flex: none;
+  background: conic-gradient(from 200deg, #0a84ff, #bf5af2, #ff375f, #ff9f0a, #0a84ff);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.55);
+}
+.af-nav {
+  display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 10px;
+  font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: background .2s;
+}
+.af-nav:hover { background: rgba(255,255,255,.42); }
+.af-nav.on {
+  color: var(--ink);
+  background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.6));
+  box-shadow: inset 0 1px .5px #fff, 0 2px 6px -2px rgba(22,28,45,.3);
+}
+.af-nav i { width: 6px; height: 6px; border-radius: 2px; background: currentColor; opacity: .45; flex: none; }
+.af-main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.af-head { display: flex; align-items: center; gap: 9px; padding: 9px 13px; border-radius: 15px; }
+.af-head .t { font-size: 12.5px; font-weight: 700; }
+.af-head .mini-pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: rgba(10,132,255,.16); color: #0060df; }
+.af-head .acts { margin-left: auto; display: flex; gap: 5px; }
+.af-head .acts button {
+  width: 28px; height: 28px; border-radius: 9px; border: none; cursor: pointer;
+  background: rgba(255,255,255,.52); color: var(--ink); font-size: 12px; transition: background .2s;
+}
+.af-head .acts button:hover { background: rgba(255,255,255,.85); }
+.af-body {
+  flex: 1; border-radius: 15px; padding: 11px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px;
+  background: rgba(255,255,255,.34); border: 1px solid rgba(255,255,255,.62);
+  box-shadow: inset 0 1px .5px rgba(255,255,255,.85);
+}
+.af-tile {
+  border-radius: 11px; padding: 9px 10px; font-size: 10.5px; font-weight: 600; color: var(--ink-2);
+  background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.42));
+  border: 1px solid rgba(255,255,255,.72);
+}
+.af-tile b {
+  display: block; font-size: 17px; font-weight: 800; letter-spacing: -.5px;
+  color: var(--ink); margin-top: 3px; font-variant-numeric: tabular-nums;
+}
+
+/* Bento */
+.bento { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.bento .bc {
+  border-radius: 16px; padding: 12px; min-height: 76px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+}
+.bento .bc .lab { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--ink-3); }
+.bento .bc .big { font-size: 19px; font-weight: 800; letter-spacing: -.6px; font-variant-numeric: tabular-nums; }
+.bento .bc .sub { font-size: 10.5px; color: var(--ink-2); font-weight: 500; }
+.bento .bc.s2 { grid-column: span 2; }
+.bento .bc.s2r { grid-row: span 2; }
+.bento .bc.fill {
+  background: linear-gradient(135deg, rgba(10,132,255,.9), rgba(0,100,220,.74));
+  border-color: rgba(255,255,255,.6); color: #fff;
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.85), 0 12px 24px -10px rgba(10,110,230,.75);
+}
+.bento .bc.fill .lab, .bento .bc.fill .sub { color: rgba(255,255,255,.78); }
+.bento .bc.fill .big { color: #fff; }
+
+/* 媒体列表 */
+.medialist { width: 100%; display: flex; flex-direction: column; gap: 1px; }
+.mrow { display: flex; align-items: center; gap: 12px; padding: 8px 11px; border-radius: 14px; transition: background .2s; }
+.mrow:hover { background: rgba(255,255,255,.45); }
+.mrow .thumb {
+  width: 50px; height: 50px; border-radius: 13px; flex: none;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.5), 0 4px 10px -4px rgba(0,0,0,.4);
+}
+.mrow .mb { flex: 1; min-width: 0; }
+.mrow .mb b { display: block; font-size: 12.5px; font-weight: 600; }
+.mrow .mb small { font-size: 11px; color: var(--ink-2); }
+.mrow .mact { font-size: 11.5px; font-weight: 600; color: var(--blue); }
+.th1 { background: linear-gradient(140deg, #5ac8fa, #0a84ff); }
+.th2 { background: linear-gradient(140deg, #ff9f0a, #ff375f); }
+.th3 { background: linear-gradient(140deg, #bf5af2, #7d3cf0); }
+.th4 { background: linear-gradient(140deg, #4cd964, #28a745); }
+
+/* 表单布局 */
+.formgrid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.formgrid .fg { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.formgrid .fg.full { grid-column: 1 / -1; }
+.formgrid .fl { font-size: 11px; font-weight: 600; color: var(--ink-2); }
+.formgrid .inp {
+  height: 40px; border-radius: 11px; padding: 0 12px; font: inherit; font-size: 13px; color: var(--ink); outline: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.48));
+  border: 1px solid rgba(255,255,255,.9);
+  box-shadow: inset 0 1px 2px rgba(22,28,45,.06);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+}
+.formgrid .inp::placeholder { color: var(--ink-3); }
+.formgrid .inp:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(10,132,255,.2); }
+.formgrid .hint { font-size: 10.5px; color: var(--ink-2); }
+
+/* 定价 */
+.pricing { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: center; }
+.pricecard { border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+.pricecard.hi { transform: translateY(-5px) scale(1.02); }
+.pricecard .pk { font-size: 10.5px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--ink-3); }
+.pricecard .pv { font-size: 25px; font-weight: 800; letter-spacing: -1.2px; font-variant-numeric: tabular-nums; }
+.pricecard .pv span { font-size: 11px; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+.pricecard ul { list-style: none; display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: var(--ink-2); }
+.pricecard li::before { content: "✓"; color: var(--green); font-weight: 800; margin-right: 5px; }
+.pc-ribbon {
+  font-size: 9px; font-weight: 800; letter-spacing: .7px; color: #fff; text-transform: uppercase;
+  background: linear-gradient(135deg, #0a84ff, #0060df); border-radius: 7px; padding: 3px 7px; align-self: flex-start;
+}
+.pricecard.hi .btn { width: 100%; }
+.pricecard .btn.sm { height: 34px; font-size: 12.5px; }
+
+/* ============================================================
+   按钮 · 加载 / 分裂 / 悬浮菜单
+   ============================================================ */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn.loading { color: transparent !important; pointer-events: none; }
+.btn.loading::before {
+  content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; animation: spin .75s linear infinite;
+}
+.btn.loading.light::before { border-color: rgba(60,60,67,.22); border-top-color: var(--ink); }
+
+.splitbtn {
+  display: inline-flex; align-items: stretch; border-radius: 23px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.6);
+  background: linear-gradient(135deg, rgba(10,132,255,.9), rgba(0,100,220,.74));
+  box-shadow: inset 0 1.5px .5px -.5px rgba(255,255,255,.8), 0 10px 22px -10px rgba(10,110,230,.7);
+}
+.splitbtn button {
+  height: 44px; border: none; background: transparent; color: #fff; font: inherit;
+  font-size: 14px; font-weight: 600; padding: 0 19px; cursor: pointer; transition: background .2s;
+}
+.splitbtn button:hover { background: rgba(255,255,255,.16); }
+.splitbtn .div { width: 1px; background: rgba(255,255,255,.34); }
+.splitbtn .more { padding: 0 14px; font-size: 12px; }
+
+.fabmenu { position: relative; display: inline-flex; flex-direction: column-reverse; align-items: center; gap: 9px; }
+.fabmenu .sub {
+  width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-size: 16px;
+  cursor: pointer; opacity: 0; transform: translateY(8px) scale(.85);
+  transition: opacity .3s, transform .45s cubic-bezier(.34,1.7,.64,1);
+}
+.fabmenu:hover .sub { opacity: 1; transform: none; }
+.fabmenu:hover .sub:nth-child(2) { transition-delay: .12s; }
+.fabmenu:hover .sub:nth-child(3) { transition-delay: .08s; }
+.fabmenu:hover .sub:nth-child(4) { transition-delay: .04s; }
+
+/* ============================================================
+   控件补充 · 迷你开关 / 色板 / 评分
+   ============================================================ */
+.sw.mini { width: 44px; height: 26px; }
+.sw.mini .track { border-radius: 13px; }
+.sw.mini .knob { width: 20px; height: 20px; top: 3px; left: 3px; }
+.sw.mini input:checked ~ .knob { transform: translateX(18px); }
+
+.setrow {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 13px; font-size: 12.5px; font-weight: 500;
+}
+.setrow + .setrow { border-top: 1px solid rgba(60,60,67,.10); }
+.setrow .si {
+  width: 27px; height: 27px; border-radius: 8px; flex: none; display: grid; place-items: center;
+  font-size: 13px; box-shadow: inset 0 1px 1px rgba(255,255,255,.5);
+}
+.setrow .st { flex: 1; min-width: 0; }
+.setrow .st small { display: block; font-size: 10.5px; color: var(--ink-3); font-weight: 500; }
+
+.swatches { display: flex; gap: 10px; align-items: center; }
+.swatches input { position: absolute; opacity: 0; width: 0; height: 0; }
+.swatches label {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 6px rgba(0,0,0,.2);
+  transition: transform .22s cubic-bezier(.34,1.7,.64,1), box-shadow .22s;
+}
+.swatches input:checked + label {
+  border-color: rgba(255,255,255,.95);
+  box-shadow: 0 0 0 3px rgba(10,132,255,.5), inset 0 1px 1px rgba(255,255,255,.55);
+  transform: scale(1.08);
+}
+
+.rate { display: inline-flex; gap: 2px; font-size: 20px; line-height: 1; color: #ffc300; text-shadow: 0 1px 2px rgba(0,0,0,.14); }
+.rate .off { color: rgba(120,120,128,.28); text-shadow: none; }
+
+/* ============================================================
+   输入补充 · 选择 / 多行 / 组合 / 标签 / 强度 / 建议
+   ============================================================ */
+.selectbox { position: relative; width: 100%; max-width: 300px; }
+.selectbox select {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 44px; border-radius: 13px;
+  padding: 0 36px 0 13px; font: inherit; font-size: 13.5px; font-weight: 500; color: var(--ink);
+  outline: none; cursor: pointer;
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 2px rgba(22,28,45,.06), 0 1px 2px rgba(0,0,0,.05);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+}
+.selectbox select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(10,132,255,.2); }
+.selectbox .caret { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 10px; color: var(--ink-2); }
+
+.ta {
+  width: 100%; min-height: 84px; resize: vertical; padding: 12px 14px; border-radius: 14px;
+  font: inherit; font-size: 13px; line-height: 1.55; color: var(--ink); outline: none;
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 3px rgba(22,28,45,.07);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+.ta::placeholder { color: var(--ink-3); }
+.ta:focus { border-color: var(--blue); box-shadow: inset 0 1px 2px rgba(22,28,45,.05), 0 0 0 3px rgba(10,132,255,.2); }
+
+.combo {
+  display: flex; align-items: center; gap: 9px; width: 100%; max-width: 340px;
+  height: 46px; padding: 0 6px 0 13px; border-radius: 14px;
+}
+.combo .pre { font-size: 12.5px; font-weight: 600; color: var(--ink-2); flex: none; }
+.combo input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font: inherit; font-size: 13.5px; color: var(--ink); }
+.combo input::placeholder { color: var(--ink-3); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 7px; width: 100%; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer;
+  background:
+    linear-gradient(var(--wash), var(--wash)) padding-box,
+    linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 35%, var(--rim-lo) 65%, var(--rim-hi)) border-box;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px .5px #fff, 0 1px 2px rgba(0,0,0,.05);
+  transition: transform .2s, background .2s;
+}
+.chip:hover { transform: translateY(-1px); }
+.chip.on {
+  background:
+    linear-gradient(135deg, rgba(10,132,255,.92), rgba(0,100,220,.76)) padding-box,
+    linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.18) 35%, rgba(255,255,255,.18) 65%, rgba(255,255,255,.78)) border-box;
+  color: #fff; border-color: transparent;
+  box-shadow: inset 0 1px .5px rgba(255,255,255,.6), 0 6px 14px -6px rgba(10,120,240,.7);
+}
+.chip .x { opacity: .55; font-weight: 800; }
+
+.strength { display: flex; gap: 4px; width: 100%; }
+.strength i { flex: 1; height: 4px; border-radius: 2px; background: rgba(60,60,67,.16); }
+.strength i.a1 { background: linear-gradient(90deg, #ff9f0a, #ff6b00); }
+.strength i.a2 { background: linear-gradient(90deg, #ffd60a, #ff9f0a); }
+.strength i.a3 { background: linear-gradient(90deg, #34c759, #28a745); }
+
+.suggest { width: 100%; max-width: 340px; border-radius: 16px; padding: 6px; }
+.suggest .sg {
+  display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 10px;
+  font-size: 12.5px; font-weight: 500; cursor: pointer; transition: background .2s;
+}
+.suggest .sg:hover { background: rgba(255,255,255,.58); }
+.suggest .sg .sy { font-size: 12px; opacity: .5; }
+.suggest .sg .k { margin-left: auto; font-size: 10.5px; color: var(--ink-3); }
+
+/* ============================================================
+   导航补充 · 面包屑 / 分页 / 页面 Tab / 折叠面板
+   ============================================================ */
+.crumbs { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+.crumbs a { color: var(--ink-2); text-decoration: none; transition: color .2s; }
+.crumbs a:hover { color: var(--ink); }
+.crumbs .sep { opacity: .4; }
+.crumbs .cur { color: var(--ink); font-weight: 600; }
+
+.pagehead { width: 100%; display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.pagehead .ph-l { flex: 1; min-width: 200px; }
+.pagehead h3 { font-size: 23px; font-weight: 800; letter-spacing: -.7px; margin: 8px 0 3px; }
+.pagehead p { font-size: 12px; color: var(--ink-2); }
+.pagehead .ph-r { display: flex; gap: 7px; }
+
+.pager { display: inline-flex; align-items: center; gap: 3px; padding: 5px; border-radius: 16px; }
+.pager button {
+  min-width: 32px; height: 32px; padding: 0 8px; border-radius: 10px; border: none; cursor: pointer;
+  background: transparent; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+  transition: background .2s, color .2s;
+}
+.pager button:hover { background: rgba(255,255,255,.6); color: var(--ink); }
+.pager button.on {
+  color: var(--ink);
+  background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.66));
+  box-shadow: inset 0 1px .5px #fff, 0 2px 6px -2px rgba(22,28,45,.3);
+}
+.pager .gap { padding: 0 3px; font-size: 12px; color: var(--ink-3); }
+
+.utabs { width: 100%; display: flex; gap: 22px; border-bottom: 1px solid rgba(60,60,67,.12); }
+.utabs a {
+  position: relative; padding: 0 2px 10px; font-size: 13px; font-weight: 600;
+  color: var(--ink-2); text-decoration: none; transition: color .2s;
+}
+.utabs a:hover { color: var(--ink); }
+.utabs a.on { color: var(--ink); }
+.utabs a.on::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2.5px;
+  border-radius: 2px; background: linear-gradient(90deg, #0a84ff, #4c9dff);
+}
+
+.acc { width: 100%; }
+.acc details { border-top: 1px solid rgba(60,60,67,.10); }
+.acc details:first-child { border-top: none; }
+.acc summary {
+  cursor: pointer; list-style: none; padding: 12px 4px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+}
+.acc summary::-webkit-details-marker { display: none; }
+.acc summary .ar { margin-left: auto; font-size: 10px; color: var(--ink-3); transition: transform .3s; }
+.acc details[open] summary .ar { transform: rotate(90deg); }
+.acc details p { font-size: 12px; color: var(--ink-2); line-height: 1.6; padding: 0 4px 13px; max-width: 92%; }
+
+/* ============================================================
+   容器补充 · 指标 / 头像 / 时间线 / 表格 / 通知
+   ============================================================ */
+.metric { width: 100%; }
+.metric .mk { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--ink-3); }
+.metric .mv { font-size: 26px; font-weight: 800; letter-spacing: -1.2px; font-variant-numeric: tabular-nums; margin: 5px 0 1px; }
+.metric .md { font-size: 11px; font-weight: 600; color: var(--ink-2); }
+.metric .md em { font-style: normal; color: #0060df; font-weight: 700; }
+
+.avs { display: flex; align-items: center; }
+.avs .av {
+  width: 30px; height: 30px; border-radius: 50%; margin-left: -9px;
+  border: 2px solid rgba(255,255,255,.92); display: grid; place-items: center;
+  font-size: 10.5px; font-weight: 700; color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.16);
+}
+.avs .av:first-child { margin-left: 0; }
+.avs .more {
+  width: 30px; height: 30px; border-radius: 50%; margin-left: -9px;
+  border: 2px solid rgba(255,255,255,.92); background: rgba(255,255,255,.8);
+  display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--ink-2);
+}
+.av1 { background: linear-gradient(140deg, #5ac8fa, #0a84ff); }
+.av2 { background: linear-gradient(140deg, #ffd60a, #ff9f0a); }
+.av3 { background: linear-gradient(140deg, #ff6482, #ff375f); }
+.av4 { background: linear-gradient(140deg, #bf5af2, #7d3cf0); }
+
+.tl { width: 100%; display: flex; flex-direction: column; }
+.tl-row { position: relative; display: flex; gap: 11px; padding-bottom: 15px; }
+.tl-row:last-child { padding-bottom: 0; }
+.tl-row::before { content: ""; position: absolute; left: 8.5px; top: 20px; bottom: 0; width: 1.5px; background: rgba(60,60,67,.13); }
+.tl-row:last-child::before { display: none; }
+.tl-dot {
+  width: 18px; height: 18px; border-radius: 50%; flex: none; margin-top: 1px;
+  border: 2px solid rgba(255,255,255,.9); box-shadow: 0 1px 3px rgba(0,0,0,.18);
+}
+.tl-txt { font-size: 12.5px; font-weight: 600; line-height: 1.35; }
+.tl-txt small { display: block; font-size: 10.5px; font-weight: 500; color: var(--ink-2); margin-top: 2px; }
+
+.gtable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.gtable th {
+  font-size: 9.5px; letter-spacing: .9px; text-transform: uppercase; color: var(--ink-3);
+  text-align: left; padding: 3px 10px 8px; font-weight: 700;
+}
+.gtable td { padding: 9px 10px; border-top: 1px solid rgba(60,60,67,.10); }
+.gtable tbody tr { transition: background .2s; }
+.gtable tbody tr:hover { background: rgba(255,255,255,.42); }
+.gtable .num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.pill {
+  display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px;
+  font-size: 10px; font-weight: 700;
+}
+.pill.ok { background: rgba(52,199,89,.22); color: #1d8b3c; }
+.pill.wait { background: rgba(255,159,10,.24); color: #9a5600; }
+.pill.stop { background: rgba(255,59,48,.16); color: #b3261e; }
+
+.notice { width: 100%; display: flex; align-items: flex-start; gap: 11px; padding: 11px 13px; border-radius: 15px; }
+.notice .ni {
+  width: 30px; height: 30px; border-radius: 10px; flex: none; display: grid; place-items: center; font-size: 14px;
+  color: #fff; box-shadow: inset 0 1px 1px rgba(255,255,255,.4);
+}
+.notice .nb { flex: 1; min-width: 0; }
+.notice .nb b { display: block; font-size: 12.5px; font-weight: 600; }
+.notice .nb small { font-size: 11px; color: var(--ink-2); line-height: 1.45; display: block; margin-top: 1px; }
+.notice .nt { font-size: 10.5px; color: var(--ink-3); flex: none; }
+
+/* ============================================================
+   反馈补充 · 骨架 / 空态 / 横幅 / 步骤条 / 加载
+   ============================================================ */
+@keyframes shim { from { background-position: 130% 0; } to { background-position: -40% 0; } }
+.sk {
+  border-radius: 7px;
+  background: linear-gradient(100deg, rgba(255,255,255,.3) 30%, rgba(255,255,255,.8) 48%, rgba(255,255,255,.3) 66%);
+  background-size: 220% 100%; animation: shim 1.5s ease-in-out infinite;
+}
+
+.empty { width: 100%; text-align: center; padding: 4px 8px 10px; }
+.empty .ei {
+  width: 56px; height: 56px; border-radius: 19px; margin: 0 auto 12px;
+  display: grid; place-items: center; font-size: 23px;
+  background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.34));
+  border: 1px solid rgba(255,255,255,.85);
+  box-shadow: inset 0 1.5px .5px -.5px #fff, 0 8px 18px -8px rgba(22,28,45,.4);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+}
+.empty h4 { font-size: 13.5px; font-weight: 700; }
+.empty p { font-size: 11.5px; color: var(--ink-2); margin: 4px 0 13px; }
+
+.banner {
+  width: 100%; display: flex; align-items: flex-start; gap: 9px; padding: 11px 13px;
+  border-radius: 14px; font-size: 12px; line-height: 1.55; border: 1px solid rgba(255,255,255,.75);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+}
+.banner .bi {
+  width: 18px; height: 18px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  font-size: 11px; font-weight: 800; color: #fff; margin-top: 1px;
+}
+.banner b { font-weight: 700; }
+.banner.info { background: linear-gradient(135deg, rgba(10,132,255,.15), rgba(10,132,255,.06)); }
+.banner.info .bi { background: #0a84ff; }
+.banner.ok { background: linear-gradient(135deg, rgba(52,199,89,.16), rgba(52,199,89,.06)); }
+.banner.ok .bi { background: #34c759; }
+.banner.warn { background: linear-gradient(135deg, rgba(255,159,10,.18), rgba(255,159,10,.07)); }
+.banner.warn .bi { background: #ff9f0a; }
+
+.steps { display: flex; align-items: center; width: 100%; }
+.stp { display: flex; align-items: center; gap: 7px; flex: none; }
+.stp .b {
+  width: 25px; height: 25px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: var(--ink-2);
+  background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.82);
+  box-shadow: inset 0 1px .5px #fff;
+}
+.stp .lab { font-size: 11px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.stp.done .b { background: linear-gradient(135deg, #34c759, #28a745); color: #fff; border-color: rgba(255,255,255,.65); }
+.stp.now .b {
+  background: linear-gradient(135deg, #0a84ff, #0060df); color: #fff; border-color: rgba(255,255,255,.65);
+  box-shadow: inset 0 1px .5px rgba(255,255,255,.7), 0 4px 10px -3px rgba(10,132,255,.6);
+}
+.stp.done .lab, .stp.now .lab { color: var(--ink); }
+.stp-line { flex: 1; height: 2px; margin: 0 8px; border-radius: 1px; background: rgba(60,60,67,.14); }
+.stp-line.fill { background: linear-gradient(90deg, #34c759, #0a84ff); }
+
+.spinner {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,.35); border-top-color: #0a84ff;
+  animation: spin .8s linear infinite;
+}
+.spinner.dark { border-color: rgba(60,60,67,.16); border-top-color: var(--ink); }
+
+footer { margin-top: 90px; padding-top: 30px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink-3); line-height: 1.9; }
+
+@media (max-width: 700px) {
+  main { padding: 0 18px 90px; }
+  .specs { grid-template-columns: 1fr; }
+  .appframe { grid-template-columns: 1fr; }
+  .af-side { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .af-body { grid-template-columns: repeat(2, 1fr); }
+  .bento { grid-template-columns: repeat(2, 1fr); }
+  .pricing { grid-template-columns: 1fr; }
+  .pricecard.hi { transform: none; }
+  .formgrid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="web" data-wallpaper="aurora">
+
+<!-- 折射滤镜 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="lg-lens" color-interpolation-filters="sRGB"><feImage x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x2%3D%221%22%20y2%3D%220%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f00%22%2F%3E%3Cstop%20offset%3D%22.14%22%20stop-color%3D%22%23f00%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%22.86%22%20stop-color%3D%22%23f00%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f00%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22url%28%23g%29%22%2F%3E%3C%2Fsvg%3E" result="rx"/><feImage x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230f0%22%2F%3E%3Cstop%20offset%3D%22.14%22%20stop-color%3D%22%230f0%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%22.86%22%20stop-color%3D%22%230f0%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f0%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22url%28%23g%29%22%2F%3E%3C%2Fsvg%3E" result="gy"/><feComposite in="rx" in2="gy" operator="arithmetic" k2="1" k3="1" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" scale="48" xChannelSelector="R" yChannelSelector="G"/></filter>
+  </defs>
+</svg>
+
+<div id="toast-zone"></div>
+
+<header class="topbar-web glass">
+  <a class="brand" href="landing.html"><span class="mark"></span>Lumi Glass</a>
+  <span class="tag">白色背景 · 完整版</span>
+  <nav data-site-nav="index"></nav>
+  <button class="theme-toggle" data-theme-toggle aria-label="切换明暗主题"></button>
+</header>
+
+<main>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="eyebrow">Human Interface Guidelines · Materials</div>
+    <h1>液态玻璃<br><em>完整组件库</em></h1>
+    <p>白色页面 + 彩色展示台。玻璃需要可折射的内容才成立，所以每个组件都放在一块彩色场景上演示——这既符合 HIG 的示意方式，也让折射、镜面高光和厚度都看得见。</p>
+    <div class="meta">
+      <span>blur 14px · saturate 180%</span>
+      <span>SVG feDisplacementMap 折射</span>
+      <span>regular / clear 双变体</span>
+      <span>纯 HTML + CSS</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:22px;flex-wrap:wrap">
+      <a class="btn sm tinted" href="mobile.html">手机端案例 →</a>
+      <a class="btn sm tinted" href="web.html">网页端案例 →</a>
+      <a class="btn sm ghost" href="docs.html">使用文档</a>
+    </div>
+  </div>
+
+  <!-- 00 材质 -->
+  <section id="materials">
+    <div class="sec-head"><span class="num">00</span><h2>材质</h2><span class="en">Materials</span></div>
+    <p class="sec-desc">HIG 定义两种变体：<b>regular</b> 模糊并调亮背景，保证文本可读，用于大多数系统组件；<b>clear</b> 高度透明，专为悬浮在照片、视频等视觉丰富背景上的控制层设计，必要时在其下方叠加 35% 的暗层以保证对比度。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a">
+          <div class="glass" style="width:100%;padding:22px;border-radius:22px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--ink-3);text-transform:uppercase;margin-bottom:10px">Regular</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px">常规材质</div>
+            <div style="font-size:12.5px;color:var(--ink-2);line-height:1.6">模糊 + 提亮背景，文字清晰可读。适用于导航栏、侧边栏、弹窗等文本较多的容器。</div>
+          </div>
+        </div>
+        <p class="cap"><b>Regular</b> · blur 18px / saturate 180% / 白色叠层 62%→28%</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage d">
+          <div class="glass clear" style="width:100%;padding:22px;border-radius:22px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:10px">Clear</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;color:#fff">透明材质</div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.6">高透明度，让背景内容完整透出。用于照片、视频之上的控制层，背景明亮时需加 35% 暗层。</div>
+          </div>
+          <span class="stage-note">深色背景上的 clear 变体</span>
+        </div>
+        <p class="cap"><b>Clear</b> · blur 5px / brightness 1.06 / 白色叠层 26%→8%</p>
+      </div>
+    </div>
+
+    <div class="tokens">
+      <div class="token"><b>模糊</b><span>blur 14–26px</span></div>
+      <div class="token"><b>饱和度</b><span>saturate 150–180%</span></div>
+      <div class="token"><b>折射</b><span>feDisplacementMap 26</span></div>
+      <div class="token"><b>镜面</b><span>inset 0 1.5px 0 #fff</span></div>
+      <div class="token"><b>投影</b><span>0 16px 34px -16px</span></div>
+      <div class="token"><b>圆角</b><span>14 / 18 / 24 / 28px</span></div>
+    </div>
+  </section>
+
+  <!-- 01 布局 -->
+  <section id="layout">
+    <div class="sec-head"><span class="num">01</span><h2>布局</h2><span class="en">Layout</span></div>
+    <p class="sec-desc">液态玻璃属于「功能层」，所以布局的核心是<b>分层</b>：悬浮的导航与侧栏、可滚动的内容区、贴边浮起的操作条。下面五种是最常用的页面骨架，全部由同一套玻璃拼成，只改容器结构。</p>
+
+    <div class="specs">
+      <div class="spec span2">
+        <div class="stage a" style="align-items:stretch;padding:24px">
+          <div class="appframe">
+            <div class="af-side glass">
+              <div class="af-brand"><span class="m"></span>Studio</div>
+              <div class="af-nav on"><i></i>概览</div>
+              <div class="af-nav"><i></i>数据集</div>
+              <div class="af-nav"><i></i>自动化</div>
+              <div class="af-nav"><i></i>成员</div>
+              <div class="af-nav" style="margin-top:auto"><i></i>设置</div>
+            </div>
+            <div class="af-main">
+              <div class="af-head glass">
+                <span class="t">概览</span>
+                <span class="mini-pill">Pro</span>
+                <div class="acts"><button>⌕</button><button>＋</button><button>⋯</button></div>
+              </div>
+              <div class="af-body">
+                <div class="af-tile">今日请求<b>12,840</b></div>
+                <div class="af-tile">平均延迟<b>182 ms</b></div>
+                <div class="af-tile">成功率<b>99.4%</b></div>
+                <div class="af-tile" style="grid-column:span 2">本周趋势<b>＋18.2%</b></div>
+                <div class="af-tile">错误<b>7</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>应用框架 App Frame</b> · 侧栏与顶栏是悬浮玻璃层，内容区是半透明实体底——三层对比把「哪一层可以动」讲清楚了</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage b" style="align-items:stretch;padding:24px">
+          <div class="bento">
+            <div class="bc glass s2"><span class="lab">总览</span><span class="big">4 个维度</span><span class="sub">数据自动刷新 · 2 分钟前</span></div>
+            <div class="bc glass"><span class="lab">活跃</span><span class="big">328</span><span class="sub">较昨日</span></div>
+            <div class="bc glass"><span class="lab">留存</span><span class="big">62%</span><span class="sub">7 日滚动</span></div>
+            <div class="bc glass fill s2"><span class="lab">本周目标</span><span class="big">78 / 100</span><span class="sub">还差 22 个转化</span></div>
+            <div class="bc glass"><span class="lab">队列</span><span class="big">14</span><span class="sub">运行中</span></div>
+            <div class="bc glass"><span class="lab">异常</span><span class="big">0</span><span class="sub">24 小时内</span></div>
+            <div class="bc glass s2"><span class="lab">转化漏斗</span><span class="big">进站 → 注册 → 付费</span><span class="sub">整体 4.8%</span></div>
+            <div class="bc glass"><span class="lab">预算</span><span class="big">¥ 8.2w</span><span class="sub">已用 61%</span></div>
+            <div class="bc glass"><span class="lab">版本</span><span class="big">v 3.4.1</span><span class="sub">今天部署</span></div>
+          </div>
+        </div>
+        <p class="cap"><b>Bento 网格</b> · 玻璃块靠 <code>span 2</code> 拼出主次；只给一块主卡上品牌色，其余保持中性，避免整屏花掉</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="align-items:flex-start;padding:22px">
+          <div class="medialist">
+            <div class="mrow"><span class="thumb th1"></span><span class="mb"><b>海岸线 05</b><small>RAW · 24.6 MB</small></span><span class="mact">打开</span></div>
+            <div class="mrow"><span class="thumb th2"></span><span class="mb"><b>落日延时</b><small>MOV · 128 MB</small></span><span class="mact">打开</span></div>
+            <div class="mrow"><span class="thumb th3"></span><span class="mb"><b>色板草稿</b><small>FIG · 8.2 MB</small></span><span class="mact">打开</span></div>
+            <div class="mrow"><span class="thumb th4"></span><span class="mb"><b>山脊航拍</b><small>JPG · 4.1 MB</small></span><span class="mact">打开</span></div>
+          </div>
+        </div>
+        <p class="cap"><b>媒体列表 Media List</b> · 缩略图负责提供色彩，行本身保持透明，hover 才铺一层薄玻璃</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="align-items:stretch;padding:24px">
+          <div class="formgrid">
+            <div class="fg"><span class="fl">姓名</span><input class="inp" type="text" value="林一"></div>
+            <div class="fg"><span class="fl">邮箱</span><input class="inp" type="email" placeholder="you@example.com"></div>
+            <div class="fg full"><span class="fl">项目说明</span><input class="inp" type="text" placeholder="一句话描述这次交付"></div>
+            <div class="fg"><span class="fl">团队</span><input class="inp" type="text" value="设计系统组"></div>
+            <div class="fg"><span class="fl">截止日期</span><input class="inp" type="text" value="2026-11-04"></div>
+            <div class="fg full" style="flex-direction:row;align-items:center;gap:10px">
+              <span class="hint" style="flex:1">提交后会通知 3 位成员</span>
+              <button class="btn primary sm">保存</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>表单布局</b> · 两列网格 + 整行字段；输入框用玻璃壳包住透明 input，聚焦只加蓝色光环</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage a" style="padding:30px 24px">
+          <div class="pricing">
+            <div class="pricecard glass">
+              <span class="pk">个人</span>
+              <span class="pv">¥ 0 <span>/ 月</span></span>
+              <ul><li>1 个空间</li><li>5 GB 存储</li><li>社区支持</li></ul>
+              <button class="btn sm" style="width:100%">开始使用</button>
+            </div>
+            <div class="pricecard glass hi">
+              <span class="pc-ribbon">推荐</span>
+              <span class="pk">团队</span>
+              <span class="pv">¥ 68 <span>/ 人 · 月</span></span>
+              <ul><li>无限空间</li><li>200 GB 存储</li><li>版本历史 90 天</li></ul>
+              <button class="btn primary sm" style="width:100%">升级团队版</button>
+            </div>
+            <div class="pricecard glass">
+              <span class="pk">企业</span>
+              <span class="pv">定制</span>
+              <ul><li>SSO / SCIM</li><li>专属节点</li><li>7×24 支持</li></ul>
+              <button class="btn sm" style="width:100%">联系我们</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>定价网格 Pricing</b> · 推荐卡上移 5px 并放大 1.02，用位置和投影表达优先级，不靠堆颜色</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 按钮 -->
+  <section id="buttons">
+    <div class="sec-head"><span class="num">02</span><h2>按钮</h2><span class="en">Buttons</span></div>
+    <p class="sec-desc">按压时果冻挤压到 1.04/.96，松手由过冲弹簧曲线回弹——弹性曲线用 <code>cubic-bezier(.34,1.7,.64,1)</code>，会先弹过原尺寸再收回，模拟玻璃的物理回弹。</p>
+
+    <div class="specs">
+      <div class="spec span2">
+        <div class="stage a">
+          <button class="btn">常规</button>
+          <button class="btn primary">主要操作</button>
+          <button class="btn tinted">着色</button>
+          <button class="btn danger">删除</button>
+          <button class="btn ghost">次要</button>
+          <button class="btn sm">小尺寸</button>
+          <button class="btn icon" title="收藏">♡</button>
+          <button class="btn icon" title="分享">↑</button>
+          <button class="fab" title="新建">＋</button>
+        </div>
+        <p class="cap"><b>按钮状态</b> · regular / primary / tinted / destructive / ghost / small / icon / FAB（Float Action Button）</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage b">
+          <button class="btn primary loading">提交中</button>
+          <button class="btn loading light">加载</button>
+          <div class="splitbtn">
+            <button>发布</button>
+            <span class="div"></span>
+            <button class="more">⌄</button>
+          </div>
+          <button class="btn tinted sm">＋ 添加成员</button>
+          <div class="fabmenu">
+            <button class="fab" title="展开">＋</button>
+            <span class="sub glass">📄</span>
+            <span class="sub glass">🖼</span>
+            <span class="sub glass">🔗</span>
+          </div>
+        </div>
+        <p class="cap"><b>加载 / 分裂按钮 / 悬浮菜单</b> · loading 用旋转描边替换文字；split 把主操作与次级菜单拼成一颗玻璃；FAB 悬停向上展开三层子操作</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 控件 -->
+  <section id="controls">
+    <div class="sec-head"><span class="num">03</span><h2>控件</h2><span class="en">Controls</span></div>
+    <p class="sec-desc">HIG 的例外条款：内容层里带瞬态交互的控制（滑块、开关）也采用液态玻璃外观，用来在操作瞬间强调交互性。滑块的玻璃旋钮会实时折射下方轨道。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage b">
+          <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">
+            <label class="sw"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+            <label class="sw"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+            <label class="sw blue"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <label class="check"><input type="checkbox" checked><span class="box">✓</span>复选框</label>
+            <label class="check"><input type="checkbox"><span class="box">✓</span>未选中</label>
+            <label class="check round"><input type="radio" name="r1" checked><span class="box">●</span>单选项</label>
+            <label class="check round"><input type="radio" name="r1"><span class="box">●</span>另一项</label>
+          </div>
+        </div>
+        <p class="cap"><b>开关 / 复选 / 单选</b> · 绿色为系统开关，蓝色为着色开关；勾选时轻微放大 1.04</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div style="display:flex;flex-direction:column;gap:20px;align-items:center;width:100%">
+            <div class="seg">
+              <input type="radio" name="seg1" id="sg1" checked><label for="sg1">日</label>
+              <input type="radio" name="seg1" id="sg2"><label for="sg2">周</label>
+              <input type="radio" name="seg1" id="sg3"><label for="sg3">月</label>
+              <input type="radio" name="seg1" id="sg4"><label for="sg4">年</label>
+            </div>
+            <div class="stepper glass">
+              <button onclick="step(this,-1)">−</button>
+              <span class="val">2</span>
+              <button onclick="step(this,1)">＋</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>分段控制 / 步进器</b> · 选中项浮起为独立玻璃片，步进器点击可增减</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage a">
+          <div class="slider" style="max-width:560px">
+            <div class="rail"></div>
+            <input type="range" min="0" max="100" value="58">
+          </div>
+        </div>
+        <p class="cap"><b>滑块</b> · 中性细轨 + 44px 玻璃旋钮；旋钮通过 backdrop 折射轨道，拖动时旋钮沿弹簧放大</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b">
+          <div style="display:flex;gap:14px;align-items:center">
+            <label class="tile"><input type="checkbox" checked><span class="face">✈️</span></label>
+            <label class="tile"><input type="checkbox"><span class="face warm">📶</span></label>
+            <label class="tile"><input type="checkbox"><span class="face">🌙</span></label>
+          </div>
+        </div>
+        <p class="cap"><b>控制中心磁贴</b> · 点亮后着色并放大，投影染上同色光晕</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div style="display:flex;gap:22px;align-items:center">
+            <div class="ring">72%</div>
+            <div class="progress">
+              <div class="bar"><div class="fill"></div></div>
+              <p style="font-size:11.5px;color:var(--ink-2);margin-top:8px">渐变进度条 · 循环充能</p>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>进度</b> · 环形用 conic-gradient + 径向遮罩；条形为流体渐变</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="align-items:stretch;padding:22px">
+          <div class="list glass">
+            <div class="setrow">
+              <span class="si" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">✈️</span>
+              <span class="st">飞行模式<small>关闭蜂窝与无线</small></span>
+              <label class="sw mini blue" style="margin-left:auto"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="setrow">
+              <span class="si" style="background:linear-gradient(140deg,#a0a0a8,#7c7c84)">🅑</span>
+              <span class="st">蓝牙<small>已连接 AirPods</small></span>
+              <label class="sw mini blue" style="margin-left:auto"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="setrow">
+              <span class="si" style="background:linear-gradient(140deg,#ff9f0a,#ff6b00)">🌙</span>
+              <span class="st">专注模式<small>22:00 自动开启</small></span>
+              <label class="sw mini blue" style="margin-left:auto"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="setrow">
+              <span class="si" style="background:linear-gradient(140deg,#4cd964,#28a745)">🔋</span>
+              <span class="st">低电量模式<small>当前 38%</small></span>
+              <label class="sw mini" style="margin-left:auto"><input type="checkbox" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>设置行</b> · 左图标右开关，行间用发丝线；开关缩到 44×26 以适应列表密度</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="align-items:center">
+          <div style="display:flex;flex-direction:column;gap:20px;align-items:center;width:100%">
+            <div class="swatches">
+              <input type="radio" name="sw" id="sw1" checked><label for="sw1" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></label>
+              <input type="radio" name="sw" id="sw2"><label for="sw2" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></label>
+              <input type="radio" name="sw" id="sw3"><label for="sw3" style="background:linear-gradient(140deg,#ff6482,#ff375f)"></label>
+              <input type="radio" name="sw" id="sw4"><label for="sw4" style="background:linear-gradient(140deg,#bf5af2,#7d3cf0)"></label>
+              <input type="radio" name="sw" id="sw5"><label for="sw5" style="background:linear-gradient(140deg,#4cd964,#28a745)"></label>
+            </div>
+            <div class="rate" aria-label="4 分">★★★★<span class="off">★</span></div>
+          </div>
+        </div>
+        <p class="cap"><b>色板 / 评分</b> · 选中态靠双层光环而不是打勾；评分用文字星形，成本最低</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage b">
+          <div style="width:100%;display:flex;flex-direction:column;gap:22px;padding:0 6px">
+            <div class="slider blue" style="max-width:420px">
+              <div class="rail"></div>
+              <input type="range" min="0" max="100" value="34">
+            </div>
+            <div class="slider blue" style="max-width:420px">
+              <div class="rail"></div>
+              <input type="range" min="0" max="100" value="72">
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>系统细轨滑块</b> · 8px 灰轨 + 44px 玻璃旋钮；这是 HIG 里滑块的原生形态，旋钮下方可以看见内容的颜色</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 输入 -->
+  <section id="inputs">
+    <div class="sec-head"><span class="num">04</span><h2>输入</h2><span class="en">Inputs</span></div>
+    <p class="sec-desc">输入类控件遵循「外玻璃、内透明」：容器是玻璃，真正的 input 完全裸奔，只保留文字与光标。</p>
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a">
+          <div class="searchbar glass">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+            <input type="search" placeholder="搜索">
+          </div>
+        </div>
+        <p class="cap"><b>搜索栏</b> · 胶囊玻璃，聚焦后出现系统蓝光环</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b">
+          <input class="field" type="text" placeholder="用户名或邮箱">
+        </div>
+        <p class="cap"><b>文本框</b> · 16px 圆角玻璃，内阴影模拟凹陷</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="align-items:stretch;padding:24px">
+          <div style="display:flex;flex-direction:column;gap:12px;width:100%;align-items:center">
+            <div class="selectbox">
+              <select>
+                <option>设计系统 · 编辑器</option>
+                <option>市场 · 官网</option>
+                <option>数据 · 仪表盘</option>
+              </select>
+              <span class="caret">▼</span>
+            </div>
+            <textarea class="ta" placeholder="补充说明（可选），支持 200 字"></textarea>
+          </div>
+        </div>
+        <p class="cap"><b>选择器 / 多行文本</b> · select 去掉系统外观后自绘箭头；textarea 只允许纵向拉伸，避免撑破布局</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="align-items:stretch;padding:22px">
+          <div style="width:100%;display:flex;flex-direction:column;gap:12px;align-items:center">
+            <div class="combo glass">
+              <span class="pre">https://</span>
+              <input type="text" placeholder="your-domain.com">
+              <button class="btn primary sm" style="height:34px;padding:0 14px;flex:none">检查</button>
+            </div>
+            <div class="suggest glass">
+              <div class="sg"><span class="sy">⌕</span>液态玻璃设计规范<span class="k">文档</span></div>
+              <div class="sg"><span class="sy">⌕</span>玻璃材质的最佳实践<span class="k">文档</span></div>
+              <div class="sg"><span class="sy">↩</span>glass materials<span class="k">搜索</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>组合输入 / 搜索建议</b> · 前缀与内嵌按钮都在同一颗玻璃里；建议列表也是玻璃，但只有被 hover 的那一行铺白</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="align-items:stretch;padding:24px">
+          <div style="width:100%;display:flex;flex-direction:column;gap:16px">
+            <div class="chips">
+              <span class="chip on">全部 <span class="x">×</span></span>
+              <span class="chip">设计 <span class="x">×</span></span>
+              <span class="chip on">已归档 <span class="x">×</span></span>
+              <span class="chip">＋ 添加</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div class="strength"><i class="a3"></i><i class="a3"></i><i class="a3"></i><i></i></div>
+              <span style="font-size:11px;color:var(--ink-2);font-weight:600">强度：强 · 12 位，含符号</span>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>标签输入 / 密码强度</b> · chip 选中态染品牌色；强度条用四段，低段暖色、高段绿色</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="align-items:stretch;padding:24px">
+          <div style="display:flex;flex-direction:column;gap:11px;width:100%;align-items:center">
+            <input class="field" type="text" value="glass@example.com"
+              style="border-color:rgba(52,199,89,.85);box-shadow:inset 0 1.5px .5px -.5px #fff, 0 0 0 3px rgba(52,199,89,.2)">
+            <input class="field" type="text" value="name@"
+              style="border-color:rgba(255,59,48,.8);box-shadow:inset 0 1.5px .5px -.5px #fff, 0 0 0 3px rgba(255,59,48,.16)">
+            <span style="align-self:flex-start;font-size:11px;font-weight:600;color:#c1271f">请输入完整的邮箱地址</span>
+          </div>
+        </div>
+        <p class="cap"><b>校验状态</b> · 成功与错误只用 1px 描边 + 3px 光环表达，不改背景色，玻璃质感不被破坏</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 导航 -->
+  <section id="navigation">
+    <div class="sec-head"><span class="num">05</span><h2>导航</h2><span class="en">Navigation</span></div>
+    <p class="sec-desc">这是 Liquid Glass 的主场。导航元素构成悬浮在内容之上的功能层，内容从玻璃下方滚动透出——注意本页顶栏与下方手机里的 Tab 栏。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage a" style="padding:26px">
+          <div class="navbar glass">
+            <span class="t">照片</span>
+            <div class="acts"><button>＋</button><button>⋯</button></div>
+          </div>
+        </div>
+        <p class="cap"><b>导航栏</b> · 高 54px，圆角 27px，右侧胶囊图标按钮</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="padding:22px">
+          <div class="dd">
+            <button type="button" class="btn sm">菜单 ⌄</button>
+            <div class="menu glass">
+              <button type="button" class="mi">编辑</button>
+              <button type="button" class="mi">复制</button>
+              <div class="sep-line"></div>
+              <button type="button" class="mi danger">删除</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>下拉菜单</b> · 全站统一 overlay 玻璃（与 docs / web 一致）</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="padding:22px">
+          <div class="large-title glass">
+            <div class="mini-nav">
+              <span class="back">‹ 返回</span>
+              <span style="opacity:.6">资料库</span>
+            </div>
+            <h3>最近项目</h3>
+            <p>12 个文件 · 今天更新</p>
+          </div>
+        </div>
+        <p class="cap"><b>大标题导航</b> · 小型玻璃返回按钮 + 标题区，滚动时标题会收缩进导航栏</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="padding:30px 20px">
+          <div class="tabbar glass">
+            <input type="radio" name="tb" id="tb1" checked><label for="tb1"><span class="ico">🏠</span>首页</label>
+            <input type="radio" name="tb" id="tb2"><label for="tb2"><span class="ico">🔍</span>搜索</label>
+            <input type="radio" name="tb" id="tb3"><label for="tb3"><span class="ico">♡</span>收藏</label>
+            <input type="radio" name="tb" id="tb4"><label for="tb4"><span class="ico">👤</span>我的</label>
+          </div>
+        </div>
+        <p class="cap"><b>标签页栏</b> · 选中项成为独立玻璃胶囊，图标彩色化（可点击切换）</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="padding:34px 20px">
+          <div class="toolbar glass">
+            <button>↺</button><button>↻</button><button>♡</button><button>↓</button><button>⋯</button>
+          </div>
+        </div>
+        <p class="cap"><b>工具栏</b> · 横向图标组，hover 单独浮起</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="padding:26px">
+          <div class="sidebar glass">
+            <span class="sb-t">资料库</span>
+            <a href="#" class="on">📁 全部项目</a>
+            <a href="#">🖼 照片</a>
+            <a href="#">📄 文档</a>
+            <a href="#">🎵 音乐</a>
+          </div>
+        </div>
+        <p class="cap"><b>侧边栏</b> · 列表项 hover 后铺一层薄玻璃</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="padding:34px 20px">
+          <div class="dock glass">
+            <span class="app a1">📷</span>
+            <span class="app a2">📝</span>
+            <span class="app a3">🎵</span>
+            <span class="app a4">🎨</span>
+            <span class="app a5">💬</span>
+          </div>
+        </div>
+        <p class="cap"><b>程序坞 Dock</b> · 图标 hover 上浮 5px——少见的「玻璃里可以不做玻璃」的场景</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage a" style="padding:34px 20px">
+          <div class="player glass">
+            <span class="art"></span>
+            <span class="meta"><b>Ambient Glass</b><small>iPhone · 正在播放</small></span>
+            <span class="ctrl"><button>⏮</button><button>⏸</button><button>⏭</button></span>
+          </div>
+        </div>
+        <p class="cap"><b>迷你播放器</b> · 玻璃底色让专辑封面保留饱和度，控制按钮不加背景只做 hover</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage c" style="align-items:flex-end;padding:26px">
+          <div class="pagehead">
+            <div class="ph-l">
+              <div class="crumbs">
+                <a href="#">工作台</a><span class="sep">›</span>
+                <a href="#">设计系统</a><span class="sep">›</span>
+                <span class="cur">玻璃组件</span>
+              </div>
+              <h3>玻璃组件</h3>
+              <p>24 个组件 · 上次同步 3 小时前</p>
+            </div>
+            <div class="ph-r">
+              <button class="btn sm">导入</button>
+              <button class="btn primary sm">新建组件</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>页面头部 Page Head</b> · 面包屑、标题与操作共处一行，底部基线对齐；窄屏时操作组自动换行</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="align-items:stretch;padding:24px">
+          <div style="width:100%;display:flex;flex-direction:column;gap:18px;align-items:center">
+            <div class="utabs" style="max-width:330px">
+              <a href="#" class="on">全部</a>
+              <a href="#">已发布</a>
+              <a href="#">草稿</a>
+            </div>
+            <div class="pager glass">
+              <button>‹</button>
+              <button class="on">1</button>
+              <button>2</button>
+              <button>3</button>
+              <span class="gap">…</span>
+              <button>12</button>
+              <button>›</button>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>页面 Tab / 分页</b> · Tab 用下划线而不是胶囊，避免与分段控制混淆；分页器整条做成玻璃</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="align-items:stretch;padding:20px">
+          <div class="acc" style="width:100%">
+            <details open>
+              <summary>玻璃可以用在内容卡上吗？<span class="ar">›</span></summary>
+              <p>只建议用在内容之上的控制层。内容卡本身要用近乎不透明的底，否则长段文字会随背景滚动而失去对比度。</p>
+            </details>
+            <details>
+              <summary>为什么我的折射看不见？<span class="ar">›</span></summary>
+              <p>backdrop-filter 引用 SVG 滤镜目前只有 Chromium 完整支持，且父级 <code>filter</code>、<code>isolation</code> 会截断采样链。</p>
+            </details>
+            <details>
+              <summary>暗色模式下要注意什么？<span class="ar">›</span></summary>
+              <p>把白色叠层换成低透明度的白 + 深色底，镜面高光降到 0.35 左右，否则会变成一块发光塑料。</p>
+            </details>
+          </div>
+        </div>
+        <p class="cap"><b>折叠面板 Accordion</b> · 原生 <code>details</code> 加玻璃底，箭头旋转 90° 表示展开</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage d" style="padding:26px">
+          <div class="glass clear" style="width:100%;display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:20px">
+            <span style="flex:1;font-size:12px;font-weight:600;color:#fff">3 项已选择</span>
+            <button class="btn sm" style="height:32px;font-size:12px">取消</button>
+            <button class="btn primary sm" style="height:32px;font-size:12px">移动到</button>
+          </div>
+          <span class="stage-note">clear 变体的典型用法：批量操作条</span>
+        </div>
+        <p class="cap"><b>批量操作条</b> · 悬浮在照片之上用 clear，让选区颜色透出来，按钮才补不透明背景</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 容器 -->
+  <section id="containers">
+    <div class="sec-head"><span class="num">06</span><h2>容器</h2><span class="en">Containers</span></div>
+    <p class="sec-desc">严格按 HIG 分工：内容卡片用 <b>regular</b> 保证文字可读；弹层（抽屉、操作表、popover、控制中心）才是真正的功能层，可以用更薄的玻璃。</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="stage b" style="align-items:flex-start">
+          <div class="card glass">
+            <div class="cover"></div>
+            <h3>玻璃卡片</h3>
+            <p>封面负责提供色彩，卡片本体只做轻微模糊与提亮，正文对比度始终足够。</p>
+            <button class="btn primary sm">查看详情</button>
+          </div>
+        </div>
+        <p class="cap"><b>卡片</b> · 内容层容器，圆角 24px</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c">
+          <div class="list glass">
+            <div class="lrow"><span class="ico" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">📶</span>无线局域网<span class="chev">›</span></div>
+            <div class="lrow"><span class="ico" style="background:linear-gradient(140deg,#a0a0a8,#7c7c84)">🅑</span>蓝牙<span class="chev">›</span></div>
+            <div class="lrow"><span class="ico" style="background:linear-gradient(140deg,#4cd964,#28a745)">🔋</span>电池<span class="chev">›</span></div>
+            <div class="lrow"><span class="ico" style="background:linear-gradient(140deg,#ff9f0a,#ff6b00)">🔔</span>通知<span class="chev">›</span></div>
+          </div>
+        </div>
+        <p class="cap"><b>分组列表</b> · 行间用 10% 透明度的发丝线，不用实线</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="padding:60px 24px 30px">
+          <div class="popover glass">
+            <h4>共享此项目</h4>
+            <p>任何拥有链接的人都可以查看，可随时撤销访问权限。</p>
+            <button class="btn primary sm" style="width:100%">拷贝链接</button>
+          </div>
+        </div>
+        <p class="cap"><b>浮出层 Popover</b> · 带尖角指向触发源，玻璃与箭头同材质</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage b" style="padding:30px">
+          <div class="control-center glass">
+            <div class="ccg glass horiz wide">
+              <div class="cc-round on">📶</div>
+              <div class="cc-name">无线局域网<br><b>Home-5G</b></div>
+            </div>
+            <div class="ccg glass horiz">
+              <div class="cc-round">🅑</div>
+              <div class="cc-name">蓝牙<br><b>关闭</b></div>
+            </div>
+            <div class="ccg glass horiz"><div class="cc-round on">🌙</div><div class="cc-round">🔇</div><div class="cc-round on">🔒</div></div>
+            <div class="ccg glass" style="align-items:center;justify-content:center">
+              <div class="cc-round on">🎧</div><div class="cc-name" style="text-align:center"><b>AirPods</b></div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>控制中心</b> · 双层嵌套玻璃：外层面板 + 内层分组，层级靠透明度区分</p>
+      </div>
+
+      <div class="spec">
+        <div class="mock a">
+          <span class="mock-title">底部抽屉 · Bottom Sheet</span>
+          <div class="sheet glass">
+            <div class="grab"></div>
+            <h4>分享到</h4>
+            <p>最近使用 · 隔空投送 · 信息</p>
+            <div style="display:flex;gap:10px">
+              <span class="cc-round" style="background:rgba(255,255,255,.5)">👤</span>
+              <span class="cc-round" style="background:rgba(255,255,255,.5)">✉️</span>
+              <span class="cc-round" style="background:rgba(255,255,255,.5)">🔗</span>
+              <span class="cc-round" style="background:rgba(255,255,255,.5)">📋</span>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>底部抽屉</b> · 顶部把手指示可拖拽，抽屉边缘比主体更亮</p>
+      </div>
+
+      <div class="spec">
+        <div class="mock b">
+          <span class="mock-title">操作表 · Action Sheet</span>
+          <div class="actionsheet">
+            <div class="as-item glass">存储图像</div>
+            <div class="as-item glass">拷贝</div>
+            <div class="as-item glass danger">删除照片</div>
+            <div class="as-item glass as-cancel">取消</div>
+          </div>
+        </div>
+        <p class="cap"><b>操作表</b> · 每项独立玻璃片，破坏性操作用系统红，取消项加粗分开</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage c" style="padding:30px 24px">
+          <div class="glass" style="width:100%;padding:8px 10px 12px;border-radius:22px">
+            <div style="display:flex;align-items:center;gap:9px;padding:8px 8px 4px">
+              <span style="font-size:13.5px;font-weight:700">成员</span>
+              <span class="pill ok">4 人</span>
+              <span style="margin-left:auto;font-size:11.5px;font-weight:600;color:var(--ink-2)">导出 CSV</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="gtable">
+                <thead>
+                  <tr><th>成员</th><th>角色</th><th>状态</th><th style="text-align:right">提交</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>林一</td><td>设计负责人</td><td><span class="pill ok">在线</span></td><td class="num" style="text-align:right">128</td></tr>
+                  <tr><td>陈默</td><td>前端</td><td><span class="pill ok">在线</span></td><td class="num" style="text-align:right">96</td></tr>
+                  <tr><td>苏可</td><td>产品</td><td><span class="pill wait">离开</span></td><td class="num" style="text-align:right">54</td></tr>
+                  <tr><td>周至</td><td>运营</td><td><span class="pill stop">未激活</span></td><td class="num" style="text-align:right">0</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>表格卡</b> · 玻璃只做外框，表头压小到 9.5px 字距拉开；状态用淡色底 pill，避免色块抢视线</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="align-items:stretch;padding:20px">
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)">✉</span>
+              <span class="nb"><b>你被邀请加入「设计系统」</b><small>林一 · 2 分钟前</small></span>
+              <span class="nt">新</span>
+            </div>
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#4cd964,#28a745)">✓</span>
+              <span class="nb"><b>构建已通过</b><small>main · 8 分钟前</small></span>
+              <span class="nt">1m</span>
+            </div>
+            <div class="notice glass">
+              <span class="ni" style="background:linear-gradient(140deg,#ff9f0a,#ff6b00)">!</span>
+              <span class="nb"><b>存储空间即将用尽</b><small>已使用 92% · 建议清理缓存</small></span>
+              <span class="nt">1h</span>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>通知卡</b> · 左侧方形图标块提供唯一饱和色，正文保持中性；右侧时间戳不参与层级</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage b" style="align-items:stretch;padding:24px">
+          <div style="width:100%;display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:12px">
+            <div class="glass metric" style="padding:16px;border-radius:18px">
+              <div class="mk">本月收入</div>
+              <div class="mv">¥ 128,400</div>
+              <div class="md">较上月 <em>＋12.4%</em></div>
+              <div class="avs" style="margin-top:16px">
+                <span class="av av1">林</span>
+                <span class="av av2">陈</span>
+                <span class="av av3">苏</span>
+                <span class="more">+5</span>
+              </div>
+            </div>
+
+            <div class="glass" style="padding:16px;border-radius:18px;display:flex;flex-direction:column">
+              <div class="mk" style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--ink-3)">团队成员</div>
+              <div class="avs" style="margin:14px 0 12px">
+                <span class="av av1">林</span>
+                <span class="av av2">陈</span>
+                <span class="av av3">苏</span>
+                <span class="av av4">周</span>
+                <span class="more">+8</span>
+              </div>
+              <div style="font-size:11px;color:var(--ink-2);font-weight:500;margin-bottom:auto">12 人 · 3 个小组</div>
+              <button class="btn sm" style="width:100%;height:32px;font-size:12px;margin-top:12px">邀请成员</button>
+            </div>
+
+            <div class="glass" style="padding:16px;border-radius:18px">
+              <div class="mk" style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--ink-3);margin-bottom:13px">最近活动</div>
+              <div class="tl">
+                <div class="tl-row">
+                  <span class="tl-dot" style="background:linear-gradient(140deg,#5ac8fa,#0a84ff)"></span>
+                  <span class="tl-txt">林一 发布了 v3.4<small>12 分钟前</small></span>
+                </div>
+                <div class="tl-row">
+                  <span class="tl-dot" style="background:linear-gradient(140deg,#ffd60a,#ff9f0a)"></span>
+                  <span class="tl-txt">陈默 提交了 6 个组件<small>1 小时前</small></span>
+                </div>
+                <div class="tl-row">
+                  <span class="tl-dot" style="background:linear-gradient(140deg,#4cd964,#28a745)"></span>
+                  <span class="tl-txt">苏可 关闭了 3 个议题<small>昨天</small></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>指标卡 / 头像组 / 时间线</b> · 三种信息密度并排，玻璃厚度一致但内部留白不同；时间线的连接线用 13% 墨色</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 反馈 -->
+  <section id="feedback">
+    <div class="sec-head"><span class="num">07</span><h2>反馈</h2><span class="en">Feedback</span></div>
+    <p class="sec-desc">弹窗、Toast、Tooltip 都是瞬时功能层。文本密集的弹窗用 regular 变体，并把背景压暗一档，保证焦点唯一。</p>
+
+    <div class="specs">
+      <div class="spec span2">
+        <div class="stage a">
+          <button class="btn" onclick="document.getElementById('alertDemo').showModal()">打开弹窗</button>
+          <button class="btn tinted" onclick="showToast('已保存到「下载」')">Toast 通知</button>
+          <span class="tip-wrap">
+            <button class="btn icon">ⓘ</button>
+            <span class="tip glass">悬停查看说明</span>
+          </span>
+          <span class="badge glass">未读 <span class="n">6</span></span>
+          <span class="badge glass"><span class="dot"></span>已连接</span>
+        </div>
+        <p class="cap"><b>弹窗 / Toast / Tooltip / 徽章</b> · 全部可交互；弹窗使用 regular + 背景模糊压暗</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage c" style="align-items:stretch;padding:20px">
+          <div class="glass" style="width:100%;padding:14px;border-radius:18px;display:flex;gap:12px">
+            <div class="sk" style="width:56px;height:56px;border-radius:14px;flex:none"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center">
+              <div class="sk" style="height:11px;width:68%"></div>
+              <div class="sk" style="height:9px;width:92%"></div>
+              <div class="sk" style="height:9px;width:46%"></div>
+            </div>
+          </div>
+          <div class="empty" style="margin-top:16px">
+            <div class="ei">🗂</div>
+            <h4>还没有组件</h4>
+            <p>从模板开始，或把现有组件拖进来</p>
+            <button class="btn primary sm">新建组件</button>
+          </div>
+        </div>
+        <p class="cap"><b>骨架屏 / 空态</b> · 骨架用高光扫过而不是整体闪烁；空态必须给一个可执行的下一步</p>
+      </div>
+
+      <div class="spec">
+        <div class="stage a" style="align-items:stretch;padding:20px">
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+            <div class="banner info"><span class="bi">i</span><span><b>新版本可用</b> · 刷新后生效</span></div>
+            <div class="banner ok"><span class="bi">✓</span><span><b>已保存</b> · 刚刚同步到云端</span></div>
+            <div class="banner warn"><span class="bi">!</span><span><b>连接不稳定</b> · 正在重试第 2 次</span></div>
+          </div>
+        </div>
+        <p class="cap"><b>行内横幅 Banner</b> · 背景只染 15% 品牌色，文字仍是深色；比整块实色柔和，也不会压过内容</p>
+      </div>
+
+      <div class="spec span2">
+        <div class="stage b" style="padding:28px 24px">
+          <div style="width:100%;display:flex;flex-direction:column;gap:24px">
+            <div class="steps">
+              <div class="stp done"><span class="b">✓</span><span class="lab">选择模板</span></div>
+              <div class="stp-line fill"></div>
+              <div class="stp done"><span class="b">✓</span><span class="lab">配置字段</span></div>
+              <div class="stp-line fill"></div>
+              <div class="stp now"><span class="b">3</span><span class="lab">邀请成员</span></div>
+              <div class="stp-line"></div>
+              <div class="stp"><span class="b">4</span><span class="lab">完成</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:15px;padding-left:2px">
+              <div class="spinner"></div>
+              <span style="font-size:12px;font-weight:600;color:var(--ink-2)">正在生成预览…</span>
+              <span style="margin-left:auto;font-size:11px;font-weight:600;color:var(--ink-3)">约 8 秒</span>
+            </div>
+          </div>
+        </div>
+        <p class="cap"><b>步骤条 / 加载指示</b> · 已完成用绿色对勾、进行中用蓝色序号、未开始保持透明玻璃；连接线复用它自己的两段渐变</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 整机 -->
+  <section id="phone">
+    <div class="sec-head"><span class="num">08</span><h2>整机演示</h2><span class="en">In Context</span></div>
+    <p class="sec-desc">状态栏、Tab 栏悬浮在滚动内容之上，缩略图从玻璃下方穿过——这是 Liquid Glass 最典型的用法：永远不遮挡内容，而是让内容从它下面流过去。</p>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="statusbar glass clear">
+            <span>9:41</span>
+            <span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>
+            <span>100%</span>
+          </div>
+
+          <div class="screen-scroll">
+            <div class="photo-card pc1">今日精选<small>摄影 · 24 张</small></div>
+            <div class="photo-card pc2">设计笔记<small>液态玻璃的折射逻辑</small></div>
+            <div class="photo-card pc3">Ambient Glass<small>正在播放</small></div>
+            <div class="photo-card pc4">地图<small>2 分钟前更新</small></div>
+            <div class="photo-card pc2">提醒事项<small>3 项待办</small></div>
+            <div class="photo-card pc1">天气<small>郑州 · 22° 晴</small></div>
+          </div>
+
+          <div class="tabbar glass float">
+            <input type="radio" name="tbf" id="tf1" checked><label for="tf1"><span class="ico">🏠</span>首页</label>
+            <input type="radio" name="tbf" id="tf2"><label for="tf2"><span class="ico">🔍</span>搜索</label>
+            <input type="radio" name="tbf" id="tf3"><label for="tf3"><span class="ico">♡</span>收藏</label>
+            <input type="radio" name="tbf" id="tf4"><label for="tf4"><span class="ico">👤</span>我的</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Liquid Glass 组件库 · 白色背景完整版<br>
+    参考 Apple Human Interface Guidelines — Materials / Color / Accessibility<br>
+    折射滤镜基于 SVG feDisplacementMap，Chromium 系浏览器效果最完整；Safari / Firefox 自动降级为磨砂玻璃
+  </footer>
+</main>
+
+<dialog class="alert" id="alertDemo">
+  <h3>使用液态玻璃？</h3>
+  <p>此效果会折射下方内容。弹窗这类文本密集的场景建议用较厚的模糊，保证正文对比度符合 WCAG。</p>
+  <div class="acts">
+    <button class="btn sm" onclick="this.closest('dialog').close()">取消</button>
+    <button class="btn primary sm" onclick="this.closest('dialog').close(); showToast('已应用液态玻璃')">好</button>
+  </div>
+</dialog>
+
+<script>
+/* 仅做交互增强，视觉与状态全部由 CSS 完成 */
+
+// 鼠标追踪高光
+document.addEventListener('pointermove', e => {
+  for (const el of document.querySelectorAll('.glass')) {
+    const r = el.getBoundingClientRect();
+    if (e.clientX > r.left - 60 && e.clientX < r.right + 60 && e.clientY > r.top - 60 && e.clientY < r.bottom + 60) {
+      el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    }
+  }
+}, { passive: true });
+
+// Toast
+function showToast(msg) {
+  const zone = document.getElementById('toast-zone');
+  const t = document.createElement('div');
+  t.className = 'toast glass';
+  t.innerHTML = '<span class="ti">✓</span>' + msg;
+  zone.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 360); }, 2400);
+}
+
+// 步进器
+function step(btn, dir) {
+  const v = btn.parentElement.querySelector('.val');
+  v.textContent = Math.min(99, Math.max(0, parseInt(v.textContent, 10) + dir));
+}
+</script>
+
+<style>
+  html:has(body > .glass-wallpaper) { background: var(--page); }
+  body:has(> .glass-wallpaper) { background: transparent !important; }
+  .lg-springing { transform: none !important; transition: none !important; }
+</style>
+<script src="glass/glass.js"></script>
+<script src="glass/site-topbar.js"></script>
+<script src="glass/glass-liquid-engine.js"></script>
+<script src="glass/glass-webgl.js"></script>
+</body>
+</html>

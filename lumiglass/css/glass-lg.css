@@ -1,0 +1,254 @@
+/* ============================================================
+   Lumi Glass · .lg 材质层（对齐 Glass UI 公开 .lg 配方）
+   与 glass-webgl.js + glass-liquid-engine.js 配套使用
+   ============================================================ */
+
+:root {
+  --lg-rim-hi: #fffc;
+  --lg-rim-lo: #ffffff2e;
+  --lg-highlight: #fff9;
+  --lg-drop: #0f172a24;
+  --foreground: var(--lg-ink);
+  --background: var(--lg-page);
+}
+
+/* 业务模板：弱化 CSS 光带，避免与 WebGL 叠成「满屏高光」 */
+html.lg-profile-app {
+  --lg-rim-hi: #ffffff45;
+  --lg-rim-lo: #ffffff14;
+  --lg-highlight: #ffffff14;
+  --lg-drop: #0f172a14;
+}
+
+/* studio：介于 app 与 showcase，控件可走局部 WebGL */
+html.lg-profile-studio {
+  --lg-rim-hi: #ffffff58;
+  --lg-rim-lo: #ffffff1e;
+  --lg-highlight: #ffffff22;
+  --lg-drop: #0f172a1c;
+}
+
+html.lg-profile-app .glass,
+html.lg-profile-app .lg {
+  box-shadow:
+    inset 0 1px 0 var(--lg-highlight),
+    0 1px 2px var(--lg-drop),
+    0 8px 20px -12px var(--lg-drop);
+}
+
+[data-theme="dark"] {
+  --lg-rim-hi: #ffffff57;
+  --lg-rim-lo: #ffffff0f;
+  --lg-highlight: #ffffff29;
+  --lg-drop: #00000073;
+}
+
+.lg {
+  --lg-tint: transparent;
+  --lg-tint-amt: 0%;
+  --lg-wash: var(--lg-tint);
+  --lg-wash: color-mix(in oklab, var(--lg-tint) var(--lg-tint-amt), var(--lg-base));
+  color: var(--foreground);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--lg-wash), var(--lg-wash)) padding-box,
+    linear-gradient(135deg, var(--lg-rim-hi), var(--lg-rim-lo) 35%, var(--lg-rim-lo) 65%, var(--lg-rim-hi)) border-box;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+  box-shadow:
+    inset 0 1px 0 var(--lg-highlight),
+    0 1px 2px var(--lg-drop),
+    0 12px 32px -14px var(--lg-drop);
+}
+
+.lg-regular { --lg-base: #ffffff6b; --lg-blur: 16px; --lg-sat: 180%; }
+[data-theme="dark"] .lg-regular { --lg-base: #ffffff12; }
+
+.lg-clear { --lg-base: #ffffff1a; --lg-blur: 2px; --lg-sat: 150%; }
+[data-theme="dark"] .lg-clear { --lg-base: #ffffff0a; }
+
+.lg-tinted {
+  --lg-tint: var(--lg-blue);
+  --lg-tint-amt: 55%;
+  --lg-base: #ffffff4d;
+  --lg-blur: 12px;
+  --lg-sat: 180%;
+  color: #fff;
+}
+[data-theme="dark"] .lg-tinted { --lg-base: #1e202859; }
+
+.lg-surface { border-radius: 28px; }
+.lg-sheet { border-radius: 34px; }
+.lg-bar, .lg-control, .lg-knob, .lg-inline { border-radius: 9999px; }
+
+/* 下拉 / 建议列表：参考站 overlay 仅 CSS 磨砂，不走 WebGL 卡片 */
+.lg-overlay {
+  --lg-base: #ffffff78;
+  --lg-blur: 22px;
+  --lg-sat: 185%;
+  border-radius: 16px;
+  box-shadow:
+    inset 0 1px 0 var(--lg-highlight),
+    0 1px 2px var(--lg-drop),
+    0 16px 40px -12px rgba(15, 23, 42, .22);
+}
+[data-theme="dark"] .lg-overlay { --lg-base: #1c1c1e8c; }
+
+html.lg-on .lg-overlay[data-lg-skip] {
+  background:
+    linear-gradient(var(--lg-wash), var(--lg-wash)) padding-box,
+    linear-gradient(135deg, var(--lg-rim-hi), var(--lg-rim-lo) 35%, var(--lg-rim-lo) 65%, var(--lg-rim-hi)) border-box !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+}
+html.lg-on .slider .thumb[data-glass-live],
+html.lg-on .lg-slider .thumb[data-glass-live] {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+html.lg-on .slider .rail[data-glass-solid],
+html.lg-on .slider .fill[data-glass-solid],
+html.lg-on .lg-slider .rail[data-glass-solid],
+html.lg-on .lg-slider .fill[data-glass-solid] {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.lg-control {
+  transition: scale .45s cubic-bezier(.34, 1.56, .64, 1), background .2s;
+}
+.lg-control:active:not(:disabled) { scale: 1.04 .96; }
+
+html.lg-lens .lg:not(.lg-inline):not(.lg-overlay) {
+  -webkit-backdrop-filter: url(#lg-lens) blur(var(--lg-blur)) saturate(var(--lg-sat));
+  backdrop-filter: url(#lg-lens) blur(var(--lg-blur)) saturate(var(--lg-sat));
+}
+
+/* WebGL 引擎运行时（见 glass-webgl.js） */
+html.lg-on [data-glass-live] {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+/* 开关：外圈走 WebGL；勿叠 .lg 边框（会挤扁内盒导致旋钮下移） */
+.sw.lg {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.lg-on .sw[data-glass-live] .track,
+html.lg-on .sw[data-glass-live] .knob {
+  box-shadow: none;
+}
+html.lg-on .sw[data-glass-live] .knob {
+  z-index: 3;
+}
+/* 分段 / 滑块：保留轨道与选中态（父级 live 只去掉自己的底） */
+html.lg-on .seg[data-glass-live] {
+  background: rgba(120, 120, 128, .12) !important;
+  box-shadow: inset 0 1px 3px rgba(22, 28, 45, .10) !important;
+}
+html.lg-on .seg[data-glass-live] input:checked + label {
+  position: relative !important;
+  z-index: 2 !important;
+  border: 1px solid rgba(255, 255, 255, .78) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .97), rgba(255, 255, 255, .58) 52%, rgba(255, 255, 255, .42)) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  box-shadow:
+    inset 0 2.5px 1px rgba(255, 255, 255, .98),
+    inset 0 -1px 0 rgba(255, 255, 255, .38),
+    0 1px 0 rgba(255, 255, 255, .55),
+    0 6px 16px -5px rgba(22, 28, 45, .32),
+    0 3px 8px -2px rgba(22, 28, 45, .14) !important;
+  transform: scale(1.055) translateY(-1px) !important;
+}
+/* 暗色：轨道加深，选中胶囊改半透明白，避免纯白刺眼 */
+html[data-theme="dark"].lg-on .seg[data-glass-live] {
+  background: rgba(120, 120, 128, .24) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35) !important;
+}
+html[data-theme="dark"].lg-on .seg[data-glass-live] input:checked + label {
+  border-color: rgba(255, 255, 255, .18) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, .10) 52%, rgba(255, 255, 255, .06)) !important;
+  box-shadow:
+    inset 0 2.5px 1px rgba(255, 255, 255, .16),
+    inset 0 -1px 0 rgba(255, 255, 255, .06),
+    0 1px 0 rgba(255, 255, 255, .10),
+    0 6px 16px -5px rgba(0, 0, 0, .45),
+    0 3px 8px -2px rgba(0, 0, 0, .28) !important;
+}
+html.lg-on .lg-control[data-glass-live]:active { scale: none; }
+
+/* 语义按钮：引擎未接管前保留原渐变，避免 .lg 白膜盖住 primary / danger */
+html.lg-on .btn.primary.lg:not([data-glass-live]) {
+  color: #fff !important;
+  background:
+    linear-gradient(135deg, rgba(10, 132, 255, .92), rgba(0, 102, 220, .78)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .18) 35%, rgba(255, 255, 255, .18) 65%, rgba(255, 255, 255, .78)) border-box !important;
+  box-shadow:
+    inset 0 1px .5px rgba(255, 255, 255, .55),
+    0 1px 2px rgba(0, 40, 120, .20),
+    0 10px 22px -8px rgba(10, 110, 230, .70) !important;
+}
+html.lg-on .btn.danger.lg:not([data-glass-live]) {
+  color: #fff !important;
+  background:
+    linear-gradient(135deg, rgba(255, 59, 48, .94), rgba(215, 40, 32, .80)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, .18) 35%, rgba(255, 255, 255, .18) 65%, rgba(255, 255, 255, .75)) border-box !important;
+  box-shadow:
+    inset 0 1px .5px rgba(255, 255, 255, .5),
+    0 10px 22px -8px rgba(220, 40, 30, .65) !important;
+}
+html.lg-on .btn.tinted.lg:not([data-glass-live]) {
+  color: var(--lg-blue-deep) !important;
+  background:
+    linear-gradient(color-mix(in oklab, var(--lg-blue) 22%, rgba(255, 255, 255, .52)), color-mix(in oklab, var(--lg-blue) 14%, rgba(255, 255, 255, .42))) padding-box,
+    linear-gradient(135deg, var(--lg-rim-hi), var(--lg-rim-lo) 35%, var(--lg-rim-lo) 65%, var(--lg-rim-hi)) border-box !important;
+}
+html[data-theme="dark"].lg-on .btn.tinted.lg:not([data-glass-live]) {
+  color: #7ab8ff !important;
+  background:
+    linear-gradient(color-mix(in oklab, var(--lg-blue) 26%, rgba(255, 255, 255, .07)), color-mix(in oklab, var(--lg-blue) 16%, rgba(255, 255, 255, .04))) padding-box,
+    linear-gradient(135deg, var(--lg-rim-hi), var(--lg-rim-lo) 35%, var(--lg-rim-lo) 65%, var(--lg-rim-hi)) border-box !important;
+}
+html.lg-ready [data-glass-backdrop] { visibility: hidden; }
+html.lg-on body { background: transparent !important; }
+
+html.lg-on body > header,
+html.lg-on body > main,
+html.lg-on body > .admin-shell,
+html.lg-on body > .shop-shell,
+html.lg-on body > .wp-tune,
+html.lg-on body > .toast-zone,
+html.lg-on .wrap,
+html.lg-on .docs-layout,
+html.lg-on .stage,
+html.lg-on .phone-stage {
+  position: relative;
+  z-index: 1;
+}
+
+.lg-engine-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glass-wallpaper {
+  z-index: -10;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html.lg-on .lg-engine-canvas { display: none; }
+}
