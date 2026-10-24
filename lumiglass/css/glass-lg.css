@@ -109,13 +109,8 @@ html.lg-on .lg-slider .thumb[data-glass-live] {
   box-shadow: none !important;
   border-color: transparent !important;
 }
-html.lg-on .slider .rail[data-glass-solid],
-html.lg-on .slider .fill[data-glass-solid],
-html.lg-on .lg-slider .rail[data-glass-solid],
-html.lg-on .lg-slider .fill[data-glass-solid] {
-  background: transparent !important;
-  box-shadow: none !important;
-}
+/* 轨道 / 进度条是纯色件，由 DOM 自绘（引擎画布在最底层，任何带背景的容器都会盖住它，
+   所以不能指望引擎绘制纯色件） */
 
 .lg-control {
   transition: scale .45s cubic-bezier(.34, 1.56, .64, 1), background .2s;

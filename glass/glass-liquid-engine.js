@@ -26,7 +26,7 @@
 (function () {
   'use strict';
 
-  var MAXG = 32;
+  var MAXG = 48;
 
   /* 形状预设。键名与 data-glass 值对应，数值为自研调校。 */
   var PRESETS = {
@@ -498,6 +498,10 @@
     var gB = this._gBuf, aB = this._aBuf, bB = this._bBuf;
     var items = this.items;
     for (var i = 0; i < items.length; i++) items[i]._drawn = false;
+
+    /* solid 件（滑块轨道/进度条）不进 shader：引擎画布位于页面最底层，
+       任何带自身背景的容器都会遮住它。纯色件一律交回 DOM 自绘。 */
+
     for (var i = 0; i < items.length && gN < MAXG; i++) {
       var it = items[i], el = it.el;
       if (!scrolling) it.blocked = blockedByAncestor(el);
@@ -543,7 +547,9 @@
         var pad = grow * Math.min(hw, hh);
         hw += pad; hh += pad;
       }
-      var x = it.dl - sx + hw, y = it.dt - sy + hh;
+      /* 中心永远取元素几何中心：grow 只向外扩边，不得移动中心
+         （否则玻璃整体向右下偏 pad px，表现为"内容不居中/外圈偏"） */
+      var x = it.dl - sx + it.dw / 2, y = it.dt - sy + it.dh / 2;
       if (x + hw < 0 || x - hw > W || y + hh < 0 || y - hh > H) continue;
 
       var o4 = gN * 4;

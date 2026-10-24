@@ -74,6 +74,9 @@
   var LG_CSS = [
     'html.lg-on [data-glass-live]{background:transparent!important;backdrop-filter:none!important;',
     '-webkit-backdrop-filter:none!important;border-color:transparent!important;box-shadow:none!important}',
+    /* live 玻璃的内层件（磁贴 face 等）自带向下投影，会叠在引擎玻璃上形成"偏心暗圈" */
+    'html.lg-on [data-glass-live] .face,html.lg-on [data-glass-live] .knob,html.lg-on [data-glass-live] .track,',
+    'html.lg-on [data-glass-live] .box{box-shadow:none!important}',
     'html.lg-on .lg-control[data-glass-live]:active{scale:none}',
     'html.lg-ready [data-glass-backdrop]{visibility:hidden}',
     'html.lg-on body{background:transparent!important}'
@@ -390,6 +393,10 @@
     });
     [].forEach.call(root.querySelectorAll('.tile .face'), function (face) {
       face.classList.add('lg-control');
+    });
+    /* 磁贴只要单圈：玻璃不外扩（grow 0），去掉内圆外那层光环 */
+    [].forEach.call(root.querySelectorAll('.tile[data-glass]'), function (el) {
+      el.setAttribute('data-grow', '0');
     });
     tagSwitches(root);
     tagSteppers(root);
