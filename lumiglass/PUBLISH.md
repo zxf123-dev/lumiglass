@@ -87,7 +87,23 @@ npx npm@11 stage publish --registry=https://registry.npmjs.org/
 # → 再去网页点 Approve
 ```
 
-## 6. 首发记录（2026-10-23）
+## 6. 发布记录
+
+### 1.2.0（2026-10-27）
+
+| 项 | 值 |
+| --- | --- |
+| 版本 | 1.2.0 |
+| shasum | 9636ef32753b0b8b5880d4bb3fc62eda7adedef3 |
+| 包体 | 64.6 kB / 解包 259.2 kB / 13 文件 |
+| stage id | 8536a1d7-46cb-4509-9141-570b1eaf8eaa |
+| dist-tags | latest → 1.2.0 |
+| 代码提交 | 3dc0f6d（tag v1.2.0，已推 GitHub） |
+
+> 认证方式更新：`npm login --auth-type=web` 在终端里跑一次即可（浏览器确认后 token 写入 `~/.npmrc`），
+> 不必再手工维护临时 `.npmrc`。**注意 CLI 的交互会话活不过自动化回合**，登录必须在真实终端里完成。
+
+### 1.1.1（2026-10-23）
 
 | 项 | 值 |
 | --- | --- |
