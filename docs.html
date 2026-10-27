@@ -336,7 +336,7 @@ LiquidGlass.setWallpaper(<span class="s">'sonoma'</span>);
 LiquidGlass.setWallpaper(<span class="k">null</span>);</pre>
         <p>内置五套预设：<code class="inline">lumi</code>（灰蓝工作区）、<code class="inline">aurora</code>（低饱和紫雾，对齐 Glass UI 官网）、<code class="inline">sonoma</code> / <code class="inline">tahoe</code> / <code class="inline">graphite</code>。业务页用 <code class="inline">lumi</code>，营销 Hero 用 <code class="inline">aurora</code>。</p>
         <h3>WebGL 液态引擎（glass-liquid-engine.js + glass-webgl.js）</h3>
-        <p>与 <a href="https://glass-ui.crenspire.com/" target="_blank" rel="noopener">Glass UI</a> 相同架构：全屏 WebGL 画布在 UI 下方，<code class="inline">data-glass</code> 控件由着色器绘制折射 + 色散 + 追光边缘；CSS 使用 <code class="inline">.lg</code> 材质层（<code class="inline">glass-lg.css</code>）。</p>
+        <p>整体架构与 <a href="https://glass-ui.crenspire.com/" target="_blank" rel="noopener">Glass UI</a> 等同类方案一致：全屏 WebGL 画布在 UI 下方，<code class="inline">data-glass</code> 控件由着色器绘制折射 + 色散 + 追光边缘；CSS 使用 <code class="inline">.lg</code> 材质层（<code class="inline">glass-lg.css</code>）。本文件为独立实现，未引用任何第三方代码。</p>
         <pre class="code">&lt;link rel=<span class="s">"stylesheet"</span> href=<span class="a">"glass/glass-lg.css"</span>&gt;
 &lt;body <span class="a">data-wallpaper</span>=<span class="s">"aurora"</span> <span class="a">data-lg-engine</span>=<span class="s">"on"</span>&gt;
 &lt;script src=<span class="a">"glass/glass.js"</span>&gt;&lt;/script&gt;

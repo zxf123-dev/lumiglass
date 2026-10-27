@@ -48,7 +48,7 @@ glass/
 ├─ glass.js            壁纸 aurora、弹簧按压、主题、Toast
 ├─ site-topbar.js      全站浮动顶栏行为（导航、主题按钮、移动端抽屉，所有页面都引）
 ├─ favicon.svg         站点图标
-├─ glass-liquid-engine.js  WebGL 折射引擎（Glass UI registry 同源）
+├─ glass-liquid-engine.js  WebGL 折射引擎（自研实现，零第三方代码）
 └─ glass-webgl.js      全站引导 + autoGlass（引即启用，关：data-lg-engine="off"）
 
 starter.html           起步模板（推荐从这里开始改）
