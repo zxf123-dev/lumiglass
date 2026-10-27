@@ -2,6 +2,8 @@
 
 iOS 液态玻璃（Liquid Glass）风格的纯 CSS 组件库。零依赖、无构建要求，Vue / React / 原生页面都能直接用。
 
+**在线演示：<https://zxf123-dev.github.io/lumiglass/>** · [GitHub](https://github.com/zxf123-dev/lumiglass) · [Gitee 镜像](https://gitee.com/zhao-xinfei/lumiglass)
+
 ## 特性
 
 - **三层配方**：磨砂（backdrop-filter）+ 边缘折射（SVG feDisplacementMap）+ 镜面高光，还原 iOS 26 Liquid Glass 质感

@@ -6,6 +6,19 @@
 
 ## 在线预览
 
+**在线演示：<https://zxf123-dev.github.io/lumiglass/>**
+
+| 站点 | 地址 |
+|---|---|
+| 在线演示（GitHub Pages） | https://zxf123-dev.github.io/lumiglass/ |
+| 源码仓库（GitHub） | https://github.com/zxf123-dev/lumiglass |
+| 源码仓库（Gitee 镜像） | https://gitee.com/zhao-xinfei/lumiglass |
+| npm 包 | https://www.npmjs.com/package/lumiglass |
+
+各页面直接拼在演示地址后即可访问，例如 `https://zxf123-dev.github.io/lumiglass/web.html`、`.../white.html`、`.../docs.html`。
+
+本地跑：任意静态服务器指向仓库根目录即可，例如 `python3 -m http.server 8000`，然后打开 `http://localhost:8000/`。
+
 | 文件 | 内容 |
 |---|---|
 | `admin.html` | **页面模板：后端管理台**（侧栏 + KPI + 图表 + 数据表格，可直接改用） |
